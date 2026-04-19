@@ -1,0 +1,16 @@
+# OS / editor
+.DS_Store
+Thumbs.db
+*.log
+.env
+
+# IDEs
+.vscode/
+.idea/
+
+# Node (common)
+node_modules/
+
+# Build outputs (generic)
+dist/
+build/

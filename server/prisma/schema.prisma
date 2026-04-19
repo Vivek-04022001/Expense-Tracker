@@ -1,0 +1,88 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Category {
+  food_and_drink
+  transport
+  bills_and_utilities
+  shopping
+  health
+  entertainment
+  education
+  other
+}
+
+enum IncomeType {
+  salary
+  freelance
+  investment
+  reward
+  other
+}
+
+enum PaymentMethod {
+  upi
+  bank_transfer
+  cash
+  other
+}
+
+model User {
+  id           String         @id @default(uuid())
+  name         String
+  phone        String         @unique
+  passwordHash String
+  expenses     Expense[]
+  incomes      Income[]
+  budgets      Budget[]
+  refreshToken RefreshToken[]
+  createdAt    DateTime       @default(now())
+}
+
+model Expense {
+  id            String        @id @default(uuid())
+  amount        Decimal
+  category      Category      @default(other)
+  paymentMethod PaymentMethod @default(other)
+  description   String?
+  userId        String
+  user          User          @relation(fields: [userId], references: [id])
+  createdAt     DateTime      @default(now())
+}
+
+model Income {
+  id          String     @id @default(uuid())
+  amount      Decimal
+  incomeType  IncomeType @default(other)
+  description String?
+  userId      String
+  user        User       @relation(fields: [userId], references: [id])
+  createdAt   DateTime   @default(now())
+}
+
+model Budget {
+  id        String   @id @default(uuid())
+  amount    Decimal
+  month     Int
+  year      Int
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  isRevoked Boolean  @default(false)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+  expiredAt DateTime
+}
