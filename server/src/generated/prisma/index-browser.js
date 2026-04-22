@@ -120,9 +120,98 @@ exports.Prisma.TransactionIsolationLevel = makeStrictEnum({
   Serializable: 'Serializable'
 });
 
+exports.Prisma.UserScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  phone: 'phone',
+  passwordHash: 'passwordHash',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.ExpenseScalarFieldEnum = {
+  id: 'id',
+  amount: 'amount',
+  category: 'category',
+  paymentMethod: 'paymentMethod',
+  description: 'description',
+  userId: 'userId',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.IncomeScalarFieldEnum = {
+  id: 'id',
+  amount: 'amount',
+  incomeType: 'incomeType',
+  description: 'description',
+  userId: 'userId',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.BudgetScalarFieldEnum = {
+  id: 'id',
+  amount: 'amount',
+  month: 'month',
+  year: 'year',
+  userId: 'userId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.RefreshTokenScalarFieldEnum = {
+  id: 'id',
+  token: 'token',
+  isRevoked: 'isRevoked',
+  userId: 'userId',
+  createdAt: 'createdAt',
+  expiredAt: 'expiredAt'
+};
+
+exports.Prisma.SortOrder = {
+  asc: 'asc',
+  desc: 'desc'
+};
+
+exports.Prisma.QueryMode = {
+  default: 'default',
+  insensitive: 'insensitive'
+};
+
+exports.Prisma.NullsOrder = {
+  first: 'first',
+  last: 'last'
+};
+exports.Category = exports.$Enums.Category = {
+  food_and_drink: 'food_and_drink',
+  transport: 'transport',
+  bills_and_utilities: 'bills_and_utilities',
+  shopping: 'shopping',
+  health: 'health',
+  entertainment: 'entertainment',
+  education: 'education',
+  other: 'other'
+};
+
+exports.PaymentMethod = exports.$Enums.PaymentMethod = {
+  upi: 'upi',
+  bank_transfer: 'bank_transfer',
+  cash: 'cash',
+  other: 'other'
+};
+
+exports.IncomeType = exports.$Enums.IncomeType = {
+  salary: 'salary',
+  freelance: 'freelance',
+  investment: 'investment',
+  reward: 'reward',
+  other: 'other'
+};
 
 exports.Prisma.ModelName = {
-
+  User: 'User',
+  Expense: 'Expense',
+  Income: 'Income',
+  Budget: 'Budget',
+  RefreshToken: 'RefreshToken'
 };
 
 /**
