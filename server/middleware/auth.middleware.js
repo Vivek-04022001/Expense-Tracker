@@ -9,7 +9,7 @@ export const authenticateToken = async (req, res, next) => {
       return res.status(401).json({ message: "Access token missing" });
     }
     const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
-    req.user = decoded.userId;
+    req.user = decoded;
     next();
   } catch (error) {
     if (error.name === "TokenExpiredError") {

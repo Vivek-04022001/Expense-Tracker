@@ -1,5 +1,5 @@
 import z from "zod";
-import { Category, PaymentMethod } from "@prisma/client";
+import { Category, PaymentMethod } from "../src/generated/prisma/index.js";
 import { prisma } from "../src/db.js";
 
 const ExpenseSchema = z.object({
