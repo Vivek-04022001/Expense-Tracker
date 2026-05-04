@@ -9,6 +9,15 @@ const ExpenseSchema = z.object({
   paymentMethod: z.enum(Object.values(PaymentMethod)).optional(),
 });
 
+const UpdateExpenseSchema = z
+  .object({
+    amount: z.number().positive().optional(),
+    category: z.enum(Object.values(Category)).optional(),
+    paymentMethod: z.enum(Object.values(PaymentMethod)).optional(),
+    description: z.string().max(255).optional(),
+  })
+  .strict();
+
 export const createExpense = async (req, res) => {
   const result = ExpenseSchema.safeParse(req.body);
 
@@ -67,3 +76,62 @@ GET http://localhost:3000/expenses — all expenses
 GET http://localhost:3000/expenses?category=food_and_drink — filtered
 GET http://localhost:3000/expenses?from=2026-01-01&to=2026-12-31 — date range
 */
+
+export const updateExpense = async (req, res) => {
+  const { id } = req.params;
+  const userId = req.user.userId;
+
+  const result = UpdateExpenseSchema.safeParse(req.body);
+  if (!result.success) {
+    return res
+      .status(400)
+      .json({ message: "Invalid data", errors: result.error.errors });
+  }
+
+  const expense = await prisma.expense.findUnique({
+    where: { id },
+  });
+
+  if (!expense || expense.deletedAt !== null) {
+    return res.status(404).json({ message: "Expense not found" });
+  }
+
+  if (expense.userId !== userId) {
+    return res.status(403).json({ message: "Forbidden" });
+  }
+
+  const updated = await prisma.expense.update({
+    where: { id },
+    data: result.data,
+  });
+
+  return res
+    .status(200)
+    .json({ message: "Expense updated successfully", expense: updated });
+};
+
+export const deleteExpense = async (req, res) => {
+  const { id } = req.params;
+  const userId = req.user.userId;
+
+  const expense = await prisma.expense.findUnique({
+    where: { id },
+  });
+
+  if (!expense || expense.deletedAt !== null) {
+    return res.status(404).json({ message: "Expense not found" });
+  }
+
+  if (expense.userId !== userId) {
+    return res.status(403).json({ message: "Forbidden" });
+  }
+
+  await prisma.expense.update({
+    where: { id },
+    data: {
+      deletedAt: new Date(),
+    },
+  });
+
+  return res.status(200).json({ message: "Expense deleted successfully" });
+};
