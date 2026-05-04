@@ -35,3 +35,35 @@ export const createExpense = async (req, res) => {
     .status(201)
     .json({ message: "Expense created successfully", expense });
 };
+
+export const getExpenses = async (req, res) => {
+  const userId = req.user.userId;
+  const { category, from, to } = req.query;
+
+  const where = {
+    userId,
+    deletedAt: null,
+  };
+
+  if (category) where.category = category;
+
+  if (from || to) {
+    where.createdAt = {};
+    if (from) where.createdAt.gte = new Date(from);
+    if (to) where.createdAt.lte = new Date(to);
+  }
+
+  const expenses = await prisma.expense.findMany({
+    where,
+    orderBy: { createdAt: "desc" },
+  });
+
+  return res.status(200).json({ expenses });
+};
+
+/*
+
+GET http://localhost:3000/expenses — all expenses
+GET http://localhost:3000/expenses?category=food_and_drink — filtered
+GET http://localhost:3000/expenses?from=2026-01-01&to=2026-12-31 — date range
+*/

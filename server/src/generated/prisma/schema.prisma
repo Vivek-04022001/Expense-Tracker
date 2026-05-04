@@ -54,6 +54,7 @@ model Expense {
   userId        String
   user          User          @relation(fields: [userId], references: [id])
   createdAt     DateTime      @default(now())
+  deletedAt     DateTime?
 }
 
 model Income {

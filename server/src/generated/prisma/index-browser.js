@@ -135,7 +135,8 @@ exports.Prisma.ExpenseScalarFieldEnum = {
   paymentMethod: 'paymentMethod',
   description: 'description',
   userId: 'userId',
-  createdAt: 'createdAt'
+  createdAt: 'createdAt',
+  deletedAt: 'deletedAt'
 };
 
 exports.Prisma.IncomeScalarFieldEnum = {
