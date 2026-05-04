@@ -135,3 +135,75 @@ export const deleteExpense = async (req, res) => {
 
   return res.status(200).json({ message: "Expense deleted successfully" });
 };
+
+export const getExpenseSummary = async (req, res) => {
+  const userId = req.user.userId;
+
+  // 1. Total by category (all time)
+  const byCategory = await prisma.expense.groupBy({
+    by: ["category"],
+    where: { userId, deletedAt: null },
+    _sum: { amount: true },
+  });
+
+  // 4. All time total
+  const allTime = await prisma.expense.aggregate({
+    where: { userId, deletedAt: null },
+    _sum: { amount: true },
+  });
+
+  // Fetch all expenses for JS-side grouping
+  const expenses = await prisma.expense.findMany({
+    where: { userId, deletedAt: null },
+    select: { amount: true, createdAt: true, category: true },
+  });
+
+  // 2. Total by month
+  const monthMap = {};
+  // 3. Category breakdown per month
+  const categoryByMonthMap = {};
+
+  for (const expense of expenses) {
+    const month = expense.createdAt.toISOString().slice(0, 7);
+    const amount = parseFloat(expense.amount);
+
+    // by month
+    if (monthMap[month]) {
+      monthMap[month] += amount;
+    } else {
+      monthMap[month] = amount;
+    }
+
+    // by category per month
+    if (!categoryByMonthMap[month]) {
+      categoryByMonthMap[month] = {};
+    }
+    if (categoryByMonthMap[month][expense.category]) {
+      categoryByMonthMap[month][expense.category] += amount;
+    } else {
+      categoryByMonthMap[month][expense.category] = amount;
+    }
+  }
+
+  const byMonth = Object.entries(monthMap).map(([month, total]) => ({
+    month,
+    total: total.toFixed(2),
+  }));
+
+  const byCategoryPerMonth = Object.entries(categoryByMonthMap).map(
+    ([month, categories]) => ({
+      month,
+      categories: Object.entries(categories).map(([category, total]) => ({
+        category,
+        total: total.toFixed(2),
+      })),
+    }),
+  );
+
+  return res.status(200).json({
+    allTimeTotal: parseFloat(allTime._sum.amount || 0).toFixed(2),
+    byCategory,
+    byMonth,
+    byCategoryPerMonth,
+  });
+};
