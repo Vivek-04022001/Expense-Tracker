@@ -1,4 +1,4 @@
-import { z } from "zod";
+import z from "zod";
 import { Category } from "../generated/prisma/index.js";
 
 export const BudgetSchema = z.object({
@@ -6,4 +6,8 @@ export const BudgetSchema = z.object({
   limitAmount: z.number().positive(),
   month: z.number().int().min(1).max(12),
   year: z.number().int().min(2024).max(2100),
+});
+
+export const UpdateBudgetSchema = z.object({
+  amount: z.number().positive(),
 });

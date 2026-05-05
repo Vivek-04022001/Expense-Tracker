@@ -150,7 +150,8 @@ exports.Prisma.IncomeScalarFieldEnum = {
 
 exports.Prisma.BudgetScalarFieldEnum = {
   id: 'id',
-  amount: 'amount',
+  limitAmount: 'limitAmount',
+  category: 'category',
   month: 'month',
   year: 'year',
   userId: 'userId',

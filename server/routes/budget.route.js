@@ -4,6 +4,7 @@ import {
   upsertBudget,
   getBudgets,
   deleteBudget,
+  getBudgetStatus,
 } from "../controllers/budget.controller.js";
 import { BudgetSchema } from "../src/validators/budgetValidator.js";
 import { validate } from "../middleware/validate.js";
@@ -14,5 +15,6 @@ router.use(authenticateToken);
 router.get("/", getBudgets);
 router.put("/", validate(BudgetSchema), upsertBudget);
 router.delete("/:id", deleteBudget);
+router.get("/:id/status", getBudgetStatus);
 
 export default router;

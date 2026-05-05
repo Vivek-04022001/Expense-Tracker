@@ -68,14 +68,17 @@ model Income {
 }
 
 model Budget {
-  id        String   @id @default(uuid())
-  amount    Decimal
-  month     Int
-  year      Int
-  userId    String
-  user      User     @relation(fields: [userId], references: [id])
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String   @id @default(uuid())
+  limitAmount Decimal
+  category    Category
+  month       Int
+  year        Int
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([userId, category, month, year])
 }
 
 model RefreshToken {
