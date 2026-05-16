@@ -1,23 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
 
 void main() {
   runApp(const ProviderScope(child: ExpenseTrackerApp()));
 }
 
-class ExpenseTrackerApp extends StatelessWidget {
+class ExpenseTrackerApp extends ConsumerWidget {
   const ExpenseTrackerApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
+  Widget build(BuildContext context, WidgetRef ref) {
+    final router = ref.watch(appRouterProvider);
+    return MaterialApp.router(
       title: 'Expense Tracker',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
       themeMode: ThemeMode.system,
-      home: const Scaffold(body: Center(child: Text('Phase 3 — Start'))),
+      routerConfig: router,
     );
   }
 }
