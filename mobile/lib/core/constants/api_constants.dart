@@ -9,6 +9,10 @@ class ApiConstants {
   static const String refreshEndpoint = '/auth/refresh';
   static const String logoutEndpoint = '/auth/logout';
 
+  static const String expenses = '/expenses';
+  static const String expenseSummary = '/expenses/summary';
+  static String expenseById(String id) => '/expenses/$id';
+
   static const String accessTokenKey = 'access_token';
   static const String refreshTokenKey = 'refresh_token';
 }
