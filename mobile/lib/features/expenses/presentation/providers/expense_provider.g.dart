@@ -42,6 +42,25 @@ final expenseSummaryProvider =
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef ExpenseSummaryRef = AutoDisposeFutureProviderRef<ExpenseSummary>;
+String _$groupedExpensesHash() => r'afe9200056d4fb749e7acd8b65565c0211c2aa9c';
+
+/// See also [groupedExpenses].
+@ProviderFor(groupedExpenses)
+final groupedExpensesProvider =
+    AutoDisposeFutureProvider<Map<String, List<ExpenseModel>>>.internal(
+      groupedExpenses,
+      name: r'groupedExpensesProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$groupedExpensesHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef GroupedExpensesRef =
+    AutoDisposeFutureProviderRef<Map<String, List<ExpenseModel>>>;
 String _$expenseListNotifierHash() =>
     r'23418f26c8d7639636ed95db75edfc118a5df0e7';
 
