@@ -23,8 +23,8 @@ GoRouter appRouter(AppRouterRef ref) {
   final notifier = _RouterNotifier(ref);
   ref.onDispose(notifier.dispose);
 
-  const protectedRoutes = ['/dashboard'];
   const publicRoutes = ['/splash', '/login', '/register'];
+  const authScreens = ['/login', '/register'];
 
   final router = GoRouter(
     initialLocation: '/splash',
@@ -44,9 +44,9 @@ GoRouter appRouter(AppRouterRef ref) {
             if (publicRoutes.contains(location)) return '/dashboard';
             return null;
           }
-          // AuthUnauthenticated
-          if (protectedRoutes.contains(location)) return '/login';
-          return null;
+          // AuthUnauthenticated — stay only on /login or /register
+          if (authScreens.contains(location)) return null;
+          return '/login';
         },
       );
     },
