@@ -5,115 +5,144 @@ class ExpenseModel {
     required this.id,
     required this.amount,
     required this.category,
-    this.description,
     required this.paymentMethod,
-    required this.date,
-    required this.createdAt,
+    this.description,
     required this.userId,
+    required this.createdAt,
   });
 
   final String id;
-  final double amount;
-  final String category;
+  final double amount;       // Prisma Decimal → arrives as string, parsed here
+  final String category;     // Category enum: food_and_drink | transport | ...
+  final String paymentMethod; // PaymentMethod enum: upi | bank_transfer | cash | other
   final String? description;
-  final String paymentMethod;
-  final DateTime date;
-  final DateTime createdAt;
   final String userId;
+  final DateTime createdAt;
 
   factory ExpenseModel.fromJson(Map<String, dynamic> json) => ExpenseModel(
         id: json['id'] as String,
         amount: double.parse(json['amount'] as String),
         category: json['category'] as String,
-        description: json['description'] as String?,
         paymentMethod: json['paymentMethod'] as String,
-        date: DateTime.parse(json['date'] as String),
-        createdAt: DateTime.parse(json['createdAt'] as String),
+        description: json['description'] as String?,
         userId: json['userId'] as String,
+        createdAt: DateTime.parse(json['createdAt'] as String),
       );
 
   String get formattedAmount =>
       NumberFormat.currency(locale: 'en_IN', symbol: '₹').format(amount);
 
-  String get formattedDate => DateFormat('d MMM yyyy').format(date);
+  String get formattedDate => DateFormat('d MMM yyyy').format(createdAt);
 }
 
-class PaginationModel {
-  const PaginationModel({
-    required this.page,
-    required this.limit,
-    required this.total,
-    required this.totalPages,
-  });
-
-  final int page;
-  final int limit;
-  final int total;
-  final int totalPages;
-
-  factory PaginationModel.fromJson(Map<String, dynamic> json) => PaginationModel(
-        page: json['page'] as int,
-        limit: json['limit'] as int,
-        total: json['total'] as int,
-        totalPages: json['totalPages'] as int,
-      );
-}
-
+// GET /expenses → { expenses: [...] }  — no pagination
 class ExpenseListResponse {
-  const ExpenseListResponse({
-    required this.expenses,
-    required this.pagination,
-  });
+  const ExpenseListResponse({required this.expenses});
 
   final List<ExpenseModel> expenses;
-  final PaginationModel pagination;
 
   factory ExpenseListResponse.fromJson(Map<String, dynamic> json) =>
       ExpenseListResponse(
         expenses: (json['expenses'] as List<dynamic>)
             .map((e) => ExpenseModel.fromJson(e as Map<String, dynamic>))
             .toList(),
-        pagination:
-            PaginationModel.fromJson(json['pagination'] as Map<String, dynamic>),
       );
 }
 
-class ExpenseSummaryCategory {
-  const ExpenseSummaryCategory({
+// GET /expenses/summary — byCategory uses Prisma groupBy result shape
+// { category, _sum: { amount } }
+class ExpenseByCategoryItem {
+  const ExpenseByCategoryItem({
     required this.category,
     required this.total,
-    required this.count,
   });
 
   final String category;
-  final double total;
-  final int count;
+  final double total; // parsed from _sum.amount (Prisma Decimal string)
 
-  factory ExpenseSummaryCategory.fromJson(Map<String, dynamic> json) =>
-      ExpenseSummaryCategory(
-        category: json['category'] as String,
-        total: (json['total'] as num).toDouble(),
-        count: json['count'] as int,
+  factory ExpenseByCategoryItem.fromJson(Map<String, dynamic> json) {
+    final sum = json['_sum'] as Map<String, dynamic>;
+    final raw = sum['amount'];
+    return ExpenseByCategoryItem(
+      category: json['category'] as String,
+      total: raw == null ? 0 : double.parse(raw.toString()),
+    );
+  }
+}
+
+// { month: "YYYY-MM", total: "string" }
+class ExpenseByMonthItem {
+  const ExpenseByMonthItem({required this.month, required this.total});
+
+  final String month;
+  final double total; // parsed from toFixed(2) string
+
+  factory ExpenseByMonthItem.fromJson(Map<String, dynamic> json) =>
+      ExpenseByMonthItem(
+        month: json['month'] as String,
+        total: double.parse(json['total'] as String),
       );
 }
 
-class ExpenseSummary {
-  const ExpenseSummary({
-    required this.totalExpenses,
-    required this.byCategory,
+// { category, total: "string" } — inside byCategoryPerMonth
+class MonthlyCategoryItem {
+  const MonthlyCategoryItem({required this.category, required this.total});
+
+  final String category;
+  final double total;
+
+  factory MonthlyCategoryItem.fromJson(Map<String, dynamic> json) =>
+      MonthlyCategoryItem(
+        category: json['category'] as String,
+        total: double.parse(json['total'] as String),
+      );
+}
+
+// { month: "YYYY-MM", categories: [...] }
+class ExpenseByCategoryPerMonth {
+  const ExpenseByCategoryPerMonth({
+    required this.month,
+    required this.categories,
   });
 
-  final double totalExpenses;
-  final List<ExpenseSummaryCategory> byCategory;
+  final String month;
+  final List<MonthlyCategoryItem> categories;
 
-  factory ExpenseSummary.fromJson(Map<String, dynamic> json) {
-    final summary = json['summary'] as Map<String, dynamic>;
-    return ExpenseSummary(
-      totalExpenses: (summary['totalExpenses'] as num).toDouble(),
-      byCategory: (summary['byCategory'] as List<dynamic>)
-          .map((e) =>
-              ExpenseSummaryCategory.fromJson(e as Map<String, dynamic>))
-          .toList(),
-    );
-  }
+  factory ExpenseByCategoryPerMonth.fromJson(Map<String, dynamic> json) =>
+      ExpenseByCategoryPerMonth(
+        month: json['month'] as String,
+        categories: (json['categories'] as List<dynamic>)
+            .map((e) => MonthlyCategoryItem.fromJson(e as Map<String, dynamic>))
+            .toList(),
+      );
+}
+
+// Full GET /expenses/summary response
+class ExpenseSummary {
+  const ExpenseSummary({
+    required this.allTimeTotal,
+    required this.byCategory,
+    required this.byMonth,
+    required this.byCategoryPerMonth,
+  });
+
+  final double allTimeTotal;
+  final List<ExpenseByCategoryItem> byCategory;
+  final List<ExpenseByMonthItem> byMonth;
+  final List<ExpenseByCategoryPerMonth> byCategoryPerMonth;
+
+  factory ExpenseSummary.fromJson(Map<String, dynamic> json) => ExpenseSummary(
+        allTimeTotal: double.parse(json['allTimeTotal'] as String),
+        byCategory: (json['byCategory'] as List<dynamic>)
+            .map((e) =>
+                ExpenseByCategoryItem.fromJson(e as Map<String, dynamic>))
+            .toList(),
+        byMonth: (json['byMonth'] as List<dynamic>)
+            .map((e) => ExpenseByMonthItem.fromJson(e as Map<String, dynamic>))
+            .toList(),
+        byCategoryPerMonth: (json['byCategoryPerMonth'] as List<dynamic>)
+            .map((e) => ExpenseByCategoryPerMonth.fromJson(
+                e as Map<String, dynamic>))
+            .toList(),
+      );
 }

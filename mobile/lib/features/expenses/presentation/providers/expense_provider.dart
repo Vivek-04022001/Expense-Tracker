@@ -5,18 +5,17 @@ import '../../data/repositories/expense_repository.dart';
 
 part 'expense_provider.g.dart';
 
+// Filter mirrors the GET /expenses query params: category, from, to
 class ExpenseFilter {
   const ExpenseFilter({
     this.category,
-    this.startDate,
-    this.endDate,
-    this.page = 1,
+    this.from,
+    this.to,
   });
 
   final String? category;
-  final DateTime? startDate;
-  final DateTime? endDate;
-  final int page;
+  final DateTime? from;
+  final DateTime? to;
 }
 
 @riverpod
@@ -32,9 +31,8 @@ class ExpenseListNotifier extends _$ExpenseListNotifier {
     final repo = ref.read(expenseRepositoryProvider);
     return repo.getExpenses(
       category: _filter.category,
-      startDate: _filter.startDate,
-      endDate: _filter.endDate,
-      page: _filter.page,
+      from: _filter.from,
+      to: _filter.to,
     );
   }
 

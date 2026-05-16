@@ -136,6 +136,15 @@ class DioClient {
     }
   }
 
+  Future<Response> put(String path, {dynamic data}) async {
+    try {
+      return await _dio.put(path, data: data);
+    } on DioException catch (e) {
+      if (e.error is AppException) throw e.error as AppException;
+      throw _mapError(e);
+    }
+  }
+
   Future<Response> delete(String path, {dynamic data}) async {
     try {
       return await _dio.delete(path, data: data);

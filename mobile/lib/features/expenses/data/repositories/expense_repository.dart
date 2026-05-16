@@ -7,91 +7,79 @@ class ExpenseRepository {
 
   final DioClient _dioClient;
 
+  // GET /expenses?category=...&from=...&to=...
   Future<ExpenseListResponse> getExpenses({
     String? category,
-    DateTime? startDate,
-    DateTime? endDate,
-    int page = 1,
-    int limit = 20,
+    DateTime? from,
+    DateTime? to,
   }) async {
-    final queryParams = <String, dynamic>{
-      'page': page,
-      'limit': limit,
+    final query = <String, dynamic>{
       if (category != null) 'category': category,
-      if (startDate != null) 'startDate': startDate.toIso8601String(),
-      if (endDate != null) 'endDate': endDate.toIso8601String(),
+      if (from != null) 'from': from.toIso8601String(),
+      if (to != null) 'to': to.toIso8601String(),
     };
 
     final response = await _dioClient.get(
       ApiConstants.expenses,
-      queryParameters: queryParams,
+      queryParameters: query.isEmpty ? null : query,
     );
     return ExpenseListResponse.fromJson(response.data as Map<String, dynamic>);
   }
 
+  // POST /expenses  body: { amount, description?, category?, paymentMethod? }
   Future<ExpenseModel> createExpense({
     required double amount,
-    required String category,
     String? description,
-    required String paymentMethod,
-    DateTime? date,
+    String? category,
+    String? paymentMethod,
   }) async {
     final body = <String, dynamic>{
       'amount': amount,
-      'category': category,
-      'paymentMethod': paymentMethod,
       if (description != null) 'description': description,
-      if (date != null) 'date': date.toIso8601String(),
+      if (category != null) 'category': category,
+      if (paymentMethod != null) 'paymentMethod': paymentMethod,
     };
 
     final response = await _dioClient.post(ApiConstants.expenses, data: body);
     return ExpenseModel.fromJson(
-      (response.data as Map<String, dynamic>)['expense'] as Map<String, dynamic>,
+      (response.data as Map<String, dynamic>)['expense']
+          as Map<String, dynamic>,
     );
   }
 
+  // PUT /expenses/:id  body: { amount?, category?, paymentMethod?, description? }
   Future<ExpenseModel> updateExpense(
     String id, {
     double? amount,
     String? category,
-    String? description,
     String? paymentMethod,
-    DateTime? date,
+    String? description,
   }) async {
     final body = <String, dynamic>{
       if (amount != null) 'amount': amount,
       if (category != null) 'category': category,
-      if (description != null) 'description': description,
       if (paymentMethod != null) 'paymentMethod': paymentMethod,
-      if (date != null) 'date': date.toIso8601String(),
+      if (description != null) 'description': description,
     };
 
-    final response = await _dioClient.patch(
+    final response = await _dioClient.put(
       ApiConstants.expenseById(id),
       data: body,
     );
     return ExpenseModel.fromJson(
-      (response.data as Map<String, dynamic>)['expense'] as Map<String, dynamic>,
+      (response.data as Map<String, dynamic>)['expense']
+          as Map<String, dynamic>,
     );
   }
 
+  // DELETE /expenses/:id  (soft delete on server)
   Future<void> deleteExpense(String id) async {
     await _dioClient.delete(ApiConstants.expenseById(id));
   }
 
-  Future<ExpenseSummary> getSummary({
-    DateTime? startDate,
-    DateTime? endDate,
-  }) async {
-    final queryParams = <String, dynamic>{
-      if (startDate != null) 'startDate': startDate.toIso8601String(),
-      if (endDate != null) 'endDate': endDate.toIso8601String(),
-    };
-
-    final response = await _dioClient.get(
-      ApiConstants.expenseSummary,
-      queryParameters: queryParams.isEmpty ? null : queryParams,
-    );
+  // GET /expenses/summary
+  Future<ExpenseSummary> getSummary() async {
+    final response = await _dioClient.get(ApiConstants.expenseSummary);
     return ExpenseSummary.fromJson(response.data as Map<String, dynamic>);
   }
 }

@@ -43,7 +43,7 @@ final expenseSummaryProvider =
 // ignore: unused_element
 typedef ExpenseSummaryRef = AutoDisposeFutureProviderRef<ExpenseSummary>;
 String _$expenseListNotifierHash() =>
-    r'c38dcd0b3fef69f831960b053d770c2ad0680cf7';
+    r'23418f26c8d7639636ed95db75edfc118a5df0e7';
 
 /// See also [ExpenseListNotifier].
 @ProviderFor(ExpenseListNotifier)
