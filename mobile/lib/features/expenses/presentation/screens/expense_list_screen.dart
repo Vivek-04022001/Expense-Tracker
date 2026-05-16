@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../providers/expense_provider.dart';
+import '../sheets/add_expense_sheet.dart';
 import '../widgets/expense_tile.dart';
 
 final _indiaFormat = NumberFormat('##,##,##0.00', 'en_IN');
@@ -22,6 +23,19 @@ class ExpenseListScreen extends ConsumerWidget {
             onPressed: () {},
           ),
         ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => showModalBottomSheet(
+          context: context,
+          isScrollControlled: true,
+          backgroundColor: Colors.transparent,
+          builder: (context) => Padding(
+            padding: EdgeInsets.only(
+                bottom: MediaQuery.of(context).viewInsets.bottom),
+            child: const AddExpenseSheet(),
+          ),
+        ),
+        child: const Icon(Icons.add),
       ),
       body: grouped.when(
         loading: () => const Center(child: CircularProgressIndicator()),

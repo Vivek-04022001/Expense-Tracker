@@ -42,7 +42,7 @@ final expenseSummaryProvider =
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef ExpenseSummaryRef = AutoDisposeFutureProviderRef<ExpenseSummary>;
-String _$groupedExpensesHash() => r'afe9200056d4fb749e7acd8b65565c0211c2aa9c';
+String _$groupedExpensesHash() => r'4a35409a2e68f1e7436b2674b0611cb62023f869';
 
 /// See also [groupedExpenses].
 @ProviderFor(groupedExpenses)

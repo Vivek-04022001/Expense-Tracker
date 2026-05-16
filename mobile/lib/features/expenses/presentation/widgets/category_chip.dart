@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-const _categoryColors = <String, Color>{
+const categoryColors = <String, Color>{
   'food_and_drink': Color(0xFFFF6B6B),
   'transport': Color(0xFF4ECDC4),
   'bills_and_utilities': Color(0xFFFFE66D),
@@ -11,7 +11,7 @@ const _categoryColors = <String, Color>{
   'other': Color(0xFF8D99AE),
 };
 
-const _categoryIcons = <String, IconData>{
+const categoryIcons = <String, IconData>{
   'food_and_drink': Icons.restaurant,
   'transport': Icons.directions_car,
   'bills_and_utilities': Icons.receipt_long,
@@ -40,8 +40,8 @@ class CategoryChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = _categoryColors[category] ?? const Color(0xFF8D99AE);
-    final icon = _categoryIcons[category] ?? Icons.more_horiz;
+    final color = categoryColors[category] ?? const Color(0xFF8D99AE);
+    final icon = categoryIcons[category] ?? Icons.more_horiz;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
