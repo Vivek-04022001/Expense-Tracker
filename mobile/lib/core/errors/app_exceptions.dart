@@ -1,4 +1,4 @@
-enum _AppExceptionType { network, unauthorized, server, unknown }
+enum _AppExceptionType { network, unauthorized, conflict, server, unknown }
 
 class AppException implements Exception {
   final String message;
@@ -22,6 +22,12 @@ class AppException implements Exception {
         type: _AppExceptionType.unauthorized,
       );
 
+  factory AppException.conflict(String message) => AppException._(
+        message: message,
+        statusCode: 409,
+        type: _AppExceptionType.conflict,
+      );
+
   factory AppException.server() => AppException._(
         message: 'Server error',
         statusCode: 500,
@@ -33,8 +39,16 @@ class AppException implements Exception {
         type: _AppExceptionType.unknown,
       );
 
+  factory AppException.fromMessage(String message, int? statusCode) =>
+      AppException._(
+        message: message,
+        statusCode: statusCode,
+        type: _AppExceptionType.unknown,
+      );
+
   bool get isNetwork => _type == _AppExceptionType.network;
   bool get isUnauthorized => _type == _AppExceptionType.unauthorized;
+  bool get isConflict => _type == _AppExceptionType.conflict;
   bool get isServer => _type == _AppExceptionType.server;
 
   @override

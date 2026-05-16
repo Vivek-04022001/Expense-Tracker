@@ -1,38 +1,50 @@
 class UserModel {
   final String id;
   final String name;
-  final String email;
+  final String phone;
 
   const UserModel({
     required this.id,
     required this.name,
-    required this.email,
+    required this.phone,
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) => UserModel(
         id: json['id'] as String,
         name: json['name'] as String,
-        email: json['email'] as String,
+        phone: json['phone'] as String,
       );
 }
 
-class AuthResponse {
-  final String message;
-  final UserModel user;
+// POST /auth/login → { accessToken, refreshToken }
+class LoginResponse {
   final String accessToken;
   final String refreshToken;
 
-  const AuthResponse({
-    required this.message,
-    required this.user,
+  const LoginResponse({
     required this.accessToken,
     required this.refreshToken,
   });
 
-  factory AuthResponse.fromJson(Map<String, dynamic> json) => AuthResponse(
-        message: json['message'] as String,
-        user: UserModel.fromJson(json['user'] as Map<String, dynamic>),
+  factory LoginResponse.fromJson(Map<String, dynamic> json) => LoginResponse(
         accessToken: json['accessToken'] as String,
         refreshToken: json['refreshToken'] as String,
+      );
+}
+
+// POST /auth/register → { message, userId }
+class RegisterResponse {
+  final String message;
+  final String userId;
+
+  const RegisterResponse({
+    required this.message,
+    required this.userId,
+  });
+
+  factory RegisterResponse.fromJson(Map<String, dynamic> json) =>
+      RegisterResponse(
+        message: json['message'] as String,
+        userId: json['userId'] as String,
       );
 }

@@ -12,32 +12,31 @@ class AuthRepository {
 
   AuthRepository(this._dioClient);
 
-  Future<AuthResponse> login({
-    required String email,
+  Future<LoginResponse> login({
+    required String phone,
     required String password,
   }) async {
     final response = await _dioClient.post(
       ApiConstants.loginEndpoint,
-      data: {'email': email, 'password': password},
+      data: {'phone': phone, 'password': password},
     );
-    return AuthResponse.fromJson(response.data as Map<String, dynamic>);
+    return LoginResponse.fromJson(response.data as Map<String, dynamic>);
   }
 
-  Future<AuthResponse> register({
+  Future<RegisterResponse> register({
     required String name,
-    required String email,
+    required String phone,
     required String password,
   }) async {
     final response = await _dioClient.post(
       ApiConstants.registerEndpoint,
-      data: {'name': name, 'email': email, 'password': password},
+      data: {'name': name, 'phone': phone, 'password': password},
     );
-    return AuthResponse.fromJson(response.data as Map<String, dynamic>);
+    return RegisterResponse.fromJson(response.data as Map<String, dynamic>);
   }
 
   Future<void> logout() async {
-    final refreshToken =
-        await _storage.read(key: ApiConstants.refreshTokenKey);
+    final refreshToken = await _storage.read(key: ApiConstants.refreshTokenKey);
     try {
       await _dioClient.post(
         ApiConstants.logoutEndpoint,
@@ -57,14 +56,15 @@ class AuthRepository {
   Future<void> saveTokens(String accessToken, String refreshToken) async {
     await _storage.write(key: ApiConstants.accessTokenKey, value: accessToken);
     await _storage.write(
-        key: ApiConstants.refreshTokenKey, value: refreshToken);
+      key: ApiConstants.refreshTokenKey,
+      value: refreshToken,
+    );
   }
 
   Future<void> saveUser(UserModel user) => _storage.write(
-        key: _userKey,
-        value: jsonEncode(
-            {'id': user.id, 'name': user.name, 'email': user.email}),
-      );
+    key: _userKey,
+    value: jsonEncode({'id': user.id, 'name': user.name, 'phone': user.phone}),
+  );
 
   Future<UserModel?> getStoredUser() async {
     final raw = await _storage.read(key: _userKey);
@@ -74,5 +74,15 @@ class AuthRepository {
     } catch (_) {
       return null;
     }
+  }
+
+  // Extracts userId from the JWT access token payload without a package.
+  String decodeJwtUserId(String token) {
+    final payload = token.split('.')[1];
+    final normalized = base64Url.normalize(payload);
+    final decoded =
+        jsonDecode(utf8.decode(base64Url.decode(normalized)))
+            as Map<String, dynamic>;
+    return decoded['userId'] as String;
   }
 }

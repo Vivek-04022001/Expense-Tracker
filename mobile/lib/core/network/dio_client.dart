@@ -90,9 +90,17 @@ class DioClient {
         return AppException.network();
       case DioExceptionType.badResponse:
         final status = err.response?.statusCode;
+        final data = err.response?.data;
+        final msg = data is Map ? data['message'] as String? : null;
         if (status == 401) return AppException.unauthorized();
+        if (status == 409) {
+          return AppException.conflict(msg ?? 'Already exists');
+        }
         if (status != null && status >= 500) return AppException.server();
-        return AppException.unknown();
+        return AppException.fromMessage(
+          msg ?? 'An unexpected error occurred',
+          status,
+        );
       default:
         return AppException.unknown();
     }

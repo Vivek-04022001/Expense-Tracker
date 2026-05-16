@@ -39,14 +39,21 @@ class AuthNotifier extends _$AuthNotifier {
     return AuthAuthenticated(user);
   }
 
-  Future<void> login(String email, String password) async {
+  Future<void> login(String phone, String password) async {
     state = const AsyncValue.loading();
     try {
       final repo = ref.read(authRepositoryProvider);
-      final response = await repo.login(email: email, password: password);
+      final response = await repo.login(phone: phone, password: password);
       await repo.saveTokens(response.accessToken, response.refreshToken);
-      await repo.saveUser(response.user);
-      state = AsyncValue.data(AuthAuthenticated(response.user));
+
+      // Decode JWT to get userId; reuse stored user (has name) if same account.
+      final userId = repo.decodeJwtUserId(response.accessToken);
+      final stored = await repo.getStoredUser();
+      final user = stored?.id == userId
+          ? stored!
+          : UserModel(id: userId, name: phone, phone: phone);
+      await repo.saveUser(user);
+      state = AsyncValue.data(AuthAuthenticated(user));
     } on AppException catch (e) {
       state = AsyncValue.data(AuthUnauthenticated(error: _errorMessage(e)));
     } catch (e) {
@@ -54,18 +61,28 @@ class AuthNotifier extends _$AuthNotifier {
     }
   }
 
-  Future<void> register(String name, String email, String password) async {
+  Future<void> register(String name, String phone, String password) async {
     state = const AsyncValue.loading();
     try {
       final repo = ref.read(authRepositoryProvider);
-      final response = await repo.register(
+      // Register → get userId, then auto-login to get tokens.
+      final registerResponse = await repo.register(
         name: name,
-        email: email,
+        phone: phone,
         password: password,
       );
-      await repo.saveTokens(response.accessToken, response.refreshToken);
-      await repo.saveUser(response.user);
-      state = AsyncValue.data(AuthAuthenticated(response.user));
+      final loginResponse = await repo.login(phone: phone, password: password);
+      await repo.saveTokens(
+        loginResponse.accessToken,
+        loginResponse.refreshToken,
+      );
+      final user = UserModel(
+        id: registerResponse.userId,
+        name: name,
+        phone: phone,
+      );
+      await repo.saveUser(user);
+      state = AsyncValue.data(AuthAuthenticated(user));
     } on AppException catch (e) {
       state = AsyncValue.data(AuthUnauthenticated(error: _errorMessage(e)));
     } catch (e) {
@@ -80,8 +97,9 @@ class AuthNotifier extends _$AuthNotifier {
   }
 
   String _errorMessage(AppException e) {
-    if (e.isUnauthorized) return 'Invalid email or password';
+    if (e.isUnauthorized) return 'Invalid phone number or password';
     if (e.isNetwork) return 'No internet connection';
+    if (e.isConflict) return e.message; // e.g. "User already exists"
     return e.message;
   }
 }

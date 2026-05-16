@@ -14,40 +14,39 @@ class LoginScreen extends ConsumerStatefulWidget {
 }
 
 class _LoginScreenState extends ConsumerState<LoginScreen> {
-  final _emailController = TextEditingController();
+  final _phoneController = TextEditingController();
   final _passwordController = TextEditingController();
-  String? _emailError;
+  String? _phoneError;
   String? _passwordError;
 
   @override
   void dispose() {
-    _emailController.dispose();
+    _phoneController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
 
   bool _validate() {
-    final email = _emailController.text.trim();
+    final phone = _phoneController.text.trim();
     final password = _passwordController.text;
 
-    final emailError =
-        email.isEmpty || !email.contains('@') ? 'Enter a valid email address' : null;
+    final phoneError = phone.isEmpty ? 'Enter your phone number' : null;
     final passwordError = password.isEmpty || password.length < 6
         ? 'Password must be at least 6 characters'
         : null;
 
     setState(() {
-      _emailError = emailError;
+      _phoneError = phoneError;
       _passwordError = passwordError;
     });
 
-    return emailError == null && passwordError == null;
+    return phoneError == null && passwordError == null;
   }
 
   Future<void> _submit() async {
     if (!_validate()) return;
     await ref.read(authNotifierProvider.notifier).login(
-          _emailController.text.trim(),
+          _phoneController.text.trim(),
           _passwordController.text,
         );
   }
@@ -91,10 +90,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               ),
               const SizedBox(height: 32),
               AppInput(
-                label: 'Email',
-                controller: _emailController,
-                errorText: _emailError,
-                keyboardType: TextInputType.emailAddress,
+                label: 'Phone number',
+                controller: _phoneController,
+                errorText: _phoneError,
+                keyboardType: TextInputType.phone,
               ),
               const SizedBox(height: 16),
               AppInput(
