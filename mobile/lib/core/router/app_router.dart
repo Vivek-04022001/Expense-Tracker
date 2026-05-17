@@ -6,14 +6,22 @@ import '../../features/auth/presentation/providers/auth_provider.dart';
 import '../../features/auth/presentation/screens/splash_screen.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/register_screen.dart';
-import '../../features/dashboard/presentation/screens/dashboard_screen.dart';
-import '../../features/expenses/presentation/screens/expense_list_screen.dart';
+import '../../features/home/presentation/screens/home_screen.dart';
+import '../../features/expenses/presentation/screens/expenses_screen.dart';
+import '../../features/insights/presentation/screens/insights_screen.dart';
+import '../../features/navigation/presentation/screens/shell_screen.dart';
+import '../../features/onboarding/presentation/providers/onboarding_provider.dart';
+import '../../features/onboarding/presentation/screens/onboarding_screen.dart';
+import '../../features/profile/presentation/screens/profile_screen.dart';
 
 part 'app_router.g.dart';
 
 class _RouterNotifier extends ChangeNotifier {
   _RouterNotifier(Ref ref) {
     ref.listen<AsyncValue<AuthState>>(authNotifierProvider, (_, __) {
+      notifyListeners();
+    });
+    ref.listen<AsyncValue<bool>>(onboardingNotifierProvider, (_, __) {
       notifyListeners();
     });
   }
@@ -24,7 +32,7 @@ GoRouter appRouter(AppRouterRef ref) {
   final notifier = _RouterNotifier(ref);
   ref.onDispose(notifier.dispose);
 
-  const publicRoutes = ['/splash', '/login', '/register'];
+  const publicRoutes = ['/splash', '/login', '/register', '/onboarding'];
   const authScreens = ['/login', '/register'];
 
   final router = GoRouter(
@@ -32,42 +40,85 @@ GoRouter appRouter(AppRouterRef ref) {
     refreshListenable: notifier,
     redirect: (context, state) {
       final asyncAuth = ref.read(authNotifierProvider);
+      final asyncOnboarding = ref.read(onboardingNotifierProvider);
       final location = state.matchedLocation;
 
-      return asyncAuth.when(
-        loading: () => location == '/splash' ? null : '/splash',
-        error: (_, __) => '/login',
-        data: (authState) {
-          if (authState is AuthInitial) {
-            return location == '/splash' ? null : '/splash';
-          }
-          if (authState is AuthAuthenticated) {
-            if (publicRoutes.contains(location)) return '/dashboard';
-            return null;
-          }
-          // AuthUnauthenticated — stay only on /login or /register
-          if (authScreens.contains(location)) return null;
-          return '/login';
-        },
-      );
+      if (asyncAuth.isLoading || asyncOnboarding.isLoading) {
+        return location == '/splash' ? null : '/splash';
+      }
+      if (asyncAuth.hasError) return '/login';
+
+      final authState = asyncAuth.value!;
+      final onboardingSeen = asyncOnboarding.valueOrNull ?? false;
+
+      if (authState is AuthInitial) {
+        return location == '/splash' ? null : '/splash';
+      }
+      if (authState is AuthAuthenticated) {
+        if (publicRoutes.contains(location)) return '/home';
+        return null;
+      }
+      // AuthUnauthenticated
+      if (!onboardingSeen) {
+        return location == '/onboarding' ? null : '/onboarding';
+      }
+      if (authScreens.contains(location)) return null;
+      return '/login';
     },
     routes: [
       GoRoute(
         path: '/splash',
         builder: (context, state) => const SplashScreen(),
       ),
-      GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
+      GoRoute(
+        path: '/onboarding',
+        builder: (context, state) => const OnboardingScreen(),
+      ),
+      GoRoute(
+        path: '/login',
+        builder: (context, state) => const LoginScreen(),
+      ),
       GoRoute(
         path: '/register',
         builder: (context, state) => const RegisterScreen(),
       ),
-      GoRoute(
-        path: '/dashboard',
-        builder: (context, state) => const DashboardScreen(),
-      ),
-      GoRoute(
-        path: '/expenses',
-        builder: (context, state) => const ExpenseListScreen(),
+      StatefulShellRoute.indexedStack(
+        builder: (context, state, navigationShell) =>
+            ShellScreen(navigationShell: navigationShell),
+        branches: [
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/home',
+                builder: (context, state) => const HomeScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/expenses',
+                builder: (context, state) => const ExpensesScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/insights',
+                builder: (context, state) => const InsightsScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/profile',
+                builder: (context, state) => const ProfileScreen(),
+              ),
+            ],
+          ),
+        ],
       ),
     ],
   );

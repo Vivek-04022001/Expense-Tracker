@@ -9,16 +9,17 @@ class DioClient {
   bool _isRefreshing = false;
 
   DioClient() {
-    _dio = Dio(BaseOptions(
-      baseUrl: ApiConstants.baseUrl,
-      connectTimeout: const Duration(seconds: 10),
-      receiveTimeout: const Duration(seconds: 15),
-      headers: {'Content-Type': 'application/json'},
-    ));
-    _dio.interceptors.add(InterceptorsWrapper(
-      onRequest: _onRequest,
-      onError: _onError,
-    ));
+    _dio = Dio(
+      BaseOptions(
+        baseUrl: ApiConstants.baseUrl,
+        connectTimeout: const Duration(seconds: 10),
+        receiveTimeout: const Duration(seconds: 15),
+        headers: {'Content-Type': 'application/json'},
+      ),
+    );
+    _dio.interceptors.add(
+      InterceptorsWrapper(onRequest: _onRequest, onError: _onError),
+    );
   }
 
   Future<void> _onRequest(
@@ -39,17 +40,20 @@ class DioClient {
     if (err.response?.statusCode == 401 && !_isRefreshing) {
       _isRefreshing = true;
       try {
-        final refreshToken =
-            await _storage.read(key: ApiConstants.refreshTokenKey);
+        final refreshToken = await _storage.read(
+          key: ApiConstants.refreshTokenKey,
+        );
         if (refreshToken == null || refreshToken.isEmpty) {
           throw Exception('No refresh token stored');
         }
 
         // Use a separate Dio instance to avoid re-entering this interceptor.
-        final refreshDio = Dio(BaseOptions(
-          baseUrl: ApiConstants.baseUrl,
-          headers: {'Content-Type': 'application/json'},
-        ));
+        final refreshDio = Dio(
+          BaseOptions(
+            baseUrl: ApiConstants.baseUrl,
+            headers: {'Content-Type': 'application/json'},
+          ),
+        );
         final response = await refreshDio.post(
           ApiConstants.refreshEndpoint,
           data: {'refreshToken': refreshToken},
@@ -64,23 +68,27 @@ class DioClient {
       } catch (_) {
         await _storage.delete(key: ApiConstants.accessTokenKey);
         await _storage.delete(key: ApiConstants.refreshTokenKey);
-        handler.reject(DioException(
-          requestOptions: err.requestOptions,
-          error: AppException.unauthorized(),
-          type: DioExceptionType.badResponse,
-        ));
+        handler.reject(
+          DioException(
+            requestOptions: err.requestOptions,
+            error: AppException.unauthorized(),
+            type: DioExceptionType.badResponse,
+          ),
+        );
       } finally {
         _isRefreshing = false;
       }
       return;
     }
 
-    handler.reject(DioException(
-      requestOptions: err.requestOptions,
-      response: err.response,
-      type: err.type,
-      error: _mapError(err),
-    ));
+    handler.reject(
+      DioException(
+        requestOptions: err.requestOptions,
+        response: err.response,
+        type: err.type,
+        error: _mapError(err),
+      ),
+    );
   }
 
   AppException _mapError(DioException err) {

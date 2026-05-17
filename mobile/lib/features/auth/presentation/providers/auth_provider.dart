@@ -25,7 +25,7 @@ DioClient dioClient(DioClientRef ref) => DioClient();
 
 @riverpod
 AuthRepository authRepository(AuthRepositoryRef ref) =>
-    AuthRepository(ref.watch(dioClientProvider));
+    AuthRepository();
 
 @riverpod
 class AuthNotifier extends _$AuthNotifier {
@@ -46,12 +46,10 @@ class AuthNotifier extends _$AuthNotifier {
       final response = await repo.login(phone: phone, password: password);
       await repo.saveTokens(response.accessToken, response.refreshToken);
 
-      // Decode JWT to get userId; reuse stored user (has name) if same account.
-      final userId = repo.decodeJwtUserId(response.accessToken);
+      // final userId = repo.decodeJwtUserId(response.accessToken);
       final stored = await repo.getStoredUser();
-      final user = stored?.id == userId
-          ? stored!
-          : UserModel(id: userId, name: phone, phone: phone);
+      final user = stored ??
+          UserModel(id: 'mock_user_001', name: phone, phone: phone);
       await repo.saveUser(user);
       state = AsyncValue.data(AuthAuthenticated(user));
     } on AppException catch (e) {
@@ -65,17 +63,14 @@ class AuthNotifier extends _$AuthNotifier {
     state = const AsyncValue.loading();
     try {
       final repo = ref.read(authRepositoryProvider);
-      // Register → get userId, then auto-login to get tokens.
       final registerResponse = await repo.register(
         name: name,
         phone: phone,
         password: password,
       );
-      final loginResponse = await repo.login(phone: phone, password: password);
-      await repo.saveTokens(
-        loginResponse.accessToken,
-        loginResponse.refreshToken,
-      );
+      // Mock: skip auto-login since tokens aren't real JWTs.
+      // final loginResponse = await repo.login(phone: phone, password: password);
+      await repo.saveTokens('mock_access_token', 'mock_refresh_token');
       final user = UserModel(
         id: registerResponse.userId,
         name: name,
