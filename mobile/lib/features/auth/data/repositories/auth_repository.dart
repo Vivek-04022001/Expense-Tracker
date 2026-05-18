@@ -1,31 +1,27 @@
 import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../../../../core/constants/api_constants.dart';
-// import '../../../../core/network/dio_client.dart';
+import '../../../../core/network/dio_client.dart';
 import '../models/auth_model.dart';
 
 class AuthRepository {
-  // final DioClient _dioClient;
-  final FlutterSecureStorage _storage = const FlutterSecureStorage();
+  final DioClient _dioClient;
+  final FlutterSecureStorage _storage;
 
   static const _userKey = 'auth_user';
 
-  AuthRepository();
+  AuthRepository(this._dioClient, {FlutterSecureStorage? storage})
+    : _storage = storage ?? const FlutterSecureStorage();
 
   Future<LoginResponse> login({
     required String phone,
     required String password,
   }) async {
-    await Future.delayed(const Duration(milliseconds: 600));
-    // final response = await _dioClient.post(
-    //   ApiConstants.loginEndpoint,
-    //   data: {'phone': phone, 'password': password},
-    // );
-    // return LoginResponse.fromJson(response.data as Map<String, dynamic>);
-    return const LoginResponse(
-      accessToken: 'mock_access_token',
-      refreshToken: 'mock_refresh_token',
+    final response = await _dioClient.post(
+      ApiConstants.loginEndpoint,
+      data: {'phone': phone, 'password': password},
     );
+    return LoginResponse.fromJson(response.data as Map<String, dynamic>);
   }
 
   Future<RegisterResponse> register({
@@ -33,26 +29,23 @@ class AuthRepository {
     required String phone,
     required String password,
   }) async {
-    await Future.delayed(const Duration(milliseconds: 600));
-    // final response = await _dioClient.post(
-    //   ApiConstants.registerEndpoint,
-    //   data: {'name': name, 'phone': phone, 'password': password},
-    // );
-    // return RegisterResponse.fromJson(response.data as Map<String, dynamic>);
-    return const RegisterResponse(
-      message: 'User registered successfully',
-      userId: 'mock_user_001',
+    final response = await _dioClient.post(
+      ApiConstants.registerEndpoint,
+      data: {'name': name, 'phone': phone, 'password': password},
     );
+    return RegisterResponse.fromJson(response.data as Map<String, dynamic>);
   }
 
   Future<void> logout() async {
-    // final refreshToken = await _storage.read(key: ApiConstants.refreshTokenKey);
-    // try {
-    //   await _dioClient.post(
-    //     ApiConstants.logoutEndpoint,
-    //     data: {'refreshToken': refreshToken},
-    //   );
-    // } catch (_) {}
+    final refreshToken = await _storage.read(key: ApiConstants.refreshTokenKey);
+    try {
+      if (refreshToken != null && refreshToken.isNotEmpty) {
+        await _dioClient.post(
+          ApiConstants.logoutEndpoint,
+          data: {'refreshToken': refreshToken},
+        );
+      }
+    } catch (_) {}
     await _storage.delete(key: ApiConstants.accessTokenKey);
     await _storage.delete(key: ApiConstants.refreshTokenKey);
     await _storage.delete(key: _userKey);
@@ -86,12 +79,10 @@ class AuthRepository {
     }
   }
 
-  // String decodeJwtUserId(String token) {
-  //   final payload = token.split('.')[1];
-  //   final normalized = base64Url.normalize(payload);
-  //   final decoded =
-  //       jsonDecode(utf8.decode(base64Url.decode(normalized)))
-  //           as Map<String, dynamic>;
-  //   return decoded['userId'] as String;
-  // }
+  Map<String, dynamic> decodeJwtPayload(String token) {
+    final payload = token.split('.')[1];
+    final normalized = base64Url.normalize(payload);
+    return jsonDecode(utf8.decode(base64Url.decode(normalized)))
+        as Map<String, dynamic>;
+  }
 }
