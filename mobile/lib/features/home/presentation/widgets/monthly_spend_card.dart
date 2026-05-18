@@ -1,86 +1,149 @@
-import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../expenses/presentation/providers/expense_provider.dart';
+import '../../../income/data/models/income_model.dart';
+import '../../../income/presentation/providers/income_provider.dart';
 
-class MonthlySpendCard extends StatelessWidget {
+class MonthlySpendCard extends ConsumerWidget {
   const MonthlySpendCard({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final summaryAsync = ref.watch(expenseSummaryProvider);
+    final incomesAsync = ref.watch(currentMonthIncomesProvider);
+
+    final isLoading =
+        summaryAsync.isLoading || incomesAsync.isLoading;
+    final hasError =
+        summaryAsync.hasError || incomesAsync.hasError;
+
+    if (isLoading) {
+      return _Card(
+        child: const SizedBox(
+          height: 110,
+          child: Center(child: CircularProgressIndicator()),
+        ),
+      );
+    }
+
+    if (hasError) {
+      return _Card(
+        child: const SizedBox(
+          height: 110,
+          child: Center(
+            child: Text(
+              'Could not load financial data',
+              style: TextStyle(color: AppColors.lightTextSecondary),
+            ),
+          ),
+        ),
+      );
+    }
+
+    final summary = summaryAsync.value!;
+    final incomes = incomesAsync.value ?? <IncomeModel>[];
+
+    final now = DateTime.now();
+    final currentKey =
+        '${now.year}-${now.month.toString().padLeft(2, '0')}';
+
+    final spent = summary.byMonth
+        .where((m) => m.month == currentKey)
+        .fold<double>(0, (s, m) => s + m.total);
+
+    final income = incomes.fold<double>(0, (s, e) => s + e.amount);
+    final saved = (income - spent).clamp(0.0, double.infinity);
+    final savedPct = income > 0 ? (saved / income).clamp(0.0, 1.0) : 0.0;
+    final spentPct = income > 0 ? (spent / income).clamp(0.0, 1.0) : 0.0;
+
+    // Latest income entry for sub-label
+    final latestIncome = incomes.isNotEmpty ? incomes.first : null;
+    final subLabel = latestIncome != null
+        ? '${latestIncome.incomeType.displayLabel} · ${DateFormat('MMM d').format(latestIncome.createdAt)}'
+        : null;
+
+    final monthLabel = DateFormat('MMMM').format(now);
+
     return _Card(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Header row
           Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Spent this month',
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: AppColors.lightTextSecondary,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    const Text(
-                      '₹42,380',
-                      style: TextStyle(
-                        fontSize: 28,
-                        fontWeight: FontWeight.w800,
-                        color: AppColors.lightTextPrimary,
-                        height: 1,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Row(
-                      children: [
-                        PhosphorIcon(
-                          PhosphorIcons.arrowUp(PhosphorIconsStyle.bold),
-                          size: 13,
-                          color: AppColors.warning,
-                        ),
-                        const SizedBox(width: 3),
-                        const Text(
-                          '12% vs last month',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: AppColors.warning,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
+              Text(
+                '$monthLabel so far',
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.lightTextPrimary,
                 ),
               ),
-              const SizedBox(width: 12),
-              _DonutChart(percent: 0.71),
+              const Spacer(),
+              if (subLabel != null)
+                Text(
+                  subLabel,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: AppColors.lightTextSecondary,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
             ],
           ),
-          const SizedBox(height: 14),
-          const Divider(height: 1, color: AppColors.lightBorderSubtle),
           const SizedBox(height: 12),
-          const Row(
-            children: [
-              Text(
-                '₹17,620 left of ₹60,000',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: AppColors.lightTextSecondary,
-                ),
+          // Progress bar: red spent | green saved
+          ClipRRect(
+            borderRadius: BorderRadius.circular(6),
+            child: SizedBox(
+              height: 8,
+              child: Row(
+                children: [
+                  if (income == 0) ...[
+                    Expanded(child: Container(color: const Color(0xFFE5E7EB))),
+                  ] else ...[
+                    if (spentPct > 0)
+                      Expanded(
+                        flex: (spentPct * 1000).round(),
+                        child: Container(color: AppColors.danger),
+                      ),
+                    if (savedPct > 0)
+                      Expanded(
+                        flex: (savedPct * 1000).round(),
+                        child: Container(color: AppColors.success),
+                      ),
+                  ],
+                ],
               ),
-              Spacer(),
-              Text(
-                '12 days remaining',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: AppColors.lightTextTertiary,
-                ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          // Three-stat row
+          Row(
+            children: [
+              _StatCol(
+                dot: const Color(0xFF1A1A2E),
+                label: 'INCOME',
+                value: '₹${_fmtNum(income.round())}',
+                valueColor: AppColors.lightTextPrimary,
+              ),
+              const SizedBox(width: 20),
+              _StatCol(
+                dot: AppColors.danger,
+                label: 'SPENT',
+                value: '₹${_fmtNum(spent.round())}',
+                valueColor: AppColors.lightTextPrimary,
+              ),
+              const SizedBox(width: 20),
+              _StatCol(
+                dot: AppColors.success,
+                label: 'SAVED',
+                value: '₹${_fmtNum(saved.round())}',
+                valueColor: AppColors.success,
+                subtitle:
+                    income > 0 ? '${(savedPct * 100).toStringAsFixed(0)}% of income' : null,
               ),
             ],
           ),
@@ -90,53 +153,72 @@ class MonthlySpendCard extends StatelessWidget {
   }
 }
 
-class _DonutChart extends StatelessWidget {
-  const _DonutChart({required this.percent});
+// ── Stat column ───────────────────────────────────────────────────────────────
 
-  final double percent;
+class _StatCol extends StatelessWidget {
+  const _StatCol({
+    required this.dot,
+    required this.label,
+    required this.value,
+    required this.valueColor,
+    this.subtitle,
+  });
+
+  final Color dot;
+  final String label;
+  final String value;
+  final Color valueColor;
+  final String? subtitle;
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: 72,
-      height: 72,
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          PieChart(
-            PieChartData(
-              centerSpaceRadius: 24,
-              sectionsSpace: 0,
-              startDegreeOffset: -90,
-              sections: [
-                PieChartSectionData(
-                  value: percent * 100,
-                  color: AppColors.warning,
-                  radius: 12,
-                  title: '',
-                ),
-                PieChartSectionData(
-                  value: (1 - percent) * 100,
-                  color: const Color(0xFFEEF0F5),
-                  radius: 12,
-                  title: '',
-                ),
-              ],
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Container(
+              width: 7,
+              height: 7,
+              decoration: BoxDecoration(color: dot, shape: BoxShape.circle),
             ),
+            const SizedBox(width: 5),
+            Text(
+              label,
+              style: const TextStyle(
+                fontSize: 10,
+                fontWeight: FontWeight.w600,
+                color: AppColors.lightTextSecondary,
+                letterSpacing: 0.5,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 4),
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w700,
+            color: valueColor,
           ),
+        ),
+        if (subtitle != null) ...[
+          const SizedBox(height: 2),
           Text(
-            '${(percent * 100).toInt()}%',
+            subtitle!,
             style: const TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w700,
-              color: AppColors.lightTextPrimary,
+              fontSize: 11,
+              color: AppColors.lightTextSecondary,
             ),
           ),
         ],
-      ),
+      ],
     );
   }
 }
+
+// ── Card wrapper ──────────────────────────────────────────────────────────────
 
 class _Card extends StatelessWidget {
   const _Card({required this.child});
@@ -161,4 +243,17 @@ class _Card extends StatelessWidget {
       child: child,
     );
   }
+}
+
+String _fmtNum(int v) {
+  if (v < 1000) return v.toString();
+  final s = v.toString();
+  final last3 = s.substring(s.length - 3);
+  final rest = s.substring(0, s.length - 3);
+  final buf = StringBuffer();
+  for (var i = 0; i < rest.length; i++) {
+    if (i > 0 && (rest.length - i) % 2 == 0) buf.write(',');
+    buf.write(rest[i]);
+  }
+  return '$buf,$last3';
 }

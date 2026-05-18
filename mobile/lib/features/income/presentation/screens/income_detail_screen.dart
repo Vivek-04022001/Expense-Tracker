@@ -3,14 +3,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../../../../core/utils/category_mapper.dart';
-import '../../data/models/expense_model.dart';
-import '../providers/expense_provider.dart';
+import '../../data/models/income_model.dart';
+import '../providers/income_provider.dart';
 
-class ExpenseDetailScreen extends ConsumerWidget {
-  const ExpenseDetailScreen({super.key, required this.expense});
+class IncomeDetailScreen extends ConsumerWidget {
+  const IncomeDetailScreen({super.key, required this.income});
 
-  final ExpenseModel expense;
+  final IncomeModel income;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -19,21 +18,18 @@ class ExpenseDetailScreen extends ConsumerWidget {
       body: SafeArea(
         child: Column(
           children: [
-            _TopBar(
-              name: expense.description ?? CategoryMapper.label(expense.category),
-              onBack: () => Navigator.of(context).pop(),
-            ),
+            _TopBar(onBack: () => Navigator.of(context).pop()),
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
                 child: Column(
                   children: [
                     const SizedBox(height: 24),
-                    _HeroSection(expense: expense),
+                    _HeroSection(income: income),
                     const SizedBox(height: 28),
-                    _DetailsCard(expense: expense),
+                    _DetailsCard(income: income),
                     const SizedBox(height: 28),
-                    _ActionRow(expense: expense),
+                    _ActionRow(income: income),
                     const SizedBox(height: 16),
                   ],
                 ),
@@ -49,9 +45,7 @@ class ExpenseDetailScreen extends ConsumerWidget {
 // ── Top bar ───────────────────────────────────────────────────────────────────
 
 class _TopBar extends StatelessWidget {
-  const _TopBar({required this.name, required this.onBack});
-
-  final String name;
+  const _TopBar({required this.onBack});
   final VoidCallback onBack;
 
   @override
@@ -64,24 +58,8 @@ class _TopBar extends StatelessWidget {
             icon: PhosphorIcons.caretLeft(PhosphorIconsStyle.bold),
             onTap: onBack,
           ),
-          const Spacer(),
-          _NavBtn(
-            icon: PhosphorIcons.dotsThree(PhosphorIconsStyle.bold),
-            onTap: () => _showMoreMenu(context),
-          ),
         ],
       ),
-    );
-  }
-
-  void _showMoreMenu(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (_) => const _MoreMenuSheet(),
     );
   }
 }
@@ -104,11 +82,7 @@ class _NavBtn extends StatelessWidget {
           border: Border.all(color: AppColors.lightBorderSubtle),
         ),
         child: Center(
-          child: PhosphorIcon(
-            icon,
-            size: 18,
-            color: AppColors.lightTextSecondary,
-          ),
+          child: PhosphorIcon(icon, size: 18, color: AppColors.lightTextSecondary),
         ),
       ),
     );
@@ -118,16 +92,23 @@ class _NavBtn extends StatelessWidget {
 // ── Hero section ──────────────────────────────────────────────────────────────
 
 class _HeroSection extends StatelessWidget {
-  const _HeroSection({required this.expense});
-  final ExpenseModel expense;
+  const _HeroSection({required this.income});
+  final IncomeModel income;
+
+  static PhosphorIconData _icon(IncomeType t) => switch (t) {
+        IncomeType.salary => PhosphorIcons.briefcase(PhosphorIconsStyle.regular),
+        IncomeType.freelance => PhosphorIcons.laptop(PhosphorIconsStyle.regular),
+        IncomeType.investment =>
+          PhosphorIcons.chartLineUp(PhosphorIconsStyle.regular),
+        IncomeType.reward => PhosphorIcons.gift(PhosphorIconsStyle.regular),
+        IncomeType.other => PhosphorIcons.dotsThree(PhosphorIconsStyle.regular),
+      };
 
   @override
   Widget build(BuildContext context) {
-    final color = CategoryMapper.color(expense.category);
-    final label = CategoryMapper.label(expense.category);
-    final name = expense.description ?? label;
-    final timeStr = DateFormat('h:mm a').format(expense.createdAt);
-    final dateLabel = _formatDate(expense.createdAt);
+    final name = income.description ?? income.incomeType.displayLabel;
+    final timeStr = DateFormat('h:mm a').format(income.createdAt);
+    final dateLabel = _formatDate(income.createdAt);
 
     return Column(
       children: [
@@ -135,14 +116,14 @@ class _HeroSection extends StatelessWidget {
           width: 72,
           height: 72,
           decoration: BoxDecoration(
-            color: color.withValues(alpha: 0.12),
+            color: AppColors.success.withValues(alpha: 0.12),
             shape: BoxShape.circle,
           ),
           child: Center(
             child: PhosphorIcon(
-              CategoryMapper.icon(expense.category),
+              _icon(income.incomeType),
               size: 32,
-              color: color,
+              color: AppColors.success,
             ),
           ),
         ),
@@ -150,15 +131,15 @@ class _HeroSection extends StatelessWidget {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
           decoration: BoxDecoration(
-            color: color.withValues(alpha: 0.1),
+            color: AppColors.success.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(20),
           ),
           child: Text(
-            label,
-            style: TextStyle(
+            income.incomeType.displayLabel,
+            style: const TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w600,
-              color: color,
+              color: AppColors.success,
             ),
           ),
         ),
@@ -174,11 +155,11 @@ class _HeroSection extends StatelessWidget {
         ),
         const SizedBox(height: 6),
         Text(
-          '−₹${_fmtNum(expense.amount.round())}',
+          '+₹${_fmtNum(income.amount.round())}',
           style: const TextStyle(
             fontSize: 34,
             fontWeight: FontWeight.w700,
-            color: AppColors.danger,
+            color: AppColors.success,
             letterSpacing: -0.5,
           ),
         ),
@@ -212,20 +193,22 @@ class _HeroSection extends StatelessWidget {
 // ── Details card ──────────────────────────────────────────────────────────────
 
 class _DetailsCard extends StatelessWidget {
-  const _DetailsCard({required this.expense});
-  final ExpenseModel expense;
+  const _DetailsCard({required this.income});
+  final IncomeModel income;
 
   @override
   Widget build(BuildContext context) {
     final rows = [
       _DetailRow(
-        label: 'Payment method',
-        value: expense.paymentMethod.displayLabel,
+        label: 'Income type',
+        value: income.incomeType.displayLabel,
       ),
       _DetailRow(
         label: 'Date',
-        value: DateFormat('MMM d, yyyy').format(expense.createdAt),
+        value: DateFormat('MMM d, yyyy').format(income.createdAt),
       ),
+      if (income.description != null && income.description!.isNotEmpty)
+        _DetailRow(label: 'Note', value: income.description!),
       const _DetailRow(label: 'Source', value: 'Manually added'),
     ];
 
@@ -245,10 +228,8 @@ class _DetailsCard extends StatelessWidget {
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
         itemCount: rows.length,
-        separatorBuilder: (_, __) => const Divider(
-          height: 1,
-          color: AppColors.lightBorderSubtle,
-        ),
+        separatorBuilder: (_, __) =>
+            const Divider(height: 1, color: AppColors.lightBorderSubtle),
         itemBuilder: (_, i) => _DetailRowTile(row: rows[i]),
       ),
     );
@@ -299,8 +280,8 @@ class _DetailRowTile extends StatelessWidget {
 // ── Action row ────────────────────────────────────────────────────────────────
 
 class _ActionRow extends ConsumerWidget {
-  const _ActionRow({required this.expense});
-  final ExpenseModel expense;
+  const _ActionRow({required this.income});
+  final IncomeModel income;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -309,8 +290,8 @@ class _ActionRow extends ConsumerWidget {
         Expanded(
           child: _ActionBtn(
             icon: PhosphorIcons.pencilSimple(PhosphorIconsStyle.regular),
-            label: 'Recategorize',
-            onTap: () => _showRecategorize(context, ref),
+            label: 'Change type',
+            onTap: () => _showChangeType(context, ref),
           ),
         ),
         const SizedBox(width: 12),
@@ -326,7 +307,7 @@ class _ActionRow extends ConsumerWidget {
     );
   }
 
-  void _showRecategorize(BuildContext context, WidgetRef ref) {
+  void _showChangeType(BuildContext context, WidgetRef ref) {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.white,
@@ -334,12 +315,12 @@ class _ActionRow extends ConsumerWidget {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (_) => _RecategorizeSheet(
-        current: expense.category,
-        onSave: (newCat) async {
+      builder: (_) => _ChangeTypeSheet(
+        current: income.incomeType,
+        onSave: (newType) async {
           await ref
-              .read(expenseListNotifierProvider.notifier)
-              .edit(expense.id, category: newCat);
+              .read(incomeListNotifierProvider.notifier)
+              .edit(income.id, incomeType: newType);
         },
       ),
     );
@@ -349,15 +330,13 @@ class _ActionRow extends ConsumerWidget {
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: const Text(
-          'Delete expense?',
+          'Delete income?',
           style: TextStyle(fontWeight: FontWeight.w700, fontSize: 17),
         ),
         content: Text(
-          'This will permanently remove "${expense.description ?? CategoryMapper.label(expense.category)}".',
+          'This will permanently remove "${income.description ?? income.incomeType.displayLabel}".',
           style: const TextStyle(
             color: AppColors.lightTextSecondary,
             fontSize: 14,
@@ -375,8 +354,8 @@ class _ActionRow extends ConsumerWidget {
             onPressed: () async {
               Navigator.pop(context);
               await ref
-                  .read(expenseListNotifierProvider.notifier)
-                  .delete(expense.id);
+                  .read(incomeListNotifierProvider.notifier)
+                  .delete(income.id);
               if (context.mounted) Navigator.pop(context);
             },
             child: const Text(
@@ -456,70 +435,19 @@ class _ActionBtn extends StatelessWidget {
   }
 }
 
-// ── More menu sheet ───────────────────────────────────────────────────────────
+// ── Change type sheet ─────────────────────────────────────────────────────────
 
-class _MoreMenuSheet extends StatelessWidget {
-  const _MoreMenuSheet();
-
-  @override
-  Widget build(BuildContext context) {
-    final items = [
-      (PhosphorIcons.share(PhosphorIconsStyle.regular), 'Share', false),
-      (PhosphorIcons.flag(PhosphorIconsStyle.regular), 'Report issue', false),
-    ];
-
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 20, 20, 32),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: items
-            .map(
-              (item) => GestureDetector(
-                onTap: () => Navigator.pop(context),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  child: Row(
-                    children: [
-                      PhosphorIcon(
-                        item.$1,
-                        size: 20,
-                        color: AppColors.lightTextSecondary,
-                      ),
-                      const SizedBox(width: 14),
-                      Text(
-                        item.$2,
-                        style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w500,
-                          color: item.$3
-                              ? AppColors.danger
-                              : AppColors.lightTextPrimary,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            )
-            .toList(),
-      ),
-    );
-  }
-}
-
-// ── Recategorize sheet ────────────────────────────────────────────────────────
-
-class _RecategorizeSheet extends StatefulWidget {
-  const _RecategorizeSheet({required this.current, required this.onSave});
-  final ExpenseCategory current;
-  final Future<void> Function(ExpenseCategory) onSave;
+class _ChangeTypeSheet extends StatefulWidget {
+  const _ChangeTypeSheet({required this.current, required this.onSave});
+  final IncomeType current;
+  final Future<void> Function(IncomeType) onSave;
 
   @override
-  State<_RecategorizeSheet> createState() => _RecategorizeSheetState();
+  State<_ChangeTypeSheet> createState() => _ChangeTypeSheetState();
 }
 
-class _RecategorizeSheetState extends State<_RecategorizeSheet> {
-  late ExpenseCategory _selected;
+class _ChangeTypeSheetState extends State<_ChangeTypeSheet> {
+  late IncomeType _selected;
   bool _saving = false;
 
   @override
@@ -542,7 +470,7 @@ class _RecategorizeSheetState extends State<_RecategorizeSheet> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            'Recategorize',
+            'Change income type',
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w700,
@@ -553,26 +481,26 @@ class _RecategorizeSheetState extends State<_RecategorizeSheet> {
           Wrap(
             spacing: 8,
             runSpacing: 8,
-            children: ExpenseCategory.values.map((cat) {
-              final isActive = cat == _selected;
+            children: IncomeType.values.map((type) {
+              final isActive = type == _selected;
               return GestureDetector(
-                onTap: () => setState(() => _selected = cat),
+                onTap: () => setState(() => _selected = type),
                 child: Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 14,
                     vertical: 8,
                   ),
                   decoration: BoxDecoration(
-                    color: isActive ? AppColors.primary500 : Colors.white,
+                    color: isActive ? AppColors.success : Colors.white,
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
                       color: isActive
-                          ? AppColors.primary500
+                          ? AppColors.success
                           : AppColors.lightBorderSubtle,
                     ),
                   ),
                   child: Text(
-                    CategoryMapper.label(cat),
+                    type.displayLabel,
                     style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
@@ -597,7 +525,7 @@ class _RecategorizeSheetState extends State<_RecategorizeSheet> {
                       if (context.mounted) Navigator.pop(context);
                     },
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary500,
+                backgroundColor: AppColors.success,
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 shape: RoundedRectangleBorder(

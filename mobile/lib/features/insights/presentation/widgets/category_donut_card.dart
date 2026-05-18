@@ -52,9 +52,9 @@ class _CategoryDonutCardState extends State<CategoryDonutCard> {
               children: [
                 PieChart(
                   PieChartData(
-                    sectionsSpace: 2,
-                    centerSpaceRadius: 62,
-                    startDegreeOffset: -90,
+                    sectionsSpace: 2.0,
+                    centerSpaceRadius: 62.0,
+                    startDegreeOffset: -90.0,
                     pieTouchData: PieTouchData(
                       touchCallback: (event, response) {
                         setState(() {
@@ -81,7 +81,7 @@ class _CategoryDonutCardState extends State<CategoryDonutCard> {
                           fontWeight: FontWeight.w700,
                           color: Colors.white,
                         ),
-                        radius: isTouched ? 46 : 38,
+                        radius: isTouched ? 46.0 : 38.0,
                       );
                     }),
                   ),

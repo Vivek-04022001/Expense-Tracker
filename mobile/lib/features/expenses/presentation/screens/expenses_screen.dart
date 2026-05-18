@@ -1,416 +1,53 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/utils/category_mapper.dart';
+import '../../data/models/expense_model.dart';
+import '../providers/expense_provider.dart';
+import '../../../../features/income/presentation/screens/income_detail_screen.dart';
+import '../../../../features/income/presentation/providers/income_provider.dart';
+import '../../../../features/income/data/models/income_model.dart';
 import 'expense_detail_screen.dart';
-
-// ── Data model ────────────────────────────────────────────────────────────────
-
-class _Entry {
-  const _Entry({
-    required this.name,
-    required this.category,
-    required this.time,
-    required this.date,
-    required this.payment,
-    required this.amount,
-    this.isIncome = false,
-  });
-
-  final String name;
-  final String category;
-  final String time;
-  final DateTime date;
-  final String payment;
-  final int amount;
-  final bool isIncome;
-}
-
-// ── Demo data ─────────────────────────────────────────────────────────────────
-
-final _allEntries = <_Entry>[
-  // May 17 (today)
-  _Entry(
-    name: 'Swiggy',
-    category: 'Food',
-    time: '7:12 PM',
-    date: DateTime(2026, 5, 17),
-    payment: 'UPI',
-    amount: 342,
-  ),
-  _Entry(
-    name: 'Uber',
-    category: 'Transport',
-    time: '5:44 PM',
-    date: DateTime(2026, 5, 17),
-    payment: 'UPI',
-    amount: 218,
-  ),
-  _Entry(
-    name: 'Blue Tokai',
-    category: 'Food',
-    time: '11:20 AM',
-    date: DateTime(2026, 5, 17),
-    payment: 'Card',
-    amount: 480,
-  ),
-  _Entry(
-    name: 'Namma Metro',
-    category: 'Transport',
-    time: '9:08 AM',
-    date: DateTime(2026, 5, 17),
-    payment: 'UPI',
-    amount: 90,
-  ),
-  // May 16
-  _Entry(
-    name: 'BigBasket',
-    category: 'Groceries',
-    time: '8:55 PM',
-    date: DateTime(2026, 5, 16),
-    payment: 'UPI',
-    amount: 2840,
-  ),
-  _Entry(
-    name: 'Zomato',
-    category: 'Food',
-    time: '2:10 PM',
-    date: DateTime(2026, 5, 16),
-    payment: 'UPI',
-    amount: 612,
-  ),
-  _Entry(
-    name: 'Airtel Postpaid',
-    category: 'Bills',
-    time: '11:00 AM',
-    date: DateTime(2026, 5, 16),
-    payment: 'UPI',
-    amount: 999,
-  ),
-  // May 15
-  _Entry(
-    name: 'Amazon',
-    category: 'Shopping',
-    time: '9:22 PM',
-    date: DateTime(2026, 5, 15),
-    payment: 'Card',
-    amount: 1899,
-  ),
-  _Entry(
-    name: 'BookMyShow',
-    category: 'Entertainment',
-    time: '6:10 PM',
-    date: DateTime(2026, 5, 15),
-    payment: 'UPI',
-    amount: 540,
-  ),
-  _Entry(
-    name: 'Apollo Pharmacy',
-    category: 'Health',
-    time: '11:45 AM',
-    date: DateTime(2026, 5, 15),
-    payment: 'Cash',
-    amount: 340,
-  ),
-  // May 14
-  _Entry(
-    name: 'Rent - K. Sharma',
-    category: 'Bills',
-    time: '9:00 AM',
-    date: DateTime(2026, 5, 14),
-    payment: 'UPI',
-    amount: 22000,
-  ),
-  _Entry(
-    name: 'Salary - Acct 4521',
-    category: 'Income',
-    time: '7:00 AM',
-    date: DateTime(2026, 5, 14),
-    payment: 'UPI',
-    amount: 125000,
-    isIncome: true,
-  ),
-  // May 13
-  _Entry(
-    name: 'Rapido',
-    category: 'Transport',
-    time: '10:20 PM',
-    date: DateTime(2026, 5, 13),
-    payment: 'UPI',
-    amount: 58,
-  ),
-  _Entry(
-    name: 'Starbucks',
-    category: 'Food',
-    time: '4:30 PM',
-    date: DateTime(2026, 5, 13),
-    payment: 'Card',
-    amount: 485,
-  ),
-  _Entry(
-    name: 'Netflix',
-    category: 'Entertainment',
-    time: '12:00 PM',
-    date: DateTime(2026, 5, 13),
-    payment: 'Card',
-    amount: 649,
-  ),
-  // May 10
-  _Entry(
-    name: 'DMart',
-    category: 'Groceries',
-    time: '6:30 PM',
-    date: DateTime(2026, 5, 10),
-    payment: 'UPI',
-    amount: 3120,
-  ),
-  _Entry(
-    name: 'Ola',
-    category: 'Transport',
-    time: '9:15 AM',
-    date: DateTime(2026, 5, 10),
-    payment: 'UPI',
-    amount: 143,
-  ),
-  // May 8
-  _Entry(
-    name: 'Myntra',
-    category: 'Shopping',
-    time: '3:45 PM',
-    date: DateTime(2026, 5, 8),
-    payment: 'Card',
-    amount: 2199,
-  ),
-  _Entry(
-    name: 'Cult Fit',
-    category: 'Health',
-    time: '7:00 AM',
-    date: DateTime(2026, 5, 8),
-    payment: 'UPI',
-    amount: 999,
-  ),
-  // May 5
-  _Entry(
-    name: 'BESCOM',
-    category: 'Bills',
-    time: '10:00 AM',
-    date: DateTime(2026, 5, 5),
-    payment: 'UPI',
-    amount: 1840,
-  ),
-  _Entry(
-    name: 'Blinkit',
-    category: 'Groceries',
-    time: '8:20 PM',
-    date: DateTime(2026, 5, 5),
-    payment: 'UPI',
-    amount: 760,
-  ),
-
-  // April 2026
-  _Entry(
-    name: 'Swiggy',
-    category: 'Food',
-    time: '8:30 PM',
-    date: DateTime(2026, 4, 30),
-    payment: 'UPI',
-    amount: 289,
-  ),
-  _Entry(
-    name: 'Uber',
-    category: 'Transport',
-    time: '6:15 PM',
-    date: DateTime(2026, 4, 30),
-    payment: 'UPI',
-    amount: 175,
-  ),
-  _Entry(
-    name: 'BigBasket',
-    category: 'Groceries',
-    time: '11:00 AM',
-    date: DateTime(2026, 4, 28),
-    payment: 'UPI',
-    amount: 3240,
-  ),
-  _Entry(
-    name: 'Amazon',
-    category: 'Shopping',
-    time: '3:00 PM',
-    date: DateTime(2026, 4, 25),
-    payment: 'Card',
-    amount: 4599,
-  ),
-  _Entry(
-    name: 'Salary - Acct 4521',
-    category: 'Income',
-    time: '7:00 AM',
-    date: DateTime(2026, 4, 14),
-    payment: 'UPI',
-    amount: 125000,
-    isIncome: true,
-  ),
-  _Entry(
-    name: 'Rent - K. Sharma',
-    category: 'Bills',
-    time: '9:00 AM',
-    date: DateTime(2026, 4, 14),
-    payment: 'UPI',
-    amount: 22000,
-  ),
-  _Entry(
-    name: 'Zomato',
-    category: 'Food',
-    time: '1:20 PM',
-    date: DateTime(2026, 4, 12),
-    payment: 'UPI',
-    amount: 410,
-  ),
-  _Entry(
-    name: 'Netflix',
-    category: 'Entertainment',
-    time: '12:00 PM',
-    date: DateTime(2026, 4, 10),
-    payment: 'Card',
-    amount: 649,
-  ),
-  _Entry(
-    name: 'Apollo Pharmacy',
-    category: 'Health',
-    time: '10:30 AM',
-    date: DateTime(2026, 4, 8),
-    payment: 'Cash',
-    amount: 560,
-  ),
-  _Entry(
-    name: 'BookMyShow',
-    category: 'Entertainment',
-    time: '7:00 PM',
-    date: DateTime(2026, 4, 5),
-    payment: 'UPI',
-    amount: 800,
-  ),
-  _Entry(
-    name: 'BESCOM',
-    category: 'Bills',
-    time: '10:00 AM',
-    date: DateTime(2026, 4, 3),
-    payment: 'UPI',
-    amount: 1620,
-  ),
-
-  // March 2026
-  _Entry(
-    name: 'Salary - Acct 4521',
-    category: 'Income',
-    time: '7:00 AM',
-    date: DateTime(2026, 3, 14),
-    payment: 'UPI',
-    amount: 125000,
-    isIncome: true,
-  ),
-  _Entry(
-    name: 'Rent - K. Sharma',
-    category: 'Bills',
-    time: '9:00 AM',
-    date: DateTime(2026, 3, 14),
-    payment: 'UPI',
-    amount: 22000,
-  ),
-  _Entry(
-    name: 'Swiggy',
-    category: 'Food',
-    time: '8:00 PM',
-    date: DateTime(2026, 3, 20),
-    payment: 'UPI',
-    amount: 312,
-  ),
-  _Entry(
-    name: 'BigBasket',
-    category: 'Groceries',
-    time: '5:00 PM',
-    date: DateTime(2026, 3, 18),
-    payment: 'UPI',
-    amount: 2890,
-  ),
-  _Entry(
-    name: 'Myntra',
-    category: 'Shopping',
-    time: '2:30 PM',
-    date: DateTime(2026, 3, 10),
-    payment: 'Card',
-    amount: 1799,
-  ),
-  _Entry(
-    name: 'Cult Fit',
-    category: 'Health',
-    time: '7:00 AM',
-    date: DateTime(2026, 3, 5),
-    payment: 'UPI',
-    amount: 999,
-  ),
-  _Entry(
-    name: 'BESCOM',
-    category: 'Bills',
-    time: '10:00 AM',
-    date: DateTime(2026, 3, 3),
-    payment: 'UPI',
-    amount: 1540,
-  ),
-];
-
-const _allCategories = [
-  'Food',
-  'Transport',
-  'Groceries',
-  'Bills',
-  'Shopping',
-  'Entertainment',
-  'Health',
-  'Income',
-];
-
-const _months = [
-  _Month(2026, 5, 'May 2026'),
-  _Month(2026, 4, 'April 2026'),
-  _Month(2026, 3, 'March 2026'),
-];
-
-class _Month {
-  const _Month(this.year, this.month, this.label);
-  final int year;
-  final int month;
-  final String label;
-}
 
 // ── Screen ────────────────────────────────────────────────────────────────────
 
-class ExpensesScreen extends StatefulWidget {
+class ExpensesScreen extends ConsumerStatefulWidget {
   const ExpensesScreen({super.key});
 
   @override
-  State<ExpensesScreen> createState() => _ExpensesScreenState();
+  ConsumerState<ExpensesScreen> createState() => _ExpensesScreenState();
 }
 
-class _ExpensesScreenState extends State<ExpensesScreen> {
-  _Month _selectedMonth = _months.first;
+class _ExpensesScreenState extends ConsumerState<ExpensesScreen>
+    with SingleTickerProviderStateMixin {
+  late final TabController _tabController;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 2, vsync: this);
+  }
+
   bool _searchOpen = false;
   String _searchQuery = '';
-  final Set<String> _activeCategories = {};
+  final Set<ExpenseCategory> _activeCategories = {};
   final _searchCtrl = TextEditingController();
 
   @override
   void dispose() {
+    _tabController.dispose();
     _searchCtrl.dispose();
     super.dispose();
   }
 
-  List<_Entry> get _filtered {
-    return _allEntries.where((e) {
-      if (e.date.year != _selectedMonth.year ||
-          e.date.month != _selectedMonth.month) {
-        return false;
-      }
+  List<ExpenseModel> _filter(List<ExpenseModel> all) {
+    return all.where((e) {
       if (_searchQuery.isNotEmpty &&
-          !e.name.toLowerCase().contains(_searchQuery.toLowerCase())) {
+          !(e.description ?? '').toLowerCase().contains(
+                _searchQuery.toLowerCase(),
+              )) {
         return false;
       }
       if (_activeCategories.isNotEmpty &&
@@ -421,18 +58,19 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
     }).toList();
   }
 
-  Map<String, List<_Entry>> get _grouped {
+  Map<String, List<ExpenseModel>> _group(List<ExpenseModel> expenses) {
     final today = DateTime.now();
     final yesterday = today.subtract(const Duration(days: 1));
-    final map = <String, List<_Entry>>{};
-    for (final e in _filtered) {
+    final map = <String, List<ExpenseModel>>{};
+    for (final e in expenses) {
+      final d = e.createdAt;
       String label;
-      if (_isSameDay(e.date, today)) {
+      if (_isSameDay(d, today)) {
         label = 'TODAY';
-      } else if (_isSameDay(e.date, yesterday)) {
+      } else if (_isSameDay(d, yesterday)) {
         label = 'YESTERDAY';
       } else {
-        label = '${_shortMonth(e.date.month).toUpperCase()} ${e.date.day}';
+        label = DateFormat('MMM d').format(d).toUpperCase();
       }
       map.putIfAbsent(label, () => []).add(e);
     }
@@ -442,28 +80,7 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
   bool _isSameDay(DateTime a, DateTime b) =>
       a.year == b.year && a.month == b.month && a.day == b.day;
 
-  String _shortMonth(int m) => [
-    'Jan',
-    'Feb',
-    'Mar',
-    'Apr',
-    'May',
-    'Jun',
-    'Jul',
-    'Aug',
-    'Sep',
-    'Oct',
-    'Nov',
-    'Dec',
-  ][m - 1];
-
-  int get _totalExpenses {
-    return _filtered.where((e) => !e.isIncome).fold(0, (s, e) => s + e.amount);
-  }
-
-  int get _expenseCount => _filtered.where((e) => !e.isIncome).length;
-
-  void _openMonthPicker() {
+  void _openMonthPicker(DateTime selected, List<DateTime> months) {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.white,
@@ -471,10 +88,12 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (_) => _MonthPickerSheet(
-        selected: _selectedMonth,
-        months: _months,
+        selected: selected,
+        months: months,
         onSelect: (m) {
-          setState(() => _selectedMonth = m);
+          ref
+              .read(selectedExpenseMonthProvider.notifier)
+              .setMonth(m.year, m.month);
           Navigator.pop(context);
         },
       ),
@@ -491,13 +110,11 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
       ),
       builder: (_) => _FilterSheet(
         activeCategories: Set.from(_activeCategories),
-        onApply: (cats) {
-          setState(() {
-            _activeCategories
-              ..clear()
-              ..addAll(cats);
-          });
-        },
+        onApply: (cats) => setState(() {
+          _activeCategories
+            ..clear()
+            ..addAll(cats);
+        }),
       ),
     );
   }
@@ -514,8 +131,13 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final grouped = _grouped;
-    final dateKeys = grouped.keys.toList();
+    final selectedMonth = ref.watch(selectedExpenseMonthProvider);
+    final expensesAsync = ref.watch(expenseListNotifierProvider);
+
+    final months = List.generate(12, (i) {
+      final now = DateTime.now();
+      return DateTime(now.year, now.month - i);
+    });
 
     return Scaffold(
       backgroundColor: AppColors.lightBgBase,
@@ -523,28 +145,112 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
         child: Column(
           children: [
             _buildHeader(),
-            if (_searchOpen) _buildSearchBar(),
-            _buildMonthRow(),
-            _buildSummaryRow(),
-            Expanded(
-              child: grouped.isEmpty
-                  ? _buildEmpty()
-                  : ListView.builder(
-                      padding: const EdgeInsets.only(bottom: 100),
-                      itemCount: dateKeys.length,
-                      itemBuilder: (_, i) {
-                        final key = dateKeys[i];
-                        final entries = grouped[key]!;
-                        final dayTotal = entries
-                            .where((e) => !e.isIncome)
-                            .fold(0, (s, e) => s + e.amount);
-                        return _DaySection(
-                          label: key,
-                          total: dayTotal,
-                          entries: entries,
-                        );
-                      },
+            // Tab bar
+            Container(
+              margin: const EdgeInsets.fromLTRB(20, 12, 20, 0),
+              padding: const EdgeInsets.all(3),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF3F4F6),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: TabBar(
+                controller: _tabController,
+                indicator: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(7),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.06),
+                      blurRadius: 4,
+                      offset: const Offset(0, 1),
                     ),
+                  ],
+                ),
+                indicatorSize: TabBarIndicatorSize.tab,
+                dividerColor: Colors.transparent,
+                labelColor: AppColors.lightTextPrimary,
+                unselectedLabelColor: AppColors.lightTextSecondary,
+                labelStyle: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                ),
+                unselectedLabelStyle: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w400,
+                ),
+                tabs: const [Tab(text: 'Expenses'), Tab(text: 'Income')],
+              ),
+            ),
+            Expanded(
+              child: TabBarView(
+                controller: _tabController,
+                children: [
+                  // ── Expenses tab ──────────────────────────────────────────
+                  Column(
+                    children: [
+                      if (_searchOpen) _buildSearchBar(),
+                      _buildMonthRow(selectedMonth, months),
+                      expensesAsync.when(
+                        loading: () => const Expanded(
+                          child: Center(child: CircularProgressIndicator()),
+                        ),
+                        error: (_, __) => const Expanded(
+                          child: Center(
+                            child: Text(
+                              'Failed to load expenses',
+                              style: TextStyle(
+                                color: AppColors.lightTextSecondary,
+                              ),
+                            ),
+                          ),
+                        ),
+                        data: (all) {
+                          final filtered = _filter(all);
+                          final grouped = _group(filtered);
+                          final dateKeys = grouped.keys.toList();
+                          final totalExpenses =
+                              filtered.fold(0.0, (s, e) => s + e.amount);
+                          return Expanded(
+                            child: Column(
+                              children: [
+                                _buildSummaryRow(
+                                  totalExpenses,
+                                  filtered.length,
+                                ),
+                                Expanded(
+                                  child: grouped.isEmpty
+                                      ? _buildEmpty('No expenses found')
+                                      : ListView.builder(
+                                          padding: const EdgeInsets.only(
+                                            bottom: 100,
+                                          ),
+                                          itemCount: dateKeys.length,
+                                          itemBuilder: (_, i) {
+                                            final key = dateKeys[i];
+                                            final entries = grouped[key]!;
+                                            final dayTotal = entries.fold(
+                                              0.0,
+                                              (s, e) => s + e.amount,
+                                            );
+                                            return _DaySection(
+                                              label: key,
+                                              total: dayTotal,
+                                              entries: entries,
+                                            );
+                                          },
+                                        ),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                  // ── Income tab ────────────────────────────────────────────
+                  _IncomeTab(),
+                ],
+              ),
             ),
           ],
         ),
@@ -558,7 +264,7 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
       child: Row(
         children: [
           const Text(
-            'Expenses',
+            'Transactions',
             style: TextStyle(
               fontSize: 26,
               fontWeight: FontWeight.w700,
@@ -659,15 +365,16 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
     );
   }
 
-  Widget _buildMonthRow() {
+  Widget _buildMonthRow(DateTime selected, List<DateTime> months) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 14, 20, 0),
       child: Row(
         children: [
           GestureDetector(
-            onTap: _openMonthPicker,
+            onTap: () => _openMonthPicker(selected, months),
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(10),
@@ -677,7 +384,7 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    _selectedMonth.label,
+                    DateFormat('MMMM yyyy').format(selected),
                     style: const TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
@@ -699,13 +406,13 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
     );
   }
 
-  Widget _buildSummaryRow() {
+  Widget _buildSummaryRow(double total, int count) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 6, 20, 8),
       child: Row(
         children: [
           Text(
-            '${_fmtRupee(_totalExpenses)} across $_expenseCount expenses',
+            '${_fmtRupee(total)} across $count expenses',
             style: const TextStyle(
               fontSize: 13,
               color: AppColors.lightTextSecondary,
@@ -716,7 +423,7 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
     );
   }
 
-  Widget _buildEmpty() {
+  Widget _buildEmpty([String label = 'No expenses found']) {
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -727,9 +434,12 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
             color: AppColors.lightTextTertiary,
           ),
           const SizedBox(height: 12),
-          const Text(
-            'No expenses found',
-            style: TextStyle(fontSize: 15, color: AppColors.lightTextSecondary),
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 15,
+              color: AppColors.lightTextSecondary,
+            ),
           ),
         ],
       ),
@@ -747,8 +457,8 @@ class _DaySection extends StatelessWidget {
   });
 
   final String label;
-  final int total;
-  final List<_Entry> entries;
+  final double total;
+  final List<ExpenseModel> entries;
 
   @override
   Widget build(BuildContext context) {
@@ -803,7 +513,7 @@ class _DaySection extends StatelessWidget {
               indent: 62,
               color: AppColors.lightBorderSubtle,
             ),
-            itemBuilder: (_, i) => _EntryTile(entry: entries[i]),
+            itemBuilder: (_, i) => _EntryTile(expense: entries[i]),
           ),
         ),
       ],
@@ -814,49 +524,25 @@ class _DaySection extends StatelessWidget {
 // ── Entry tile ────────────────────────────────────────────────────────────────
 
 class _EntryTile extends StatelessWidget {
-  const _EntryTile({required this.entry});
-  final _Entry entry;
-
-  static const _smsTemplates = {
-    'Food': 'Rs {amount}.00 debited from a/c via UPI on {date}. Ref: {ref}',
-    'Transport':
-        'Rs {amount}.00 debited from a/c via UPI on {date}. Ref: {ref}',
-    'Groceries':
-        'Rs {amount}.00 debited from a/c via UPI on {date}. Ref: {ref}',
-    'Bills': 'Rs {amount}.00 debited from a/c via NEFT on {date}. Ref: {ref}',
-  };
+  const _EntryTile({required this.expense});
+  final ExpenseModel expense;
 
   void _openDetail(BuildContext context) {
-    final hasSms = _smsTemplates.containsKey(entry.category);
-    final smsText = hasSms
-        ? 'Rs ${entry.amount}.00 debited from a/c via ${entry.payment} on '
-              '${entry.date.day.toString().padLeft(2, '0')}-'
-              '${entry.date.month.toString().padLeft(2, '0')}. '
-              'Ref: ${entry.date.millisecondsSinceEpoch % 999999999}'
-        : null;
-
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (_) => ExpenseDetailScreen(
-          args: ExpenseDetailArgs(
-            name: entry.name,
-            category: entry.category,
-            amount: entry.amount,
-            time: entry.time,
-            date: entry.date,
-            payment: entry.payment,
-            isIncome: entry.isIncome,
-            note: entry.category == 'Food' ? 'Biryani + Coke' : null,
-            smsText: smsText,
-          ),
-        ),
+        builder: (_) => ExpenseDetailScreen(expense: expense),
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    final color = _categoryColor(entry.category);
+    final color = CategoryMapper.color(expense.category);
+    final label = CategoryMapper.label(expense.category);
+    final timeStr = DateFormat('h:mm a').format(expense.createdAt);
+    final paymentLabel = expense.paymentMethod.displayLabel;
+    final name = expense.description ?? label;
+
     return GestureDetector(
       onTap: () => _openDetail(context),
       behavior: HitTestBehavior.opaque,
@@ -873,7 +559,7 @@ class _EntryTile extends StatelessWidget {
               ),
               child: Center(
                 child: PhosphorIcon(
-                  _categoryIcon(entry.category),
+                  CategoryMapper.icon(expense.category),
                   size: 18,
                   color: color,
                 ),
@@ -884,27 +570,19 @@ class _EntryTile extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    children: [
-                      Flexible(
-                        child: Text(
-                          entry.name,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.lightTextPrimary,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 6),
-                      _AutoBadge(),
-                    ],
+                  Text(
+                    name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.lightTextPrimary,
+                    ),
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    '${entry.category} · ${entry.time} · ${entry.payment}',
+                    '$label · $timeStr · $paymentLabel',
                     style: const TextStyle(
                       fontSize: 12,
                       color: AppColors.lightTextSecondary,
@@ -915,64 +593,14 @@ class _EntryTile extends StatelessWidget {
             ),
             const SizedBox(width: 8),
             Text(
-              entry.isIncome
-                  ? '+${_fmtRupee(entry.amount)}'
-                  : '-${_fmtRupee(entry.amount)}',
-              style: TextStyle(
+              '-${_fmtRupee(expense.amount)}',
+              style: const TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
-                color: entry.isIncome ? AppColors.success : AppColors.danger,
+                color: AppColors.danger,
               ),
             ),
           ],
-        ),
-      ),
-    );
-  }
-
-  PhosphorIconData _categoryIcon(String cat) => switch (cat) {
-    'Food' => PhosphorIcons.forkKnife(PhosphorIconsStyle.fill),
-    'Transport' => PhosphorIcons.car(PhosphorIconsStyle.fill),
-    'Groceries' => PhosphorIcons.shoppingCart(PhosphorIconsStyle.fill),
-    'Bills' => PhosphorIcons.receipt(PhosphorIconsStyle.fill),
-    'Shopping' => PhosphorIcons.bag(PhosphorIconsStyle.fill),
-    'Entertainment' => PhosphorIcons.ticket(PhosphorIconsStyle.fill),
-    'Health' => PhosphorIcons.heartbeat(PhosphorIconsStyle.fill),
-    'Income' => PhosphorIcons.arrowDown(PhosphorIconsStyle.bold),
-    _ => PhosphorIcons.creditCard(PhosphorIconsStyle.fill),
-  };
-
-  Color _categoryColor(String cat) => switch (cat) {
-    'Food' => AppColors.categoryFood,
-    'Transport' => AppColors.categoryTransport,
-    'Groceries' => AppColors.categoryHealth,
-    'Bills' => AppColors.categoryBills,
-    'Shopping' => AppColors.categoryShopping,
-    'Entertainment' => AppColors.categoryEntertainment,
-    'Health' => AppColors.categoryHealth,
-    'Income' => AppColors.success,
-    _ => AppColors.categoryOther,
-  };
-}
-
-// ── AUTO badge ────────────────────────────────────────────────────────────────
-
-class _AutoBadge extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
-      decoration: BoxDecoration(
-        color: AppColors.primary100,
-        borderRadius: BorderRadius.circular(5),
-      ),
-      child: const Text(
-        'AUTO',
-        style: TextStyle(
-          fontSize: 9,
-          fontWeight: FontWeight.w700,
-          color: AppColors.primary500,
-          letterSpacing: 0.4,
         ),
       ),
     );
@@ -1011,7 +639,8 @@ class _IconBtn extends StatelessWidget {
           child: PhosphorIcon(
             icon,
             size: 18,
-            color: active ? AppColors.primary500 : AppColors.lightTextSecondary,
+            color:
+                active ? AppColors.primary500 : AppColors.lightTextSecondary,
           ),
         ),
       ),
@@ -1028,9 +657,9 @@ class _MonthPickerSheet extends StatelessWidget {
     required this.onSelect,
   });
 
-  final _Month selected;
-  final List<_Month> months;
-  final void Function(_Month) onSelect;
+  final DateTime selected;
+  final List<DateTime> months;
+  final void Function(DateTime) onSelect;
 
   @override
   Widget build(BuildContext context) {
@@ -1049,7 +678,7 @@ class _MonthPickerSheet extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
-          ...months.map((m) {
+          ...months.take(6).map((m) {
             final isSelected =
                 m.month == selected.month && m.year == selected.year;
             return GestureDetector(
@@ -1073,7 +702,7 @@ class _MonthPickerSheet extends StatelessWidget {
                 child: Row(
                   children: [
                     Text(
-                      m.label,
+                      DateFormat('MMMM yyyy').format(m),
                       style: TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.w600,
@@ -1104,15 +733,15 @@ class _MonthPickerSheet extends StatelessWidget {
 
 class _FilterSheet extends StatefulWidget {
   const _FilterSheet({required this.activeCategories, required this.onApply});
-  final Set<String> activeCategories;
-  final void Function(Set<String>) onApply;
+  final Set<ExpenseCategory> activeCategories;
+  final void Function(Set<ExpenseCategory>) onApply;
 
   @override
   State<_FilterSheet> createState() => _FilterSheetState();
 }
 
 class _FilterSheetState extends State<_FilterSheet> {
-  late final Set<String> _selected;
+  late final Set<ExpenseCategory> _selected;
 
   @override
   void initState() {
@@ -1162,7 +791,7 @@ class _FilterSheetState extends State<_FilterSheet> {
           Wrap(
             spacing: 8,
             runSpacing: 8,
-            children: _allCategories.map((cat) {
+            children: ExpenseCategory.values.map((cat) {
               final isActive = _selected.contains(cat);
               return GestureDetector(
                 onTap: () => setState(() {
@@ -1187,7 +816,7 @@ class _FilterSheetState extends State<_FilterSheet> {
                     ),
                   ),
                   child: Text(
-                    cat,
+                    CategoryMapper.label(cat),
                     style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
@@ -1232,9 +861,261 @@ class _FilterSheetState extends State<_FilterSheet> {
   }
 }
 
+// ── Income tab ────────────────────────────────────────────────────────────────
+
+class _IncomeTab extends ConsumerStatefulWidget {
+  @override
+  ConsumerState<_IncomeTab> createState() => _IncomeTabState();
+}
+
+class _IncomeTabState extends ConsumerState<_IncomeTab> {
+  void _openMonthPicker(DateTime selected, List<DateTime> months) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (_) => _MonthPickerSheet(
+        selected: selected,
+        months: months,
+        onSelect: (m) {
+          ref
+              .read(selectedIncomeMonthProvider.notifier)
+              .setMonth(m.year, m.month);
+          Navigator.pop(context);
+        },
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final selectedMonth = ref.watch(selectedIncomeMonthProvider);
+    final incomesAsync = ref.watch(incomeListNotifierProvider);
+    final months = List.generate(12, (i) {
+      final now = DateTime.now();
+      return DateTime(now.year, now.month - i);
+    });
+
+    return Column(
+      children: [
+        // Month picker row
+        Padding(
+          padding: const EdgeInsets.fromLTRB(20, 14, 20, 0),
+          child: Row(
+            children: [
+              GestureDetector(
+                onTap: () => _openMonthPicker(selectedMonth, months),
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: AppColors.lightBorderSubtle),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        DateFormat('MMMM yyyy').format(selectedMonth),
+                        style: const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.lightTextPrimary,
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      PhosphorIcon(
+                        PhosphorIcons.caretDown(PhosphorIconsStyle.bold),
+                        size: 12,
+                        color: AppColors.lightTextSecondary,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        incomesAsync.when(
+          loading: () => const Expanded(
+            child: Center(child: CircularProgressIndicator()),
+          ),
+          error: (_, __) => const Expanded(
+            child: Center(
+              child: Text(
+                'Failed to load income',
+                style: TextStyle(color: AppColors.lightTextSecondary),
+              ),
+            ),
+          ),
+          data: (incomes) {
+            if (incomes.isEmpty) {
+              return Expanded(
+                child: Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      PhosphorIcon(
+                        PhosphorIcons.trendUp(PhosphorIconsStyle.light),
+                        size: 56,
+                        color: AppColors.lightTextTertiary,
+                      ),
+                      const SizedBox(height: 12),
+                      const Text(
+                        'No income this month',
+                        style: TextStyle(
+                          fontSize: 15,
+                          color: AppColors.lightTextSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }
+            final totalIncome =
+                incomes.fold(0.0, (s, e) => s + e.amount);
+            return Expanded(
+              child: Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 6, 20, 8),
+                    child: Row(
+                      children: [
+                        Text(
+                          '${_fmtRupee(totalIncome)} across ${incomes.length} entries',
+                          style: const TextStyle(
+                            fontSize: 13,
+                            color: AppColors.lightTextSecondary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Expanded(
+                    child: ListView.builder(
+                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 100),
+                      itemCount: incomes.length,
+                      itemBuilder: (_, i) => _IncomeTile(income: incomes[i]),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
+      ],
+    );
+  }
+}
+
+class _IncomeTile extends StatelessWidget {
+  const _IncomeTile({required this.income});
+  final IncomeModel income;
+
+  static PhosphorIconData _icon(IncomeType t) => switch (t) {
+        IncomeType.salary => PhosphorIcons.briefcase(),
+        IncomeType.freelance => PhosphorIcons.laptop(),
+        IncomeType.investment => PhosphorIcons.chartLineUp(),
+        IncomeType.reward => PhosphorIcons.gift(),
+        IncomeType.other => PhosphorIcons.dotsThree(),
+      };
+
+  void _openDetail(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => IncomeDetailScreen(income: income),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final timeStr = DateFormat('h:mm a').format(income.createdAt);
+    final name = income.description ?? income.incomeType.displayLabel;
+
+    return GestureDetector(
+      onTap: () => _openDetail(context),
+      behavior: HitTestBehavior.opaque,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(14),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.04),
+              blurRadius: 8,
+              offset: const Offset(0, 1),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 38,
+              height: 38,
+              decoration: BoxDecoration(
+                color: AppColors.success.withValues(alpha: 0.12),
+                shape: BoxShape.circle,
+              ),
+              child: Center(
+                child: PhosphorIcon(
+                  _icon(income.incomeType),
+                  size: 18,
+                  color: AppColors.success,
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.lightTextPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    '${income.incomeType.displayLabel} · $timeStr',
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: AppColors.lightTextSecondary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            Text(
+              '+${_fmtRupee(income.amount)}',
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: AppColors.success,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-String _fmtRupee(int v) => '₹${_fmtNum(v)}';
+String _fmtRupee(double v) => '₹${_fmtNum(v.round())}';
 
 String _fmtNum(int v) {
   if (v < 1000) return v.toString();

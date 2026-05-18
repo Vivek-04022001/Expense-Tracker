@@ -1,39 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
-import '../../../../core/errors/app_exceptions.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/category_mapper.dart';
-import '../../data/models/expense_model.dart';
-import '../providers/expense_provider.dart';
+import '../../../expenses/data/models/expense_model.dart';
+import '../providers/budget_provider.dart';
 
-class AddExpenseSheet extends ConsumerStatefulWidget {
-  const AddExpenseSheet({super.key});
+class AddBudgetSheet extends ConsumerStatefulWidget {
+  const AddBudgetSheet({super.key, this.prefillCategory});
+
+  final ExpenseCategory? prefillCategory;
 
   @override
-  ConsumerState<AddExpenseSheet> createState() => _AddExpenseSheetState();
+  ConsumerState<AddBudgetSheet> createState() => _AddBudgetSheetState();
 }
 
-class _AddExpenseSheetState extends ConsumerState<AddExpenseSheet> {
+class _AddBudgetSheetState extends ConsumerState<AddBudgetSheet> {
+  late ExpenseCategory _category;
   String _amount = '';
-  ExpenseCategory _category = ExpenseCategory.foodAndDrink;
-  final _merchantCtrl = TextEditingController();
-  ExpensePaymentMethod _payment = ExpensePaymentMethod.upi;
-  DateTime _date = DateTime.now();
   bool _saving = false;
 
-  static const _paymentLabels = ['Cash', 'UPI', 'Bank Transfer'];
-  static const _paymentMethods = [
-    ExpensePaymentMethod.cash,
-    ExpensePaymentMethod.upi,
-    ExpensePaymentMethod.bankTransfer,
-  ];
-
   @override
-  void dispose() {
-    _merchantCtrl.dispose();
-    super.dispose();
+  void initState() {
+    super.initState();
+    _category = widget.prefillCategory ?? ExpenseCategory.foodAndDrink;
   }
 
   void _numpadTap(String key) {
@@ -58,48 +48,20 @@ class _AddExpenseSheetState extends ConsumerState<AddExpenseSheet> {
     if (value == null || value <= 0) return;
     setState(() => _saving = true);
     try {
-      final desc = _merchantCtrl.text.trim();
-      await ref
-          .read(expenseListNotifierProvider.notifier)
-          .create(
-            amount: value,
-            description: desc.length >= 5 ? desc : null,
+      await ref.read(budgetListNotifierProvider.notifier).upsert(
             category: _category,
-            paymentMethod: _payment,
+            limitAmount: value,
           );
       if (mounted) Navigator.of(context).pop(true);
-    } on AppException catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(e.message)));
-      }
     } catch (_) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Failed to save expense')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Failed to save budget')),
+        );
       }
     } finally {
       if (mounted) setState(() => _saving = false);
     }
-  }
-
-  Future<void> _pickDate() async {
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: _date,
-      firstDate: DateTime.now().subtract(const Duration(days: 365)),
-      lastDate: DateTime.now(),
-    );
-    if (picked != null) setState(() => _date = picked);
-  }
-
-  bool get _isToday {
-    final now = DateTime.now();
-    return _date.day == now.day &&
-        _date.month == now.month &&
-        _date.year == now.year;
   }
 
   @override
@@ -132,7 +94,7 @@ class _AddExpenseSheetState extends ConsumerState<AddExpenseSheet> {
               child: Row(
                 children: [
                   const Text(
-                    'Add expense',
+                    'Set budget',
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w700,
@@ -193,7 +155,7 @@ class _AddExpenseSheetState extends ConsumerState<AddExpenseSheet> {
                 ),
                 const SizedBox(height: 4),
                 const Text(
-                  'Enter an amount',
+                  'Monthly limit',
                   style: TextStyle(
                     fontSize: 13,
                     color: AppColors.lightTextTertiary,
@@ -212,8 +174,8 @@ class _AddExpenseSheetState extends ConsumerState<AddExpenseSheet> {
                 separatorBuilder: (_, __) => const SizedBox(width: 8),
                 itemBuilder: (_, i) {
                   final cat = ExpenseCategory.values[i];
-                  final color = CategoryMapper.color(cat);
                   final selected = _category == cat;
+                  final color = CategoryMapper.color(cat);
                   return GestureDetector(
                     onTap: () => setState(() => _category = cat),
                     child: AnimatedContainer(
@@ -228,21 +190,22 @@ class _AddExpenseSheetState extends ConsumerState<AddExpenseSheet> {
                             : Colors.white,
                         borderRadius: BorderRadius.circular(20),
                         border: Border.all(
-                          color: selected ? color : AppColors.lightBorderSubtle,
+                          color: selected
+                              ? color
+                              : AppColors.lightBorderSubtle,
                         ),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Container(
-                            width: 7,
-                            height: 7,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: color,
-                            ),
+                          PhosphorIcon(
+                            CategoryMapper.icon(cat),
+                            size: 13,
+                            color: selected
+                                ? color
+                                : AppColors.lightTextTertiary,
                           ),
-                          const SizedBox(width: 6),
+                          const SizedBox(width: 5),
                           Text(
                             CategoryMapper.label(cat),
                             style: TextStyle(
@@ -260,99 +223,8 @@ class _AddExpenseSheetState extends ConsumerState<AddExpenseSheet> {
                 },
               ),
             ),
-            const SizedBox(height: 12),
-            // Merchant + Date row
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Container(
-                decoration: BoxDecoration(
-                  border: Border.all(color: AppColors.lightBorderSubtle),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        controller: _merchantCtrl,
-                        style: const TextStyle(
-                          fontSize: 14,
-                          color: AppColors.lightTextPrimary,
-                        ),
-                        decoration: const InputDecoration(
-                          hintText: 'Merchant / Note',
-                          hintStyle: TextStyle(
-                            color: AppColors.lightTextTertiary,
-                            fontSize: 14,
-                          ),
-                          border: InputBorder.none,
-                          contentPadding: EdgeInsets.symmetric(
-                            horizontal: 14,
-                            vertical: 12,
-                          ),
-                          isDense: true,
-                        ),
-                      ),
-                    ),
-                    Container(
-                      width: 1,
-                      height: 36,
-                      color: AppColors.lightBorderSubtle,
-                    ),
-                    GestureDetector(
-                      onTap: _pickDate,
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 14),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            PhosphorIcon(
-                              PhosphorIcons.calendarBlank(),
-                              size: 15,
-                              color: AppColors.lightTextSecondary,
-                            ),
-                            const SizedBox(width: 6),
-                            Text(
-                              _isToday
-                                  ? 'Today'
-                                  : DateFormat('MMM d').format(_date),
-                              style: const TextStyle(
-                                fontSize: 14,
-                                color: AppColors.lightTextPrimary,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 10),
-            // Payment method toggle
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Container(
-                padding: const EdgeInsets.all(3),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF3F4F6),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Row(
-                  children: List.generate(
-                    _paymentLabels.length,
-                    (i) => _PaymentTab(
-                      label: _paymentLabels[i],
-                      selected: _payment == _paymentMethods[i],
-                      onTap: () =>
-                          setState(() => _payment = _paymentMethods[i]),
-                    ),
-                  ),
-                ),
-              ),
-            ),
             const SizedBox(height: 8),
-            // Custom numpad
+            // Numpad
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8),
               child: _Numpad(onTap: _numpadTap),
@@ -368,9 +240,8 @@ class _AddExpenseSheetState extends ConsumerState<AddExpenseSheet> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary500,
                     foregroundColor: Colors.white,
-                    disabledBackgroundColor: AppColors.primary500.withValues(
-                      alpha: 0.4,
-                    ),
+                    disabledBackgroundColor:
+                        AppColors.primary500.withValues(alpha: 0.4),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14),
                     ),
@@ -386,7 +257,7 @@ class _AddExpenseSheetState extends ConsumerState<AddExpenseSheet> {
                           ),
                         )
                       : const Text(
-                          'Save expense',
+                          'Save budget',
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
@@ -402,48 +273,7 @@ class _AddExpenseSheetState extends ConsumerState<AddExpenseSheet> {
   }
 }
 
-// ─── Payment tab ─────────────────────────────────────────────────────────────
-
-class _PaymentTab extends StatelessWidget {
-  const _PaymentTab({
-    required this.label,
-    required this.selected,
-    required this.onTap,
-  });
-
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      child: GestureDetector(
-        onTap: onTap,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 150),
-          padding: const EdgeInsets.symmetric(vertical: 9),
-          decoration: BoxDecoration(
-            color: selected ? AppColors.primary500 : Colors.transparent,
-            borderRadius: BorderRadius.circular(7),
-          ),
-          child: Center(
-            child: Text(
-              label,
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
-                color: selected ? Colors.white : AppColors.lightTextSecondary,
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-// ─── Numpad ───────────────────────────────────────────────────────────────────
+// ── Numpad ────────────────────────────────────────────────────────────────────
 
 class _Numpad extends StatelessWidget {
   const _Numpad({required this.onTap});

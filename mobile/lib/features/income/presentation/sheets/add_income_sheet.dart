@@ -1,38 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
 import '../../../../core/errors/app_exceptions.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../../../../core/utils/category_mapper.dart';
-import '../../data/models/expense_model.dart';
-import '../providers/expense_provider.dart';
+import '../../data/models/income_model.dart';
+import '../providers/income_provider.dart';
 
-class AddExpenseSheet extends ConsumerStatefulWidget {
-  const AddExpenseSheet({super.key});
+class AddIncomeSheet extends ConsumerStatefulWidget {
+  const AddIncomeSheet({super.key});
 
   @override
-  ConsumerState<AddExpenseSheet> createState() => _AddExpenseSheetState();
+  ConsumerState<AddIncomeSheet> createState() => _AddIncomeSheetState();
 }
 
-class _AddExpenseSheetState extends ConsumerState<AddExpenseSheet> {
+class _AddIncomeSheetState extends ConsumerState<AddIncomeSheet> {
   String _amount = '';
-  ExpenseCategory _category = ExpenseCategory.foodAndDrink;
-  final _merchantCtrl = TextEditingController();
-  ExpensePaymentMethod _payment = ExpensePaymentMethod.upi;
-  DateTime _date = DateTime.now();
+  IncomeType _incomeType = IncomeType.salary;
+  final _descCtrl = TextEditingController();
   bool _saving = false;
-
-  static const _paymentLabels = ['Cash', 'UPI', 'Bank Transfer'];
-  static const _paymentMethods = [
-    ExpensePaymentMethod.cash,
-    ExpensePaymentMethod.upi,
-    ExpensePaymentMethod.bankTransfer,
-  ];
 
   @override
   void dispose() {
-    _merchantCtrl.dispose();
+    _descCtrl.dispose();
     super.dispose();
   }
 
@@ -58,48 +46,27 @@ class _AddExpenseSheetState extends ConsumerState<AddExpenseSheet> {
     if (value == null || value <= 0) return;
     setState(() => _saving = true);
     try {
-      final desc = _merchantCtrl.text.trim();
-      await ref
-          .read(expenseListNotifierProvider.notifier)
-          .create(
+      final desc = _descCtrl.text.trim();
+      await ref.read(incomeListNotifierProvider.notifier).create(
             amount: value,
-            description: desc.length >= 5 ? desc : null,
-            category: _category,
-            paymentMethod: _payment,
+            incomeType: _incomeType,
+            description: desc.isNotEmpty ? desc : null,
           );
       if (mounted) Navigator.of(context).pop(true);
     } on AppException catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(e.message)));
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(e.message)));
       }
     } catch (_) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Failed to save expense')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Failed to save income')),
+        );
       }
     } finally {
       if (mounted) setState(() => _saving = false);
     }
-  }
-
-  Future<void> _pickDate() async {
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: _date,
-      firstDate: DateTime.now().subtract(const Duration(days: 365)),
-      lastDate: DateTime.now(),
-    );
-    if (picked != null) setState(() => _date = picked);
-  }
-
-  bool get _isToday {
-    final now = DateTime.now();
-    return _date.day == now.day &&
-        _date.month == now.month &&
-        _date.year == now.year;
   }
 
   @override
@@ -132,7 +99,7 @@ class _AddExpenseSheetState extends ConsumerState<AddExpenseSheet> {
               child: Row(
                 children: [
                   const Text(
-                    'Add expense',
+                    'Add income',
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w700,
@@ -202,20 +169,19 @@ class _AddExpenseSheetState extends ConsumerState<AddExpenseSheet> {
               ],
             ),
             const SizedBox(height: 16),
-            // Category chips
+            // Income type chips
             SizedBox(
               height: 36,
               child: ListView.separated(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 scrollDirection: Axis.horizontal,
-                itemCount: ExpenseCategory.values.length,
+                itemCount: IncomeType.values.length,
                 separatorBuilder: (_, __) => const SizedBox(width: 8),
                 itemBuilder: (_, i) {
-                  final cat = ExpenseCategory.values[i];
-                  final color = CategoryMapper.color(cat);
-                  final selected = _category == cat;
+                  final type = IncomeType.values[i];
+                  final selected = _incomeType == type;
                   return GestureDetector(
-                    onTap: () => setState(() => _category = cat),
+                    onTap: () => setState(() => _incomeType = type),
                     child: AnimatedContainer(
                       duration: const Duration(milliseconds: 150),
                       padding: const EdgeInsets.symmetric(
@@ -224,11 +190,13 @@ class _AddExpenseSheetState extends ConsumerState<AddExpenseSheet> {
                       ),
                       decoration: BoxDecoration(
                         color: selected
-                            ? color.withValues(alpha: 0.15)
+                            ? AppColors.success.withValues(alpha: 0.15)
                             : Colors.white,
                         borderRadius: BorderRadius.circular(20),
                         border: Border.all(
-                          color: selected ? color : AppColors.lightBorderSubtle,
+                          color: selected
+                              ? AppColors.success
+                              : AppColors.lightBorderSubtle,
                         ),
                       ),
                       child: Row(
@@ -239,17 +207,19 @@ class _AddExpenseSheetState extends ConsumerState<AddExpenseSheet> {
                             height: 7,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              color: color,
+                              color: selected
+                                  ? AppColors.success
+                                  : AppColors.lightTextTertiary,
                             ),
                           ),
                           const SizedBox(width: 6),
                           Text(
-                            CategoryMapper.label(cat),
+                            type.displayLabel,
                             style: TextStyle(
                               fontSize: 13,
                               fontWeight: FontWeight.w500,
                               color: selected
-                                  ? color
+                                  ? AppColors.success
                                   : AppColors.lightTextPrimary,
                             ),
                           ),
@@ -261,7 +231,7 @@ class _AddExpenseSheetState extends ConsumerState<AddExpenseSheet> {
               ),
             ),
             const SizedBox(height: 12),
-            // Merchant + Date row
+            // Description field
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Container(
@@ -269,84 +239,24 @@ class _AddExpenseSheetState extends ConsumerState<AddExpenseSheet> {
                   border: Border.all(color: AppColors.lightBorderSubtle),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        controller: _merchantCtrl,
-                        style: const TextStyle(
-                          fontSize: 14,
-                          color: AppColors.lightTextPrimary,
-                        ),
-                        decoration: const InputDecoration(
-                          hintText: 'Merchant / Note',
-                          hintStyle: TextStyle(
-                            color: AppColors.lightTextTertiary,
-                            fontSize: 14,
-                          ),
-                          border: InputBorder.none,
-                          contentPadding: EdgeInsets.symmetric(
-                            horizontal: 14,
-                            vertical: 12,
-                          ),
-                          isDense: true,
-                        ),
-                      ),
+                child: TextField(
+                  controller: _descCtrl,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: AppColors.lightTextPrimary,
+                  ),
+                  decoration: const InputDecoration(
+                    hintText: 'Note (optional)',
+                    hintStyle: TextStyle(
+                      color: AppColors.lightTextTertiary,
+                      fontSize: 14,
                     ),
-                    Container(
-                      width: 1,
-                      height: 36,
-                      color: AppColors.lightBorderSubtle,
+                    border: InputBorder.none,
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 12,
                     ),
-                    GestureDetector(
-                      onTap: _pickDate,
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 14),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            PhosphorIcon(
-                              PhosphorIcons.calendarBlank(),
-                              size: 15,
-                              color: AppColors.lightTextSecondary,
-                            ),
-                            const SizedBox(width: 6),
-                            Text(
-                              _isToday
-                                  ? 'Today'
-                                  : DateFormat('MMM d').format(_date),
-                              style: const TextStyle(
-                                fontSize: 14,
-                                color: AppColors.lightTextPrimary,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 10),
-            // Payment method toggle
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Container(
-                padding: const EdgeInsets.all(3),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF3F4F6),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Row(
-                  children: List.generate(
-                    _paymentLabels.length,
-                    (i) => _PaymentTab(
-                      label: _paymentLabels[i],
-                      selected: _payment == _paymentMethods[i],
-                      onTap: () =>
-                          setState(() => _payment = _paymentMethods[i]),
-                    ),
+                    isDense: true,
                   ),
                 ),
               ),
@@ -366,11 +276,10 @@ class _AddExpenseSheetState extends ConsumerState<AddExpenseSheet> {
                 child: ElevatedButton(
                   onPressed: (_amount.isNotEmpty && !_saving) ? _save : null,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary500,
+                    backgroundColor: AppColors.success,
                     foregroundColor: Colors.white,
-                    disabledBackgroundColor: AppColors.primary500.withValues(
-                      alpha: 0.4,
-                    ),
+                    disabledBackgroundColor:
+                        AppColors.success.withValues(alpha: 0.4),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14),
                     ),
@@ -386,7 +295,7 @@ class _AddExpenseSheetState extends ConsumerState<AddExpenseSheet> {
                           ),
                         )
                       : const Text(
-                          'Save expense',
+                          'Save income',
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
@@ -396,47 +305,6 @@ class _AddExpenseSheetState extends ConsumerState<AddExpenseSheet> {
               ),
             ),
           ],
-        ),
-      ),
-    );
-  }
-}
-
-// ─── Payment tab ─────────────────────────────────────────────────────────────
-
-class _PaymentTab extends StatelessWidget {
-  const _PaymentTab({
-    required this.label,
-    required this.selected,
-    required this.onTap,
-  });
-
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      child: GestureDetector(
-        onTap: onTap,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 150),
-          padding: const EdgeInsets.symmetric(vertical: 9),
-          decoration: BoxDecoration(
-            color: selected ? AppColors.primary500 : Colors.transparent,
-            borderRadius: BorderRadius.circular(7),
-          ),
-          child: Center(
-            child: Text(
-              label,
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
-                color: selected ? Colors.white : AppColors.lightTextSecondary,
-              ),
-            ),
-          ),
         ),
       ),
     );

@@ -6,6 +6,8 @@ import '../../features/auth/presentation/providers/auth_provider.dart';
 import '../../features/auth/presentation/screens/splash_screen.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/register_screen.dart';
+import '../../features/budgets/presentation/screens/budgets_screen.dart';
+import '../../features/savings/presentation/screens/savings_screen.dart';
 import '../../features/home/presentation/screens/home_screen.dart';
 import '../../features/expenses/presentation/screens/expenses_screen.dart';
 import '../../features/insights/presentation/screens/insights_screen.dart';
@@ -105,8 +107,8 @@ GoRouter appRouter(AppRouterRef ref) {
           StatefulShellBranch(
             routes: [
               GoRoute(
-                path: '/insights',
-                builder: (context, state) => const InsightsScreen(),
+                path: '/budgets',
+                builder: (context, state) => const BudgetsScreen(),
               ),
             ],
           ),
@@ -119,6 +121,14 @@ GoRouter appRouter(AppRouterRef ref) {
             ],
           ),
         ],
+      ),
+      GoRoute(
+        path: '/insights',
+        builder: (context, state) => const InsightsScreen(),
+      ),
+      GoRoute(
+        path: '/savings',
+        builder: (context, state) => const SavingsScreen(),
       ),
     ],
   );

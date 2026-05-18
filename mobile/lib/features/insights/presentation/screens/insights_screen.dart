@@ -1,5 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/utils/category_mapper.dart';
+import '../../../budgets/presentation/providers/budget_provider.dart';
+import '../../../expenses/data/models/expense_model.dart';
+import '../../../expenses/presentation/providers/expense_provider.dart';
 import '../widgets/ai_insight_card.dart';
 import '../widgets/budget_list_card.dart';
 import '../widgets/category_donut_card.dart';
@@ -16,12 +22,6 @@ class InsightsMonth {
   final int month;
   final String label;
 }
-
-const insightsMonths = [
-  InsightsMonth(2026, 5, 'May 2026'),
-  InsightsMonth(2026, 4, 'April 2026'),
-  InsightsMonth(2026, 3, 'March 2026'),
-];
 
 class InsightsData {
   const InsightsData({
@@ -86,371 +86,67 @@ class AiInsight {
   final String subtitle;
 }
 
-// ── Demo data ─────────────────────────────────────────────────────────────────
-
-final _aprilData = InsightsData(
-  totalSpend: 42380,
-  prevMonthSpend: 37839,
-  prevMonthLabel: 'March',
-  categories: const [
-    CategorySlice(label: 'Food', amount: 8420, color: AppColors.categoryFood),
-    CategorySlice(
-      label: 'Bills',
-      amount: 23999,
-      color: AppColors.categoryBills,
-    ),
-    CategorySlice(
-      label: 'Groceries',
-      amount: 4120,
-      color: AppColors.categoryHealth,
-    ),
-    CategorySlice(
-      label: 'Shopping',
-      amount: 3399,
-      color: AppColors.categoryShopping,
-    ),
-    CategorySlice(
-      label: 'Transport',
-      amount: 1240,
-      color: AppColors.categoryTransport,
-    ),
-    CategorySlice(
-      label: 'Entertainment',
-      amount: 1202,
-      color: AppColors.categoryEntertainment,
-    ),
-  ],
-  dailySpend: [
-    320,
-    0,
-    480,
-    210,
-    0,
-    890,
-    150,
-    560,
-    0,
-    1200,
-    340,
-    210,
-    0,
-    24620,
-    280,
-    0,
-    410,
-    649,
-    800,
-    560,
-    0,
-    312,
-    175,
-    289,
-    4599,
-    0,
-    410,
-    3240,
-    0,
-    342,
-  ],
-  budgets: const [
-    BudgetItem(
-      category: 'Food',
-      spent: 8420,
-      limit: 8000,
-      color: AppColors.categoryFood,
-    ),
-    BudgetItem(
-      category: 'Groceries',
-      spent: 4120,
-      limit: 6000,
-      color: AppColors.categoryHealth,
-    ),
-    BudgetItem(
-      category: 'Transport',
-      spent: 1240,
-      limit: 3000,
-      color: AppColors.categoryTransport,
-    ),
-    BudgetItem(
-      category: 'Shopping',
-      spent: 3399,
-      limit: 5000,
-      color: AppColors.categoryShopping,
-    ),
-    BudgetItem(
-      category: 'Entertainment',
-      spent: 540,
-      limit: 2000,
-      color: AppColors.categoryEntertainment,
-    ),
-  ],
-  merchants: const [
-    MerchantItem(name: 'Swiggy', txCount: 12, amount: 3840),
-    MerchantItem(name: 'Zomato', txCount: 8, amount: 2910),
-    MerchantItem(name: 'BigBasket', txCount: 3, amount: 5420),
-    MerchantItem(name: 'Uber', txCount: 14, amount: 2180),
-    MerchantItem(name: 'Amazon', txCount: 5, amount: 4890),
-  ],
-  aiInsights: const [
-    AiInsight(
-      title: 'Weekend spending is 40% higher than weekdays.',
-      subtitle: 'Saturdays alone account for ₹9,200 this month.',
-    ),
-    AiInsight(
-      title: 'Swiggy: ₹3,840 across 12 orders.',
-      subtitle: "That's up from 8 orders in March.",
-    ),
-  ],
-);
-
-final _mayData = InsightsData(
-  totalSpend: 31420,
-  prevMonthSpend: 42380,
-  prevMonthLabel: 'April',
-  categories: const [
-    CategorySlice(label: 'Food', amount: 7107, color: AppColors.categoryFood),
-    CategorySlice(
-      label: 'Bills',
-      amount: 23840,
-      color: AppColors.categoryBills,
-    ),
-    CategorySlice(
-      label: 'Groceries',
-      amount: 6880,
-      color: AppColors.categoryHealth,
-    ),
-    CategorySlice(
-      label: 'Shopping',
-      amount: 2199,
-      color: AppColors.categoryShopping,
-    ),
-    CategorySlice(
-      label: 'Transport',
-      amount: 509,
-      color: AppColors.categoryTransport,
-    ),
-    CategorySlice(
-      label: 'Entertainment',
-      amount: 649,
-      color: AppColors.categoryEntertainment,
-    ),
-  ],
-  dailySpend: [
-    0,
-    0,
-    0,
-    0,
-    2600,
-    0,
-    0,
-    3198,
-    0,
-    3263,
-    0,
-    0,
-    0,
-    22058,
-    0,
-    0,
-    1130,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-  ],
-  budgets: const [
-    BudgetItem(
-      category: 'Food',
-      spent: 7107,
-      limit: 8000,
-      color: AppColors.categoryFood,
-    ),
-    BudgetItem(
-      category: 'Groceries',
-      spent: 6880,
-      limit: 6000,
-      color: AppColors.categoryHealth,
-    ),
-    BudgetItem(
-      category: 'Transport',
-      spent: 509,
-      limit: 3000,
-      color: AppColors.categoryTransport,
-    ),
-    BudgetItem(
-      category: 'Shopping',
-      spent: 2199,
-      limit: 5000,
-      color: AppColors.categoryShopping,
-    ),
-    BudgetItem(
-      category: 'Entertainment',
-      spent: 649,
-      limit: 2000,
-      color: AppColors.categoryEntertainment,
-    ),
-  ],
-  merchants: const [
-    MerchantItem(name: 'DMart', txCount: 2, amount: 3880),
-    MerchantItem(name: 'Myntra', txCount: 1, amount: 2199),
-    MerchantItem(name: 'Swiggy', txCount: 4, amount: 1312),
-    MerchantItem(name: 'Netflix', txCount: 1, amount: 649),
-    MerchantItem(name: 'Cult Fit', txCount: 2, amount: 1998),
-  ],
-  aiInsights: const [
-    AiInsight(
-      title: 'Groceries over budget by ₹880.',
-      subtitle: 'Consider switching to monthly bulk orders.',
-    ),
-    AiInsight(
-      title: 'Bills make up 76% of this month.',
-      subtitle: 'Rent (₹22,000) dominates your May spend.',
-    ),
-  ],
-);
-
-final _marchData = InsightsData(
-  totalSpend: 37839,
-  prevMonthSpend: 34100,
-  prevMonthLabel: 'February',
-  categories: const [
-    CategorySlice(label: 'Food', amount: 7140, color: AppColors.categoryFood),
-    CategorySlice(
-      label: 'Bills',
-      amount: 23540,
-      color: AppColors.categoryBills,
-    ),
-    CategorySlice(
-      label: 'Groceries',
-      amount: 4890,
-      color: AppColors.categoryHealth,
-    ),
-    CategorySlice(
-      label: 'Shopping',
-      amount: 1799,
-      color: AppColors.categoryShopping,
-    ),
-    CategorySlice(
-      label: 'Health',
-      amount: 999,
-      color: AppColors.categoryHealth,
-    ),
-  ],
-  dailySpend: [
-    0,
-    0,
-    1540,
-    0,
-    999,
-    0,
-    0,
-    0,
-    0,
-    1799,
-    0,
-    0,
-    0,
-    22312,
-    0,
-    0,
-    0,
-    2890,
-    0,
-    312,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-  ],
-  budgets: const [
-    BudgetItem(
-      category: 'Food',
-      spent: 7140,
-      limit: 8000,
-      color: AppColors.categoryFood,
-    ),
-    BudgetItem(
-      category: 'Groceries',
-      spent: 4890,
-      limit: 6000,
-      color: AppColors.categoryHealth,
-    ),
-    BudgetItem(
-      category: 'Transport',
-      spent: 0,
-      limit: 3000,
-      color: AppColors.categoryTransport,
-    ),
-    BudgetItem(
-      category: 'Shopping',
-      spent: 1799,
-      limit: 5000,
-      color: AppColors.categoryShopping,
-    ),
-    BudgetItem(
-      category: 'Entertainment',
-      spent: 0,
-      limit: 2000,
-      color: AppColors.categoryEntertainment,
-    ),
-  ],
-  merchants: const [
-    MerchantItem(name: 'BigBasket', txCount: 2, amount: 2890),
-    MerchantItem(name: 'Swiggy', txCount: 5, amount: 1560),
-    MerchantItem(name: 'Myntra', txCount: 1, amount: 1799),
-    MerchantItem(name: 'Cult Fit', txCount: 1, amount: 999),
-    MerchantItem(name: 'BESCOM', txCount: 1, amount: 1540),
-  ],
-  aiInsights: const [
-    AiInsight(
-      title: 'Great month — under budget across all categories.',
-      subtitle: 'Total spend was ₹4,261 less than your combined limits.',
-    ),
-    AiInsight(
-      title: 'No transport expenses recorded.',
-      subtitle: 'Did you use your own vehicle this month?',
-    ),
-  ],
-);
-
-InsightsData dataFor(InsightsMonth m) {
-  if (m.month == 4) return _aprilData;
-  if (m.month == 5) return _mayData;
-  return _marchData;
-}
-
 // ── Screen ────────────────────────────────────────────────────────────────────
 
-class InsightsScreen extends StatefulWidget {
+class InsightsScreen extends ConsumerStatefulWidget {
   const InsightsScreen({super.key});
 
   @override
-  State<InsightsScreen> createState() => _InsightsScreenState();
+  ConsumerState<InsightsScreen> createState() => _InsightsScreenState();
 }
 
-class _InsightsScreenState extends State<InsightsScreen> {
-  InsightsMonth _month = insightsMonths[1];
+class _InsightsScreenState extends ConsumerState<InsightsScreen> {
+  late DateTime _selectedMonth;
+
+  @override
+  void initState() {
+    super.initState();
+    final now = DateTime.now();
+    _selectedMonth = DateTime(now.year, now.month);
+  }
+
+  List<InsightsMonth> _buildMonthList() {
+    return List.generate(6, (i) {
+      final d = DateTime(
+        _selectedMonth.year,
+        _selectedMonth.month - i,
+      );
+      return InsightsMonth(
+        d.year,
+        d.month,
+        DateFormat('MMMM yyyy').format(d),
+      );
+    });
+  }
+
+  InsightsMonth _toInsightsMonth(DateTime dt) => InsightsMonth(
+        dt.year,
+        dt.month,
+        DateFormat('MMMM yyyy').format(dt),
+      );
 
   @override
   Widget build(BuildContext context) {
-    final data = dataFor(_month);
+    final summaryAsync = ref.watch(expenseSummaryProvider);
+    final expensesAsync = ref.watch(expensesForMonthProvider(_selectedMonth));
+    final budgetsAsync = ref.watch(budgetsForMonthProvider(_selectedMonth));
+
+    final months = _buildMonthList();
+    final currentInsightsMonth = _toInsightsMonth(_selectedMonth);
+
+    final monthKey = DateFormat('yyyy-MM').format(_selectedMonth);
+    final prevMonthDt =
+        DateTime(_selectedMonth.year, _selectedMonth.month - 1);
+    final prevKey = DateFormat('yyyy-MM').format(prevMonthDt);
+
+    InsightsData data = _buildData(
+      summaryAsync: summaryAsync,
+      expensesAsync: expensesAsync,
+      budgetsAsync: budgetsAsync,
+      monthKey: monthKey,
+      prevKey: prevKey,
+      prevMonthDt: prevMonthDt,
+    );
 
     return Scaffold(
       backgroundColor: AppColors.lightBgBase,
@@ -459,9 +155,11 @@ class _InsightsScreenState extends State<InsightsScreen> {
           padding: const EdgeInsets.only(bottom: 40),
           children: [
             InsightsHeader(
-              selected: _month,
-              months: insightsMonths,
-              onSelect: (m) => setState(() => _month = m),
+              selected: currentInsightsMonth,
+              months: months,
+              onSelect: (m) => setState(
+                () => _selectedMonth = DateTime(m.year, m.month),
+              ),
             ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -472,24 +170,142 @@ class _InsightsScreenState extends State<InsightsScreen> {
                   const SizedBox(height: 14),
                   CategoryDonutCard(data: data),
                   const SizedBox(height: 14),
-                  DailySpendChart(data: data, month: _month),
+                  DailySpendChart(data: data, month: currentInsightsMonth),
                   const SizedBox(height: 14),
                   BudgetListCard(data: data),
                   const SizedBox(height: 14),
                   TopMerchantsCard(data: data),
-                  const SizedBox(height: 14),
-                  ...data.aiInsights.map(
-                    (i) => Padding(
-                      padding: const EdgeInsets.only(bottom: 10),
-                      child: AiInsightCard(insight: i),
+                  if (data.aiInsights.isNotEmpty) ...[
+                    const SizedBox(height: 14),
+                    ...data.aiInsights.map(
+                      (i) => Padding(
+                        padding: const EdgeInsets.only(bottom: 10),
+                        child: AiInsightCard(insight: i),
+                      ),
                     ),
-                  ),
+                  ],
                 ],
               ),
             ),
           ],
         ),
       ),
+    );
+  }
+
+  InsightsData _buildData({
+    required AsyncValue summaryAsync,
+    required AsyncValue<List<ExpenseModel>> expensesAsync,
+    required AsyncValue budgetsAsync,
+    required String monthKey,
+    required String prevKey,
+    required DateTime prevMonthDt,
+  }) {
+    final summary = summaryAsync.valueOrNull;
+    final expenses = expensesAsync.valueOrNull ?? <ExpenseModel>[];
+    final rawBudgets = budgetsAsync.valueOrNull;
+
+    // Monthly totals from summary
+    int totalSpend = 0;
+    int prevMonthSpend = 0;
+    List<CategorySlice> categories = [];
+
+    if (summary != null) {
+      totalSpend = summary.byMonth
+          .where((m) => m.month == monthKey)
+          .fold<double>(0, (s, m) => s + m.total)
+          .round();
+
+      prevMonthSpend = summary.byMonth
+          .where((m) => m.month == prevKey)
+          .fold<double>(0, (s, m) => s + m.total)
+          .round();
+
+      final monthBreakdown = summary.byCategoryPerMonth
+          .where((m) => m.month == monthKey)
+          .expand((m) => m.categories)
+          .toList();
+
+      categories = monthBreakdown
+          .map(
+            (c) => CategorySlice(
+              label: CategoryMapper.label(
+                ExpenseCategory.fromServer(c.category),
+              ),
+              amount: c.total.round(),
+              color: AppColors.forCategory(c.category),
+            ),
+          )
+          .where((c) => c.amount > 0)
+          .toList()
+        ..sort((a, b) => b.amount.compareTo(a.amount));
+    }
+
+    // Daily spend — group expenses by day-of-month
+    final dailySpend = List<double>.filled(31, 0.0);
+    for (final e in expenses) {
+      final day = e.createdAt.day;
+      if (day >= 1 && day <= 31) dailySpend[day - 1] += e.amount;
+    }
+
+    // Top merchants — group by description
+    final merchantMap = <String, (int, double)>{};
+    for (final e in expenses) {
+      final name = e.description?.trim().isEmpty ?? true
+          ? CategoryMapper.label(e.category)
+          : e.description!.trim();
+      final (count, total) = merchantMap[name] ?? (0, 0.0);
+      merchantMap[name] = (count + 1, total + e.amount);
+    }
+    final merchants = merchantMap.entries
+        .map(
+          (e) => MerchantItem(
+            name: e.key,
+            txCount: e.value.$1,
+            amount: e.value.$2.round(),
+          ),
+        )
+        .toList()
+      ..sort((a, b) => b.amount.compareTo(a.amount));
+
+    // Budgets — merge server budget limits with actual spend from summary
+    List<BudgetItem> budgets = [];
+    if (rawBudgets != null) {
+      final categorySpendMap = <String, double>{};
+      if (summary != null) {
+        for (final m in summary.byCategoryPerMonth
+            .where((m) => m.month == monthKey)) {
+          for (final c in m.categories) {
+            categorySpendMap[c.category] =
+                (categorySpendMap[c.category] ?? 0) + c.total;
+          }
+        }
+      }
+      budgets = (rawBudgets as List)
+          .map(
+            (b) {
+              final serverCat = b.category.toServer();
+              final spent = categorySpendMap[serverCat] ?? 0.0;
+              return BudgetItem(
+                category: CategoryMapper.label(b.category),
+                spent: spent.round(),
+                limit: b.limitAmount.round(),
+                color: CategoryMapper.color(b.category),
+              );
+            },
+          )
+          .toList();
+    }
+
+    return InsightsData(
+      totalSpend: totalSpend,
+      prevMonthSpend: prevMonthSpend,
+      prevMonthLabel: DateFormat('MMMM').format(prevMonthDt),
+      categories: categories,
+      dailySpend: dailySpend,
+      budgets: budgets,
+      merchants: merchants.take(5).toList(),
+      aiInsights: const [],
     );
   }
 }

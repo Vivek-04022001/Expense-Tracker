@@ -74,8 +74,8 @@ class DailySpendChart extends StatelessWidget {
                   bottomTitles: AxisTitles(
                     sideTitles: SideTitles(
                       showTitles: true,
-                      reservedSize: 24,
-                      interval: 1,
+                      reservedSize: 24.0,
+                      interval: 1.0,
                       getTitlesWidget: (value, meta) {
                         final day = value.toInt() + 1;
                         if (day == firstDay || day == midDay || day == lastDay) {

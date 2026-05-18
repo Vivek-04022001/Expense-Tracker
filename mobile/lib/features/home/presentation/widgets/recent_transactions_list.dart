@@ -1,23 +1,92 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/utils/category_mapper.dart';
+import '../../../expenses/data/models/expense_model.dart';
+import '../../../expenses/presentation/providers/expense_provider.dart';
+import '../../../income/data/models/income_model.dart';
+import '../../../income/presentation/providers/income_provider.dart';
 
-class RecentTransactionsList extends StatelessWidget {
+// ── Unified transaction entry ─────────────────────────────────────────────────
+
+class _Tx {
+  const _Tx._({
+    required this.id,
+    required this.name,
+    required this.subtitle,
+    required this.icon,
+    required this.iconColor,
+    required this.amountLabel,
+    required this.amountColor,
+    required this.createdAt,
+  });
+
+  factory _Tx.fromExpense(ExpenseModel e) {
+    final color = CategoryMapper.color(e.category);
+    final label = CategoryMapper.label(e.category);
+    final time = DateFormat('h:mm a').format(e.createdAt);
+    return _Tx._(
+      id: e.id,
+      name: e.description ?? label,
+      subtitle: '$label · $time · ${e.paymentMethod.displayLabel}',
+      icon: CategoryMapper.icon(e.category),
+      iconColor: color,
+      amountLabel: '-₹${_fmt(e.amount.round())}',
+      amountColor: AppColors.danger,
+      createdAt: e.createdAt,
+    );
+  }
+
+  factory _Tx.fromIncome(IncomeModel e) {
+    final time = DateFormat('h:mm a').format(e.createdAt);
+    return _Tx._(
+      id: e.id,
+      name: e.description ?? e.incomeType.displayLabel,
+      subtitle: '${e.incomeType.displayLabel} · $time',
+      icon: _incomeIcon(e.incomeType),
+      iconColor: AppColors.success,
+      amountLabel: '+₹${_fmt(e.amount.round())}',
+      amountColor: AppColors.success,
+      createdAt: e.createdAt,
+    );
+  }
+
+  final String id;
+  final String name;
+  final String subtitle;
+  final PhosphorIconData icon;
+  final Color iconColor;
+  final String amountLabel;
+  final Color amountColor;
+  final DateTime createdAt;
+
+  static PhosphorIconData _incomeIcon(IncomeType t) => switch (t) {
+        IncomeType.salary => PhosphorIcons.briefcase(),
+        IncomeType.freelance => PhosphorIcons.laptop(),
+        IncomeType.investment => PhosphorIcons.chartLineUp(),
+        IncomeType.reward => PhosphorIcons.gift(),
+        IncomeType.other => PhosphorIcons.dotsThree(),
+      };
+}
+
+// ── Widget ────────────────────────────────────────────────────────────────────
+
+class RecentTransactionsList extends ConsumerWidget {
   const RecentTransactionsList({super.key});
 
-  static const _transactions = [
-    _Tx(name: 'Swiggy', category: 'Food', time: '7:12 PM', payment: 'UPI', amount: 342),
-    _Tx(name: 'Uber', category: 'Transport', time: '5:44 PM', payment: 'UPI', amount: 218),
-    _Tx(name: 'Blue Tokai', category: 'Food', time: '11:20 AM', payment: 'Card', amount: 480),
-    _Tx(name: 'Namma Metro', category: 'Transport', time: '9:08 AM', payment: 'UPI', amount: 90),
-    _Tx(name: 'BigBasket', category: 'Groceries', time: '8:55 PM', payment: 'UPI', amount: 2840),
-  ];
-
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final expensesAsync = ref.watch(currentMonthExpensesProvider);
+    final incomesAsync = ref.watch(currentMonthIncomesProvider);
+
+    final isLoading = expensesAsync.isLoading || incomesAsync.isLoading;
+    final hasError = expensesAsync.hasError || incomesAsync.hasError;
+
     return Column(
       children: [
-        // Section header
         Row(
           children: [
             const Text(
@@ -30,7 +99,7 @@ class RecentTransactionsList extends StatelessWidget {
             ),
             const Spacer(),
             GestureDetector(
-              onTap: () {},
+              onTap: () => context.go('/expenses'),
               child: const Text(
                 'See all',
                 style: TextStyle(
@@ -43,34 +112,78 @@ class RecentTransactionsList extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 12),
-        Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.04),
-                blurRadius: 12,
-                offset: const Offset(0, 2),
+        if (isLoading)
+          const SizedBox(
+            height: 120,
+            child: Center(child: CircularProgressIndicator()),
+          )
+        else if (hasError)
+          const SizedBox(
+            height: 80,
+            child: Center(
+              child: Text(
+                'Could not load transactions',
+                style: TextStyle(color: AppColors.lightTextSecondary),
               ),
-            ],
-          ),
-          child: ListView.separated(
-            physics: const NeverScrollableScrollPhysics(),
-            shrinkWrap: true,
-            itemCount: _transactions.length,
-            separatorBuilder: (_, __) => const Divider(
-              height: 1,
-              indent: 60,
-              color: AppColors.lightBorderSubtle,
             ),
-            itemBuilder: (_, i) => _TransactionTile(tx: _transactions[i]),
+          )
+        else
+          _buildList(
+            expensesAsync.value ?? [],
+            incomesAsync.value ?? [],
           ),
-        ),
       ],
     );
   }
+
+  Widget _buildList(List<ExpenseModel> expenses, List<IncomeModel> incomes) {
+    final all = [
+      ...expenses.map(_Tx.fromExpense),
+      ...incomes.map(_Tx.fromIncome),
+    ]..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+
+    final recent = all.take(5).toList();
+
+    if (recent.isEmpty) {
+      return const SizedBox(
+        height: 80,
+        child: Center(
+          child: Text(
+            'No transactions this month',
+            style: TextStyle(color: AppColors.lightTextSecondary),
+          ),
+        ),
+      );
+    }
+
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 12,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: ListView.separated(
+        physics: const NeverScrollableScrollPhysics(),
+        shrinkWrap: true,
+        itemCount: recent.length,
+        separatorBuilder: (_, __) => const Divider(
+          height: 1,
+          indent: 60,
+          color: AppColors.lightBorderSubtle,
+        ),
+        itemBuilder: (_, i) => _TransactionTile(tx: recent[i]),
+      ),
+    );
+  }
 }
+
+// ── Tile ──────────────────────────────────────────────────────────────────────
 
 class _TransactionTile extends StatelessWidget {
   const _TransactionTile({required this.tx});
@@ -83,45 +196,35 @@ class _TransactionTile extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       child: Row(
         children: [
-          // Category icon circle
           Container(
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: _categoryColor(tx.category).withValues(alpha: 0.12),
+              color: tx.iconColor.withValues(alpha: 0.12),
               shape: BoxShape.circle,
             ),
             child: Center(
-              child: PhosphorIcon(
-                _categoryIcon(tx.category),
-                size: 18,
-                color: _categoryColor(tx.category),
-              ),
+              child: PhosphorIcon(tx.icon, size: 18, color: tx.iconColor),
             ),
           ),
           const SizedBox(width: 12),
-          // Name + details
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  children: [
-                    Text(
-                      tx.name,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.lightTextPrimary,
-                      ),
-                    ),
-                    const SizedBox(width: 6),
-                    _AutoBadge(),
-                  ],
+                Text(
+                  tx.name,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.lightTextPrimary,
+                  ),
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  '${tx.category} · ${tx.time} · ${tx.payment}',
+                  tx.subtitle,
                   style: const TextStyle(
                     fontSize: 12,
                     color: AppColors.lightTextSecondary,
@@ -130,86 +233,31 @@ class _TransactionTile extends StatelessWidget {
               ],
             ),
           ),
-          // Amount
           Text(
-            '-₹${_fmt(tx.amount)}',
-            style: const TextStyle(
+            tx.amountLabel,
+            style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w600,
-              color: AppColors.danger,
+              color: tx.amountColor,
             ),
           ),
         ],
       ),
     );
   }
-
-  String _fmt(int v) {
-    if (v >= 1000) {
-      final s = v.toString();
-      // Indian grouping: last 3 then groups of 2
-      if (s.length <= 3) return s;
-      final last3 = s.substring(s.length - 3);
-      final rest = s.substring(0, s.length - 3);
-      final buf = StringBuffer();
-      for (var i = 0; i < rest.length; i++) {
-        if (i > 0 && (rest.length - i) % 2 == 0) buf.write(',');
-        buf.write(rest[i]);
-      }
-      return '$buf,$last3';
-    }
-    return v.toString();
-  }
-
-  PhosphorIconData _categoryIcon(String cat) => switch (cat) {
-    'Food' => PhosphorIcons.forkKnife(PhosphorIconsStyle.fill),
-    'Transport' => PhosphorIcons.car(PhosphorIconsStyle.fill),
-    'Groceries' => PhosphorIcons.shoppingCart(PhosphorIconsStyle.fill),
-    _ => PhosphorIcons.creditCard(PhosphorIconsStyle.fill),
-  };
-
-  Color _categoryColor(String cat) => switch (cat) {
-    'Food' => AppColors.categoryFood,
-    'Transport' => AppColors.categoryTransport,
-    'Groceries' => AppColors.categoryHealth,
-    _ => AppColors.categoryOther,
-  };
 }
 
-class _AutoBadge extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-      decoration: BoxDecoration(
-        color: AppColors.primary100,
-        borderRadius: BorderRadius.circular(5),
-      ),
-      child: const Text(
-        'AUTO',
-        style: TextStyle(
-          fontSize: 9,
-          fontWeight: FontWeight.w700,
-          color: AppColors.primary500,
-          letterSpacing: 0.4,
-        ),
-      ),
-    );
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
+String _fmt(int v) {
+  if (v < 1000) return v.toString();
+  final s = v.toString();
+  final last3 = s.substring(s.length - 3);
+  final rest = s.substring(0, s.length - 3);
+  final buf = StringBuffer();
+  for (var i = 0; i < rest.length; i++) {
+    if (i > 0 && (rest.length - i) % 2 == 0) buf.write(',');
+    buf.write(rest[i]);
   }
-}
-
-class _Tx {
-  const _Tx({
-    required this.name,
-    required this.category,
-    required this.time,
-    required this.payment,
-    required this.amount,
-  });
-
-  final String name;
-  final String category;
-  final String time;
-  final String payment;
-  final int amount;
+  return '$buf,$last3';
 }
