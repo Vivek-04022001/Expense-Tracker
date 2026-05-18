@@ -1,8 +1,9 @@
 import 'dart:io';
 
 class ApiConstants {
-  static final String baseUrl =
-      Platform.isAndroid ? 'http://10.0.2.2:3000' : 'http://localhost:3000';
+  static final String baseUrl = Platform.isAndroid
+      ? 'http://10.0.2.2:3000'
+      : 'http://localhost:3000';
 
   static const String registerEndpoint = '/auth/register';
   static const String loginEndpoint = '/auth/login';

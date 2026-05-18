@@ -1,5 +1,6 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../screens/insights_screen.dart';
 
@@ -14,14 +15,26 @@ class CategoryDonutCard extends StatefulWidget {
 class _CategoryDonutCardState extends State<CategoryDonutCard> {
   int _touchedIndex = -1;
 
+  // Merge budget limits into category slices (match by label)
+  Map<String, int> get _budgetLimits {
+    final map = <String, int>{};
+    for (final b in widget.data.budgets) {
+      map[b.category] = b.limit;
+    }
+    return map;
+  }
+
   @override
   Widget build(BuildContext context) {
     final total = widget.data.totalSpend;
     final slices = widget.data.categories;
+    final budgetLimits = _budgetLimits;
+
+    if (slices.isEmpty) return const SizedBox.shrink();
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
@@ -36,24 +49,40 @@ class _CategoryDonutCardState extends State<CategoryDonutCard> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Where it went',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
-              color: AppColors.lightTextPrimary,
-            ),
+          // Header
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Expense Breakdown',
+                style: GoogleFonts.inter(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.lightTextPrimary,
+                ),
+              ),
+              Text(
+                'By category',
+                style: GoogleFonts.inter(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                  color: AppColors.lightTextTertiary,
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 24),
+
+          // Donut chart
           SizedBox(
-            height: 200,
+            height: 220,
             child: Stack(
               alignment: Alignment.center,
               children: [
                 PieChart(
                   PieChartData(
-                    sectionsSpace: 2.0,
-                    centerSpaceRadius: 62.0,
+                    sectionsSpace: 3.0,
+                    centerSpaceRadius: 68.0,
                     startDegreeOffset: -90.0,
                     pieTouchData: PieTouchData(
                       touchCallback: (event, response) {
@@ -63,43 +92,70 @@ class _CategoryDonutCardState extends State<CategoryDonutCard> {
                               response.touchedSection == null) {
                             _touchedIndex = -1;
                           } else {
-                            _touchedIndex = response.touchedSection!.touchedSectionIndex;
+                            _touchedIndex =
+                                response.touchedSection!.touchedSectionIndex;
                           }
                         });
                       },
                     ),
                     sections: List.generate(slices.length, (i) {
                       final s = slices[i];
-                      final pct = s.amount / total * 100;
+                      final pct = total > 0 ? s.amount / total * 100 : 0.0;
                       final isTouched = i == _touchedIndex;
+                      final budget = budgetLimits[s.label];
+                      final budgetPct = (budget != null && budget > 0)
+                          ? (s.amount / budget * 100).round()
+                          : null;
+                      final overBudget =
+                          budget != null && s.amount > budget;
+
                       return PieChartSectionData(
                         color: s.color,
                         value: s.amount.toDouble(),
-                        title: isTouched ? '${pct.round()}%' : '',
-                        titleStyle: const TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.white,
-                        ),
-                        radius: isTouched ? 46.0 : 38.0,
+                        title: '',
+                        showTitle: false,
+                        radius: isTouched ? 56.0 : 48.0,
+                        borderSide: overBudget
+                            ? const BorderSide(
+                                color: AppColors.danger,
+                                width: 2,
+                              )
+                            : BorderSide.none,
+                        badgeWidget: pct >= 6
+                            ? _SegmentBadge(
+                                pct: pct.round(),
+                                budgetPct: budgetPct,
+                                isTouched: isTouched,
+                                overBudget: overBudget,
+                              )
+                            : null,
+                        badgePositionPercentageOffset: 0.55,
                       );
                     }),
                   ),
                 ),
+
+                // Center text
                 Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Text(
-                      'Total spend',
-                      style: TextStyle(fontSize: 11, color: AppColors.lightTextTertiary),
+                    Text(
+                      _fmtRupee(total),
+                      style: GoogleFonts.inter(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.lightTextPrimary,
+                        letterSpacing: -0.5,
+                        fontFeatures: const [FontFeature.tabularFigures()],
+                      ),
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      _fmtRupee(total),
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.lightTextPrimary,
+                      'Total Expenses',
+                      style: GoogleFonts.inter(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w500,
+                        color: AppColors.lightTextTertiary,
                       ),
                     ),
                   ],
@@ -108,52 +164,180 @@ class _CategoryDonutCardState extends State<CategoryDonutCard> {
             ),
           ),
           const SizedBox(height: 20),
-          // Legend
-          ...slices.map((s) {
-            final pct = (s.amount / total * 100).round();
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: Row(
+
+          // Divider
+          Container(height: 1, color: AppColors.lightBorderSubtle),
+          const SizedBox(height: 16),
+
+          // Legend — 2-column grid
+          _buildLegend(slices, total, budgetLimits),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLegend(
+    List<CategorySlice> slices,
+    int total,
+    Map<String, int> budgetLimits,
+  ) {
+    final rows = <Widget>[];
+    for (var i = 0; i < slices.length; i += 2) {
+      rows.add(
+        Row(
+          children: [
+            Expanded(child: _legendItem(slices[i], total, budgetLimits)),
+            const SizedBox(width: 12),
+            if (i + 1 < slices.length)
+              Expanded(
+                child: _legendItem(slices[i + 1], total, budgetLimits),
+              )
+            else
+              const Expanded(child: SizedBox()),
+          ],
+        ),
+      );
+      if (i + 2 < slices.length) const SizedBox(height: 0);
+      rows.add(const SizedBox(height: 12));
+    }
+    return Column(children: rows);
+  }
+
+  Widget _legendItem(
+    CategorySlice s,
+    int total,
+    Map<String, int> budgetLimits,
+  ) {
+    final pct = total > 0 ? (s.amount / total * 100).round() : 0;
+    final budget = budgetLimits[s.label];
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Color indicator
+        Padding(
+          padding: const EdgeInsets.only(top: 3),
+          child: Container(
+            width: 10,
+            height: 10,
+            decoration: BoxDecoration(
+              color: s.color,
+              borderRadius: BorderRadius.circular(3),
+            ),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
                 children: [
-                  Container(
-                    width: 10,
-                    height: 10,
-                    decoration: BoxDecoration(
-                      color: s.color,
-                      shape: BoxShape.circle,
+                  Expanded(
+                    child: Text(
+                      s.label,
+                      style: GoogleFonts.inter(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                        color: AppColors.lightTextSecondary,
+                      ),
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                  const SizedBox(width: 10),
-                  Text(
-                    s.label,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      color: AppColors.lightTextPrimary,
-                    ),
-                  ),
-                  const Spacer(),
                   Text(
                     '$pct%',
-                    style: const TextStyle(
-                      fontSize: 13,
-                      color: AppColors.lightTextSecondary,
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Text(
-                    _fmtRupee(s.amount),
-                    style: const TextStyle(
-                      fontSize: 14,
+                    style: GoogleFonts.inter(
+                      fontSize: 11,
                       fontWeight: FontWeight.w600,
-                      color: AppColors.lightTextPrimary,
+                      color: AppColors.lightTextTertiary,
                     ),
                   ),
                 ],
               ),
-            );
-          }),
+              const SizedBox(height: 2),
+              Text(
+                _fmtRupee(s.amount),
+                style: GoogleFonts.inter(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.lightTextPrimary,
+                  fontFeatures: const [FontFeature.tabularFigures()],
+                ),
+              ),
+              if (budget != null) ...[
+                const SizedBox(height: 1),
+                Text(
+                  'Budget ${_fmtRupee(budget)}',
+                  style: GoogleFonts.inter(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w400,
+                    color: s.amount > budget
+                        ? AppColors.danger
+                        : AppColors.lightTextTertiary,
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _SegmentBadge extends StatelessWidget {
+  const _SegmentBadge({
+    required this.pct,
+    required this.budgetPct,
+    required this.isTouched,
+    required this.overBudget,
+  });
+
+  final int pct;
+  final int? budgetPct;
+  final bool isTouched;
+  final bool overBudget;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          '$pct%',
+          style: GoogleFonts.inter(
+            fontSize: isTouched ? 14 : 12,
+            fontWeight: FontWeight.w700,
+            color: Colors.white,
+            height: 1.1,
+          ),
+        ),
+        if (budgetPct != null) ...[
+          const SizedBox(height: 1),
+          Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 4,
+              vertical: 1,
+            ),
+            decoration: BoxDecoration(
+              color: overBudget
+                  ? AppColors.danger.withValues(alpha: 0.95)
+                  : Colors.white.withValues(alpha: 0.22),
+              borderRadius: BorderRadius.circular(6),
+            ),
+            child: Text(
+              '$budgetPct%',
+              style: GoogleFonts.inter(
+                fontSize: 8.5,
+                fontWeight: FontWeight.w700,
+                color: Colors.white,
+                height: 1.1,
+                letterSpacing: 0.2,
+              ),
+            ),
+          ),
         ],
-      ),
+      ],
     );
   }
 }

@@ -14,6 +14,7 @@ import '../../features/insights/presentation/screens/insights_screen.dart';
 import '../../features/navigation/presentation/screens/shell_screen.dart';
 import '../../features/onboarding/presentation/providers/onboarding_provider.dart';
 import '../../features/onboarding/presentation/screens/onboarding_screen.dart';
+import '../../features/history/presentation/screens/history_screen.dart';
 import '../../features/profile/presentation/screens/profile_screen.dart';
 
 part 'app_router.g.dart';
@@ -107,8 +108,8 @@ GoRouter appRouter(AppRouterRef ref) {
           StatefulShellBranch(
             routes: [
               GoRoute(
-                path: '/budgets',
-                builder: (context, state) => const BudgetsScreen(),
+                path: '/statistics',
+                builder: (context, state) => const HistoryScreen(),
               ),
             ],
           ),
@@ -125,6 +126,10 @@ GoRouter appRouter(AppRouterRef ref) {
       GoRoute(
         path: '/insights',
         builder: (context, state) => const InsightsScreen(),
+      ),
+      GoRoute(
+        path: '/budgets',
+        builder: (context, state) => const BudgetsScreen(),
       ),
       GoRoute(
         path: '/savings',

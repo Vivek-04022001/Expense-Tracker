@@ -5,6 +5,7 @@ import 'package:phosphor_flutter/phosphor_flutter.dart';
 import '../../../../core/errors/app_exceptions.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/category_mapper.dart';
+import '../../../../shared/widgets/calculator_numpad.dart';
 import '../../data/models/expense_model.dart';
 import '../providers/expense_provider.dart';
 
@@ -16,12 +17,13 @@ class AddExpenseSheet extends ConsumerStatefulWidget {
 }
 
 class _AddExpenseSheetState extends ConsumerState<AddExpenseSheet> {
-  String _amount = '';
+  String _expr = '';
   ExpenseCategory _category = ExpenseCategory.foodAndDrink;
   final _merchantCtrl = TextEditingController();
   ExpensePaymentMethod _payment = ExpensePaymentMethod.upi;
   DateTime _date = DateTime.now();
   bool _saving = false;
+  bool _showSuccess = false;
 
   static const _paymentLabels = ['Cash', 'UPI', 'Bank Transfer'];
   static const _paymentMethods = [
@@ -36,52 +38,114 @@ class _AddExpenseSheetState extends ConsumerState<AddExpenseSheet> {
     super.dispose();
   }
 
-  void _numpadTap(String key) {
+  // ─── Expression logic ───────────────────────────────────────────────────────
+
+  static int _opIdx(String expr) {
+    for (int i = 1; i < expr.length; i++) {
+      if ('+-×÷'.contains(expr[i])) return i;
+    }
+    return -1;
+  }
+
+  double? _computeResult() {
+    if (_expr.isEmpty) return null;
+    final idx = _opIdx(_expr);
+    if (idx < 0) return double.tryParse(_expr);
+    final left = double.tryParse(_expr.substring(0, idx));
+    final op = _expr[idx];
+    final rightStr = _expr.substring(idx + 1);
+    if (rightStr.isEmpty) return left;
+    final right = double.tryParse(rightStr);
+    if (left == null || right == null) return null;
+    return switch (op) {
+      '+' => left + right,
+      '-' => left - right,
+      '×' => left * right,
+      '÷' => right != 0 ? left / right : null,
+      _ => null,
+    };
+  }
+
+  bool get _hasFullExpression {
+    final idx = _opIdx(_expr);
+    return idx > 0 && _expr.substring(idx + 1).isNotEmpty;
+  }
+
+  String _fmtNum(double r) {
+    if (r == r.roundToDouble() && !r.isInfinite) return r.toInt().toString();
+    return r.toStringAsFixed(2);
+  }
+
+  void _onKey(String key) {
     setState(() {
-      switch (key) {
-        case '⌫':
-          if (_amount.isNotEmpty) {
-            _amount = _amount.substring(0, _amount.length - 1);
-          }
-        case '.':
-          if (!_amount.contains('.')) {
-            _amount = _amount.isEmpty ? '0.' : '$_amount.';
-          }
-        default:
-          if (_amount.length < 9) _amount += key;
+      if (key == '⌫') {
+        if (_expr.isNotEmpty) _expr = _expr.substring(0, _expr.length - 1);
+        return;
       }
+
+      if ('+-×÷'.contains(key)) {
+        if (_expr.isEmpty) return;
+        final last = _expr[_expr.length - 1];
+        if ('+-×÷'.contains(last)) {
+          _expr = '${_expr.substring(0, _expr.length - 1)}$key';
+        } else {
+          final idx = _opIdx(_expr);
+          if (idx > 0 && idx < _expr.length - 1) {
+            final r = _computeResult();
+            if (r != null) _expr = '${_fmtNum(r)}$key';
+          } else {
+            _expr += key;
+          }
+        }
+        return;
+      }
+
+      if (key == '.') {
+        final idx = _opIdx(_expr);
+        final seg = idx < 0 ? _expr : _expr.substring(idx + 1);
+        if (seg.contains('.')) return;
+        _expr += seg.isEmpty ? '0.' : '.';
+        return;
+      }
+
+      if (_expr.length < 12) _expr += key;
     });
   }
 
+  // ─── Save ───────────────────────────────────────────────────────────────────
+
   Future<void> _save() async {
-    final value = double.tryParse(_amount);
+    final value = _computeResult();
     if (value == null || value <= 0) return;
     setState(() => _saving = true);
     try {
       final desc = _merchantCtrl.text.trim();
-      await ref
-          .read(expenseListNotifierProvider.notifier)
-          .create(
+      await ref.read(expenseListNotifierProvider.notifier).create(
             amount: value,
             description: desc.length >= 5 ? desc : null,
             category: _category,
             paymentMethod: _payment,
           );
+      if (!mounted) return;
+      setState(() {
+        _saving = false;
+        _showSuccess = true;
+      });
+      await Future.delayed(const Duration(milliseconds: 1300));
       if (mounted) Navigator.of(context).pop(true);
     } on AppException catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(e.message)));
+        setState(() => _saving = false);
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(e.message)));
       }
     } catch (_) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Failed to save expense')));
+        setState(() => _saving = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Failed to save expense')),
+        );
       }
-    } finally {
-      if (mounted) setState(() => _saving = false);
     }
   }
 
@@ -102,8 +166,13 @@ class _AddExpenseSheetState extends ConsumerState<AddExpenseSheet> {
         _date.year == now.year;
   }
 
+  // ─── Build ──────────────────────────────────────────────────────────────────
+
   @override
   Widget build(BuildContext context) {
+    final result = _computeResult();
+    final canSave = result != null && result > 0 && !_saving;
+
     return Container(
       decoration: const BoxDecoration(
         color: Colors.white,
@@ -112,290 +181,413 @@ class _AddExpenseSheetState extends ConsumerState<AddExpenseSheet> {
       padding: EdgeInsets.only(
         bottom: MediaQuery.of(context).viewInsets.bottom,
       ),
-      child: SafeArea(
-        top: false,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const SizedBox(height: 10),
-            Container(
-              width: 36,
-              height: 4,
-              decoration: BoxDecoration(
-                color: const Color(0xFFDDE1EC),
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-            const SizedBox(height: 14),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Row(
-                children: [
-                  const Text(
-                    'Add expense',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.lightTextPrimary,
-                    ),
-                  ),
-                  const Spacer(),
-                  GestureDetector(
-                    onTap: () => Navigator.of(context).pop(),
-                    child: Container(
-                      width: 30,
-                      height: 30,
-                      decoration: const BoxDecoration(
-                        color: Color(0xFFF3F4F6),
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(
-                        Icons.close,
-                        size: 16,
-                        color: AppColors.lightTextSecondary,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 20),
-            // Amount display
-            Column(
+      child: Stack(
+        children: [
+          SafeArea(
+            top: false,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.baseline,
-                  textBaseline: TextBaseline.alphabetic,
-                  children: [
-                    Text(
-                      '₹',
-                      style: TextStyle(
-                        fontSize: 28,
-                        fontWeight: FontWeight.w500,
-                        color: _amount.isEmpty
-                            ? AppColors.lightTextTertiary
-                            : AppColors.lightTextPrimary,
-                      ),
-                    ),
-                    Text(
-                      _amount.isEmpty ? '0' : _amount,
-                      style: TextStyle(
-                        fontSize: 52,
-                        fontWeight: FontWeight.w800,
-                        height: 1,
-                        color: _amount.isEmpty
-                            ? AppColors.lightTextTertiary
-                            : AppColors.lightTextPrimary,
-                      ),
-                    ),
-                  ],
+                const SizedBox(height: 10),
+                Container(
+                  width: 36,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFDDE1EC),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
                 ),
-                const SizedBox(height: 4),
-                const Text(
-                  'Enter an amount',
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: AppColors.lightTextTertiary,
+                const SizedBox(height: 14),
+                // Header
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Row(
+                    children: [
+                      const Text(
+                        'Add expense',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.lightTextPrimary,
+                        ),
+                      ),
+                      const Spacer(),
+                      GestureDetector(
+                        onTap: () => Navigator.of(context).pop(),
+                        child: Container(
+                          width: 30,
+                          height: 30,
+                          decoration: const BoxDecoration(
+                            color: Color(0xFFF3F4F6),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.close,
+                            size: 16,
+                            color: AppColors.lightTextSecondary,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 24),
+                // Amount / expression display
+                _AmountDisplay(
+                  expr: _expr,
+                  result: result,
+                  hasFullExpression: _hasFullExpression,
+                  fmtNum: _fmtNum,
+                ),
+                const SizedBox(height: 16),
+                // Category chips
+                SizedBox(
+                  height: 36,
+                  child: ListView.separated(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    scrollDirection: Axis.horizontal,
+                    itemCount: ExpenseCategory.values.length,
+                    separatorBuilder: (_, __) => const SizedBox(width: 8),
+                    itemBuilder: (_, i) {
+                      final cat = ExpenseCategory.values[i];
+                      final color = CategoryMapper.color(cat);
+                      final selected = _category == cat;
+                      return GestureDetector(
+                        onTap: () => setState(() => _category = cat),
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 150),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 6,
+                          ),
+                          decoration: BoxDecoration(
+                            color: selected
+                                ? color.withValues(alpha: 0.15)
+                                : Colors.white,
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                              color: selected
+                                  ? color
+                                  : AppColors.lightBorderSubtle,
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Container(
+                                width: 7,
+                                height: 7,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: color,
+                                ),
+                              ),
+                              const SizedBox(width: 6),
+                              Text(
+                                CategoryMapper.label(cat),
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w500,
+                                  color: selected
+                                      ? color
+                                      : AppColors.lightTextPrimary,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                const SizedBox(height: 12),
+                // Merchant + Date
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      border: Border.all(color: AppColors.lightBorderSubtle),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: _merchantCtrl,
+                            style: const TextStyle(
+                              fontSize: 14,
+                              color: AppColors.lightTextPrimary,
+                            ),
+                            decoration: const InputDecoration(
+                              hintText: 'Merchant / Note',
+                              hintStyle: TextStyle(
+                                color: AppColors.lightTextTertiary,
+                                fontSize: 14,
+                              ),
+                              border: InputBorder.none,
+                              contentPadding: EdgeInsets.symmetric(
+                                horizontal: 14,
+                                vertical: 12,
+                              ),
+                              isDense: true,
+                            ),
+                          ),
+                        ),
+                        Container(
+                          width: 1,
+                          height: 36,
+                          color: AppColors.lightBorderSubtle,
+                        ),
+                        GestureDetector(
+                          onTap: _pickDate,
+                          child: Padding(
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 14),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                PhosphorIcon(
+                                  PhosphorIcons.calendarBlank(),
+                                  size: 15,
+                                  color: AppColors.lightTextSecondary,
+                                ),
+                                const SizedBox(width: 6),
+                                Text(
+                                  _isToday
+                                      ? 'Today'
+                                      : DateFormat('MMM d').format(_date),
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    color: AppColors.lightTextPrimary,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                // Payment method
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Container(
+                    padding: const EdgeInsets.all(3),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF3F4F6),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Row(
+                      children: List.generate(
+                        _paymentLabels.length,
+                        (i) => _PaymentTab(
+                          label: _paymentLabels[i],
+                          selected: _payment == _paymentMethods[i],
+                          onTap: () =>
+                              setState(() => _payment = _paymentMethods[i]),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                // Calculator numpad
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  child: CalculatorNumpad(onKeyTap: _onKey),
+                ),
+                // Save button
+                Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                  child: SizedBox(
+                    width: double.infinity,
+                    height: 54,
+                    child: ElevatedButton(
+                      onPressed: canSave ? _save : null,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary500,
+                        foregroundColor: Colors.white,
+                        disabledBackgroundColor:
+                            AppColors.primary500.withValues(alpha: 0.4),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        elevation: 0,
+                      ),
+                      child: _saving
+                          ? const SizedBox(
+                              width: 22,
+                              height: 22,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2.5,
+                                color: Colors.white,
+                              ),
+                            )
+                          : Text(
+                              _hasFullExpression && result != null
+                                  ? 'Save ₹${_fmtNum(result)}'
+                                  : 'Save expense',
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                    ),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 16),
-            // Category chips
-            SizedBox(
-              height: 36,
-              child: ListView.separated(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                scrollDirection: Axis.horizontal,
-                itemCount: ExpenseCategory.values.length,
-                separatorBuilder: (_, __) => const SizedBox(width: 8),
-                itemBuilder: (_, i) {
-                  final cat = ExpenseCategory.values[i];
-                  final color = CategoryMapper.color(cat);
-                  final selected = _category == cat;
-                  return GestureDetector(
-                    onTap: () => setState(() => _category = cat),
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 150),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color: selected
-                            ? color.withValues(alpha: 0.15)
-                            : Colors.white,
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(
-                          color: selected ? color : AppColors.lightBorderSubtle,
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Container(
-                            width: 7,
-                            height: 7,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: color,
-                            ),
-                          ),
-                          const SizedBox(width: 6),
-                          Text(
-                            CategoryMapper.label(cat),
-                            style: TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w500,
-                              color: selected
-                                  ? color
-                                  : AppColors.lightTextPrimary,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                },
+          ),
+          // Success overlay
+          if (_showSuccess)
+            _SuccessOverlay(
+              amount: _fmtNum(_computeResult() ?? 0),
+              color: AppColors.primary500,
+              label: 'Expense saved',
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── Amount display ───────────────────────────────────────────────────────────
+
+class _AmountDisplay extends StatelessWidget {
+  const _AmountDisplay({
+    required this.expr,
+    required this.result,
+    required this.hasFullExpression,
+    required this.fmtNum,
+  });
+
+  final String expr;
+  final double? result;
+  final bool hasFullExpression;
+  final String Function(double) fmtNum;
+
+  @override
+  Widget build(BuildContext context) {
+    final isEmpty = expr.isEmpty;
+    final displayText = isEmpty ? '0' : expr;
+    final textColor =
+        isEmpty ? AppColors.lightTextTertiary : AppColors.lightTextPrimary;
+
+    return Column(
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.baseline,
+          textBaseline: TextBaseline.alphabetic,
+          children: [
+            Text(
+              '₹',
+              style: TextStyle(
+                fontSize: 28,
+                fontWeight: FontWeight.w500,
+                color: textColor,
               ),
             ),
-            const SizedBox(height: 12),
-            // Merchant + Date row
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Container(
-                decoration: BoxDecoration(
-                  border: Border.all(color: AppColors.lightBorderSubtle),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        controller: _merchantCtrl,
-                        style: const TextStyle(
-                          fontSize: 14,
-                          color: AppColors.lightTextPrimary,
-                        ),
-                        decoration: const InputDecoration(
-                          hintText: 'Merchant / Note',
-                          hintStyle: TextStyle(
-                            color: AppColors.lightTextTertiary,
-                            fontSize: 14,
-                          ),
-                          border: InputBorder.none,
-                          contentPadding: EdgeInsets.symmetric(
-                            horizontal: 14,
-                            vertical: 12,
-                          ),
-                          isDense: true,
-                        ),
-                      ),
-                    ),
-                    Container(
-                      width: 1,
-                      height: 36,
-                      color: AppColors.lightBorderSubtle,
-                    ),
-                    GestureDetector(
-                      onTap: _pickDate,
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 14),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            PhosphorIcon(
-                              PhosphorIcons.calendarBlank(),
-                              size: 15,
-                              color: AppColors.lightTextSecondary,
-                            ),
-                            const SizedBox(width: 6),
-                            Text(
-                              _isToday
-                                  ? 'Today'
-                                  : DateFormat('MMM d').format(_date),
-                              style: const TextStyle(
-                                fontSize: 14,
-                                color: AppColors.lightTextPrimary,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 10),
-            // Payment method toggle
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Container(
-                padding: const EdgeInsets.all(3),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF3F4F6),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Row(
-                  children: List.generate(
-                    _paymentLabels.length,
-                    (i) => _PaymentTab(
-                      label: _paymentLabels[i],
-                      selected: _payment == _paymentMethods[i],
-                      onTap: () =>
-                          setState(() => _payment = _paymentMethods[i]),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 8),
-            // Custom numpad
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8),
-              child: _Numpad(onTap: _numpadTap),
-            ),
-            // Save button
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-              child: SizedBox(
-                width: double.infinity,
-                height: 54,
-                child: ElevatedButton(
-                  onPressed: (_amount.isNotEmpty && !_saving) ? _save : null,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary500,
-                    foregroundColor: Colors.white,
-                    disabledBackgroundColor: AppColors.primary500.withValues(
-                      alpha: 0.4,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                    elevation: 0,
-                  ),
-                  child: _saving
-                      ? const SizedBox(
-                          width: 22,
-                          height: 22,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2.5,
-                            color: Colors.white,
-                          ),
-                        )
-                      : const Text(
-                          'Save expense',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                ),
+            Text(
+              displayText,
+              style: TextStyle(
+                fontSize: 52,
+                fontWeight: FontWeight.w800,
+                height: 1,
+                color: textColor,
               ),
             ),
           ],
+        ),
+        const SizedBox(height: 6),
+        AnimatedSwitcher(
+          duration: const Duration(milliseconds: 200),
+          child: hasFullExpression && result != null
+              ? Text(
+                  '= ₹${fmtNum(result!)}',
+                  key: const ValueKey('result'),
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: AppColors.lightTextSecondary,
+                    fontWeight: FontWeight.w500,
+                  ),
+                )
+              : Text(
+                  isEmpty ? 'Enter an amount' : '',
+                  key: const ValueKey('hint'),
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: AppColors.lightTextTertiary,
+                  ),
+                ),
+        ),
+      ],
+    );
+  }
+}
+
+// ─── Success overlay ─────────────────────────────────────────────────────────
+
+class _SuccessOverlay extends StatelessWidget {
+  const _SuccessOverlay({
+    required this.amount,
+    required this.color,
+    required this.label,
+  });
+
+  final String amount;
+  final Color color;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned.fill(
+      child: TweenAnimationBuilder<double>(
+        tween: Tween(begin: 0.0, end: 1.0),
+        duration: const Duration(milliseconds: 350),
+        curve: Curves.easeOut,
+        builder: (context, v, child) => Opacity(opacity: v, child: child),
+        child: Container(
+          decoration: BoxDecoration(
+            color: color,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                width: 72,
+                height: 72,
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.2),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.check, color: Colors.white, size: 36),
+              ),
+              const SizedBox(height: 20),
+              Text(
+                '₹$amount',
+                style: const TextStyle(
+                  fontSize: 48,
+                  fontWeight: FontWeight.w800,
+                  color: Colors.white,
+                  height: 1,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.white.withValues(alpha: 0.85),
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -432,79 +624,14 @@ class _PaymentTab extends StatelessWidget {
               label,
               style: TextStyle(
                 fontSize: 14,
-                fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
-                color: selected ? Colors.white : AppColors.lightTextSecondary,
+                fontWeight:
+                    selected ? FontWeight.w600 : FontWeight.w400,
+                color: selected
+                    ? Colors.white
+                    : AppColors.lightTextSecondary,
               ),
             ),
           ),
-        ),
-      ),
-    );
-  }
-}
-
-// ─── Numpad ───────────────────────────────────────────────────────────────────
-
-class _Numpad extends StatelessWidget {
-  const _Numpad({required this.onTap});
-
-  final void Function(String) onTap;
-
-  static const _rows = [
-    ['1', '2', '3'],
-    ['4', '5', '6'],
-    ['7', '8', '9'],
-    ['.', '0', '⌫'],
-  ];
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: _rows
-          .map(
-            (row) => Row(
-              children: row
-                  .map(
-                    (key) => Expanded(
-                      child: _NumKey(label: key, onTap: () => onTap(key)),
-                    ),
-                  )
-                  .toList(),
-            ),
-          )
-          .toList(),
-    );
-  }
-}
-
-class _NumKey extends StatelessWidget {
-  const _NumKey({required this.label, required this.onTap});
-
-  final String label;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
-      child: SizedBox(
-        height: 54,
-        child: Center(
-          child: label == '⌫'
-              ? const Icon(
-                  Icons.backspace_outlined,
-                  size: 22,
-                  color: AppColors.lightTextPrimary,
-                )
-              : Text(
-                  label,
-                  style: const TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.w500,
-                    color: AppColors.lightTextPrimary,
-                  ),
-                ),
         ),
       ),
     );

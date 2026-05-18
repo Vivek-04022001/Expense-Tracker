@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/errors/app_exceptions.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../shared/widgets/calculator_numpad.dart';
 import '../../data/models/income_model.dart';
 import '../providers/income_provider.dart';
 
@@ -13,10 +14,11 @@ class AddIncomeSheet extends ConsumerStatefulWidget {
 }
 
 class _AddIncomeSheetState extends ConsumerState<AddIncomeSheet> {
-  String _amount = '';
+  String _expr = '';
   IncomeType _incomeType = IncomeType.salary;
   final _descCtrl = TextEditingController();
   bool _saving = false;
+  bool _showSuccess = false;
 
   @override
   void dispose() {
@@ -24,25 +26,84 @@ class _AddIncomeSheetState extends ConsumerState<AddIncomeSheet> {
     super.dispose();
   }
 
-  void _numpadTap(String key) {
+  // ─── Expression logic ───────────────────────────────────────────────────────
+
+  static int _opIdx(String expr) {
+    for (int i = 1; i < expr.length; i++) {
+      if ('+-×÷'.contains(expr[i])) return i;
+    }
+    return -1;
+  }
+
+  double? _computeResult() {
+    if (_expr.isEmpty) return null;
+    final idx = _opIdx(_expr);
+    if (idx < 0) return double.tryParse(_expr);
+    final left = double.tryParse(_expr.substring(0, idx));
+    final op = _expr[idx];
+    final rightStr = _expr.substring(idx + 1);
+    if (rightStr.isEmpty) return left;
+    final right = double.tryParse(rightStr);
+    if (left == null || right == null) return null;
+    return switch (op) {
+      '+' => left + right,
+      '-' => left - right,
+      '×' => left * right,
+      '÷' => right != 0 ? left / right : null,
+      _ => null,
+    };
+  }
+
+  bool get _hasFullExpression {
+    final idx = _opIdx(_expr);
+    return idx > 0 && _expr.substring(idx + 1).isNotEmpty;
+  }
+
+  String _fmtNum(double r) {
+    if (r == r.roundToDouble() && !r.isInfinite) return r.toInt().toString();
+    return r.toStringAsFixed(2);
+  }
+
+  void _onKey(String key) {
     setState(() {
-      switch (key) {
-        case '⌫':
-          if (_amount.isNotEmpty) {
-            _amount = _amount.substring(0, _amount.length - 1);
-          }
-        case '.':
-          if (!_amount.contains('.')) {
-            _amount = _amount.isEmpty ? '0.' : '$_amount.';
-          }
-        default:
-          if (_amount.length < 9) _amount += key;
+      if (key == '⌫') {
+        if (_expr.isNotEmpty) _expr = _expr.substring(0, _expr.length - 1);
+        return;
       }
+
+      if ('+-×÷'.contains(key)) {
+        if (_expr.isEmpty) return;
+        final last = _expr[_expr.length - 1];
+        if ('+-×÷'.contains(last)) {
+          _expr = '${_expr.substring(0, _expr.length - 1)}$key';
+        } else {
+          final idx = _opIdx(_expr);
+          if (idx > 0 && idx < _expr.length - 1) {
+            final r = _computeResult();
+            if (r != null) _expr = '${_fmtNum(r)}$key';
+          } else {
+            _expr += key;
+          }
+        }
+        return;
+      }
+
+      if (key == '.') {
+        final idx = _opIdx(_expr);
+        final seg = idx < 0 ? _expr : _expr.substring(idx + 1);
+        if (seg.contains('.')) return;
+        _expr += seg.isEmpty ? '0.' : '.';
+        return;
+      }
+
+      if (_expr.length < 12) _expr += key;
     });
   }
 
+  // ─── Save ───────────────────────────────────────────────────────────────────
+
   Future<void> _save() async {
-    final value = double.tryParse(_amount);
+    final value = _computeResult();
     if (value == null || value <= 0) return;
     setState(() => _saving = true);
     try {
@@ -52,25 +113,39 @@ class _AddIncomeSheetState extends ConsumerState<AddIncomeSheet> {
             incomeType: _incomeType,
             description: desc.isNotEmpty ? desc : null,
           );
+      if (!mounted) return;
+      setState(() {
+        _saving = false;
+        _showSuccess = true;
+      });
+      await Future.delayed(const Duration(milliseconds: 1300));
       if (mounted) Navigator.of(context).pop(true);
     } on AppException catch (e) {
       if (mounted) {
+        setState(() => _saving = false);
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text(e.message)));
       }
     } catch (_) {
       if (mounted) {
+        setState(() => _saving = false);
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Failed to save income')),
         );
       }
-    } finally {
-      if (mounted) setState(() => _saving = false);
     }
   }
 
+  // ─── Build ──────────────────────────────────────────────────────────────────
+
   @override
   Widget build(BuildContext context) {
+    final result = _computeResult();
+    final canSave = result != null && result > 0 && !_saving;
+    final isEmpty = _expr.isEmpty;
+    final textColor =
+        isEmpty ? AppColors.lightTextTertiary : AppColors.lightTextPrimary;
+
     return Container(
       decoration: const BoxDecoration(
         color: Colors.white,
@@ -79,300 +154,315 @@ class _AddIncomeSheetState extends ConsumerState<AddIncomeSheet> {
       padding: EdgeInsets.only(
         bottom: MediaQuery.of(context).viewInsets.bottom,
       ),
-      child: SafeArea(
-        top: false,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const SizedBox(height: 10),
-            Container(
-              width: 36,
-              height: 4,
-              decoration: BoxDecoration(
-                color: const Color(0xFFDDE1EC),
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-            const SizedBox(height: 14),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Row(
-                children: [
-                  const Text(
-                    'Add income',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.lightTextPrimary,
-                    ),
-                  ),
-                  const Spacer(),
-                  GestureDetector(
-                    onTap: () => Navigator.of(context).pop(),
-                    child: Container(
-                      width: 30,
-                      height: 30,
-                      decoration: const BoxDecoration(
-                        color: Color(0xFFF3F4F6),
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(
-                        Icons.close,
-                        size: 16,
-                        color: AppColors.lightTextSecondary,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 20),
-            // Amount display
-            Column(
+      child: Stack(
+        children: [
+          SafeArea(
+            top: false,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.baseline,
-                  textBaseline: TextBaseline.alphabetic,
+                const SizedBox(height: 10),
+                Container(
+                  width: 36,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFDDE1EC),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                const SizedBox(height: 14),
+                // Header
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Row(
+                    children: [
+                      const Text(
+                        'Add income',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.lightTextPrimary,
+                        ),
+                      ),
+                      const Spacer(),
+                      GestureDetector(
+                        onTap: () => Navigator.of(context).pop(),
+                        child: Container(
+                          width: 30,
+                          height: 30,
+                          decoration: const BoxDecoration(
+                            color: Color(0xFFF3F4F6),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.close,
+                            size: 16,
+                            color: AppColors.lightTextSecondary,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 24),
+                // Amount / expression display
+                Column(
                   children: [
-                    Text(
-                      '₹',
-                      style: TextStyle(
-                        fontSize: 28,
-                        fontWeight: FontWeight.w500,
-                        color: _amount.isEmpty
-                            ? AppColors.lightTextTertiary
-                            : AppColors.lightTextPrimary,
-                      ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.baseline,
+                      textBaseline: TextBaseline.alphabetic,
+                      children: [
+                        Text(
+                          '₹',
+                          style: TextStyle(
+                            fontSize: 28,
+                            fontWeight: FontWeight.w500,
+                            color: textColor,
+                          ),
+                        ),
+                        Text(
+                          isEmpty ? '0' : _expr,
+                          style: TextStyle(
+                            fontSize: 52,
+                            fontWeight: FontWeight.w800,
+                            height: 1,
+                            color: textColor,
+                          ),
+                        ),
+                      ],
                     ),
-                    Text(
-                      _amount.isEmpty ? '0' : _amount,
-                      style: TextStyle(
-                        fontSize: 52,
-                        fontWeight: FontWeight.w800,
-                        height: 1,
-                        color: _amount.isEmpty
-                            ? AppColors.lightTextTertiary
-                            : AppColors.lightTextPrimary,
-                      ),
+                    const SizedBox(height: 6),
+                    AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 200),
+                      child: _hasFullExpression && result != null
+                          ? Text(
+                              '= ₹${_fmtNum(result)}',
+                              key: const ValueKey('result'),
+                              style: const TextStyle(
+                                fontSize: 14,
+                                color: AppColors.lightTextSecondary,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            )
+                          : Text(
+                              isEmpty ? 'Enter an amount' : '',
+                              key: const ValueKey('hint'),
+                              style: const TextStyle(
+                                fontSize: 13,
+                                color: AppColors.lightTextTertiary,
+                              ),
+                            ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 4),
-                const Text(
-                  'Enter an amount',
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: AppColors.lightTextTertiary,
+                const SizedBox(height: 16),
+                // Income type chips
+                SizedBox(
+                  height: 36,
+                  child: ListView.separated(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    scrollDirection: Axis.horizontal,
+                    itemCount: IncomeType.values.length,
+                    separatorBuilder: (_, __) => const SizedBox(width: 8),
+                    itemBuilder: (_, i) {
+                      final type = IncomeType.values[i];
+                      final selected = _incomeType == type;
+                      return GestureDetector(
+                        onTap: () => setState(() => _incomeType = type),
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 150),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 6,
+                          ),
+                          decoration: BoxDecoration(
+                            color: selected
+                                ? AppColors.success.withValues(alpha: 0.15)
+                                : Colors.white,
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                              color: selected
+                                  ? AppColors.success
+                                  : AppColors.lightBorderSubtle,
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Container(
+                                width: 7,
+                                height: 7,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: selected
+                                      ? AppColors.success
+                                      : AppColors.lightTextTertiary,
+                                ),
+                              ),
+                              const SizedBox(width: 6),
+                              Text(
+                                type.displayLabel,
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w500,
+                                  color: selected
+                                      ? AppColors.success
+                                      : AppColors.lightTextPrimary,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                const SizedBox(height: 12),
+                // Description
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      border: Border.all(color: AppColors.lightBorderSubtle),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: TextField(
+                      controller: _descCtrl,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: AppColors.lightTextPrimary,
+                      ),
+                      decoration: const InputDecoration(
+                        hintText: 'Note (optional)',
+                        hintStyle: TextStyle(
+                          color: AppColors.lightTextTertiary,
+                          fontSize: 14,
+                        ),
+                        border: InputBorder.none,
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 12,
+                        ),
+                        isDense: true,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                // Calculator numpad
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  child: CalculatorNumpad(onKeyTap: _onKey),
+                ),
+                // Save button
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 20, vertical: 10),
+                  child: SizedBox(
+                    width: double.infinity,
+                    height: 54,
+                    child: ElevatedButton(
+                      onPressed: canSave ? _save : null,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.success,
+                        foregroundColor: Colors.white,
+                        disabledBackgroundColor:
+                            AppColors.success.withValues(alpha: 0.4),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        elevation: 0,
+                      ),
+                      child: _saving
+                          ? const SizedBox(
+                              width: 22,
+                              height: 22,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2.5,
+                                color: Colors.white,
+                              ),
+                            )
+                          : Text(
+                              _hasFullExpression && result != null
+                                  ? 'Save ₹${_fmtNum(result)}'
+                                  : 'Save income',
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                    ),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 16),
-            // Income type chips
-            SizedBox(
-              height: 36,
-              child: ListView.separated(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                scrollDirection: Axis.horizontal,
-                itemCount: IncomeType.values.length,
-                separatorBuilder: (_, __) => const SizedBox(width: 8),
-                itemBuilder: (_, i) {
-                  final type = IncomeType.values[i];
-                  final selected = _incomeType == type;
-                  return GestureDetector(
-                    onTap: () => setState(() => _incomeType = type),
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 150),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color: selected
-                            ? AppColors.success.withValues(alpha: 0.15)
-                            : Colors.white,
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(
-                          color: selected
-                              ? AppColors.success
-                              : AppColors.lightBorderSubtle,
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Container(
-                            width: 7,
-                            height: 7,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: selected
-                                  ? AppColors.success
-                                  : AppColors.lightTextTertiary,
-                            ),
-                          ),
-                          const SizedBox(width: 6),
-                          Text(
-                            type.displayLabel,
-                            style: TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w500,
-                              color: selected
-                                  ? AppColors.success
-                                  : AppColors.lightTextPrimary,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                },
-              ),
+          ),
+          // Success overlay
+          if (_showSuccess)
+            _SuccessOverlay(
+              amount: _fmtNum(_computeResult() ?? 0),
             ),
-            const SizedBox(height: 12),
-            // Description field
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Container(
-                decoration: BoxDecoration(
-                  border: Border.all(color: AppColors.lightBorderSubtle),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: TextField(
-                  controller: _descCtrl,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: AppColors.lightTextPrimary,
-                  ),
-                  decoration: const InputDecoration(
-                    hintText: 'Note (optional)',
-                    hintStyle: TextStyle(
-                      color: AppColors.lightTextTertiary,
-                      fontSize: 14,
-                    ),
-                    border: InputBorder.none,
-                    contentPadding: EdgeInsets.symmetric(
-                      horizontal: 14,
-                      vertical: 12,
-                    ),
-                    isDense: true,
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 8),
-            // Custom numpad
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8),
-              child: _Numpad(onTap: _numpadTap),
-            ),
-            // Save button
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-              child: SizedBox(
-                width: double.infinity,
-                height: 54,
-                child: ElevatedButton(
-                  onPressed: (_amount.isNotEmpty && !_saving) ? _save : null,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.success,
-                    foregroundColor: Colors.white,
-                    disabledBackgroundColor:
-                        AppColors.success.withValues(alpha: 0.4),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                    elevation: 0,
-                  ),
-                  child: _saving
-                      ? const SizedBox(
-                          width: 22,
-                          height: 22,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2.5,
-                            color: Colors.white,
-                          ),
-                        )
-                      : const Text(
-                          'Save income',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                ),
-              ),
-            ),
-          ],
-        ),
+        ],
       ),
     );
   }
 }
 
-// ─── Numpad ───────────────────────────────────────────────────────────────────
+// ─── Success overlay ─────────────────────────────────────────────────────────
 
-class _Numpad extends StatelessWidget {
-  const _Numpad({required this.onTap});
+class _SuccessOverlay extends StatelessWidget {
+  const _SuccessOverlay({required this.amount});
 
-  final void Function(String) onTap;
-
-  static const _rows = [
-    ['1', '2', '3'],
-    ['4', '5', '6'],
-    ['7', '8', '9'],
-    ['.', '0', '⌫'],
-  ];
+  final String amount;
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: _rows
-          .map(
-            (row) => Row(
-              children: row
-                  .map(
-                    (key) => Expanded(
-                      child: _NumKey(label: key, onTap: () => onTap(key)),
-                    ),
-                  )
-                  .toList(),
-            ),
-          )
-          .toList(),
-    );
-  }
-}
-
-class _NumKey extends StatelessWidget {
-  const _NumKey({required this.label, required this.onTap});
-
-  final String label;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
-      child: SizedBox(
-        height: 54,
-        child: Center(
-          child: label == '⌫'
-              ? const Icon(
-                  Icons.backspace_outlined,
-                  size: 22,
-                  color: AppColors.lightTextPrimary,
-                )
-              : Text(
-                  label,
-                  style: const TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.w500,
-                    color: AppColors.lightTextPrimary,
-                  ),
+    return Positioned.fill(
+      child: TweenAnimationBuilder<double>(
+        tween: Tween(begin: 0.0, end: 1.0),
+        duration: const Duration(milliseconds: 350),
+        curve: Curves.easeOut,
+        builder: (context, v, child) => Opacity(opacity: v, child: child),
+        child: Container(
+          decoration: const BoxDecoration(
+            color: AppColors.success,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                width: 72,
+                height: 72,
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.2),
+                  shape: BoxShape.circle,
                 ),
+                child:
+                    const Icon(Icons.check, color: Colors.white, size: 36),
+              ),
+              const SizedBox(height: 20),
+              Text(
+                '₹$amount',
+                style: const TextStyle(
+                  fontSize: 48,
+                  fontWeight: FontWeight.w800,
+                  color: Colors.white,
+                  height: 1,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Income saved',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.white.withValues(alpha: 0.85),
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
