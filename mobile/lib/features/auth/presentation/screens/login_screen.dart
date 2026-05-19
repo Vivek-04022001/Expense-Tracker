@@ -62,7 +62,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final textSecondary =
-        isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary;
+        isDark ? AppColors.darkTextSecondary : context.textSecondary;
 
     return Scaffold(
       body: SafeArea(
@@ -73,29 +73,29 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             children: [
               if (context.canPop())
                 IconButton(
-                  icon: const Icon(Icons.arrow_back),
+                  icon: Icon(Icons.arrow_back),
                   onPressed: () => context.pop(),
                 ),
-              const SizedBox(height: 32),
+              SizedBox(height: 32),
               Text(
                 'Welcome back',
                 style: Theme.of(context).textTheme.headlineLarge,
               ),
-              const SizedBox(height: 8),
+              SizedBox(height: 8),
               Text(
                 'Sign in to your account',
                 style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                       color: textSecondary,
                     ),
               ),
-              const SizedBox(height: 32),
+              SizedBox(height: 32),
               AppInput(
                 label: 'Phone number',
                 controller: _phoneController,
                 errorText: _phoneError,
                 keyboardType: TextInputType.phone,
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: 16),
               AppInput(
                 label: 'Password',
                 controller: _passwordController,
@@ -104,22 +104,22 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 showToggle: true,
                 textInputAction: TextInputAction.done,
               ),
-              const SizedBox(height: 8),
+              SizedBox(height: 8),
               Align(
                 alignment: Alignment.centerRight,
                 child: TextButton(
                   onPressed: () {},
-                  child: const Text('Forgot password?'),
+                  child: Text('Forgot password?'),
                 ),
               ),
-              const SizedBox(height: 24),
+              SizedBox(height: 24),
               AppButton(
                 label: 'Sign in',
                 onPressed: isLoading ? null : _submit,
                 isLoading: isLoading,
               ),
               if (authError != null) ...[
-                const SizedBox(height: 8),
+                SizedBox(height: 8),
                 Text(
                   authError,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -127,7 +127,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       ),
                 ),
               ],
-              const SizedBox(height: 16),
+              SizedBox(height: 16),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -137,7 +137,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   ),
                   TextButton(
                     onPressed: () => context.push('/register'),
-                    child: const Text('Create one'),
+                    child: Text('Create one'),
                   ),
                 ],
               ),

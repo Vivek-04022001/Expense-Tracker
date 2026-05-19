@@ -15,7 +15,7 @@ class SavingsScreen extends ConsumerWidget {
     final now = DateTime.now();
 
     return Scaffold(
-      backgroundColor: AppColors.lightBgBase,
+      backgroundColor: context.bgBase,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(16, 18, 16, 40),
@@ -30,33 +30,33 @@ class SavingsScreen extends ConsumerWidget {
                       width: 38,
                       height: 38,
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: context.bgSurface,
                         borderRadius: BorderRadius.circular(10),
-                        border: Border.all(color: AppColors.lightBorderSubtle),
+                        border: Border.all(color: context.borderSubtle),
                       ),
-                      child: const Center(
+                      child: Center(
                         child: PhosphorIcon(
                           PhosphorIconsRegular.caretLeft,
                           size: 18,
-                          color: AppColors.lightTextSecondary,
+                          color: context.textSecondary,
                         ),
                       ),
                     ),
                   ),
-                  const SizedBox(width: 12),
-                  const Text(
+                  SizedBox(width: 12),
+                  Text(
                     'Savings',
                     style: TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.w700,
-                      color: AppColors.lightTextPrimary,
+                      color: context.textPrimary,
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 24),
+              SizedBox(height: 24),
               _SectionLabel(label: DateFormat('MMMM yyyy').format(now)),
-              const SizedBox(height: 10),
+              SizedBox(height: 10),
               monthAsync.when(
                 loading: () => const _LoadingCard(),
                 error: (_, __) => const _ErrorCard(),
@@ -67,9 +67,9 @@ class SavingsScreen extends ConsumerWidget {
                   savingsRate: s.savingsRate,
                 ),
               ),
-              const SizedBox(height: 24),
+              SizedBox(height: 24),
               const _SectionLabel(label: 'All time'),
-              const SizedBox(height: 10),
+              SizedBox(height: 10),
               allTimeAsync.when(
                 loading: () => const _LoadingCard(),
                 error: (_, __) => const _ErrorCard(),
@@ -98,10 +98,10 @@ class _SectionLabel extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       label,
-      style: const TextStyle(
+      style: TextStyle(
         fontSize: 13,
         fontWeight: FontWeight.w600,
-        color: AppColors.lightTextSecondary,
+        color: context.textSecondary,
         letterSpacing: 0.3,
       ),
     );
@@ -141,7 +141,7 @@ class _SummaryCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.bgSurface,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
@@ -161,14 +161,14 @@ class _SummaryCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
+                    Text(
                       'Net savings',
                       style: TextStyle(
                         fontSize: 13,
-                        color: AppColors.lightTextSecondary,
+                        color: context.textSecondary,
                       ),
                     ),
-                    const SizedBox(height: 4),
+                    SizedBox(height: 4),
                     Text(
                       '${isPositive ? '+' : '−'}₹${_fmtNum(netSavings.abs().round())}',
                       style: TextStyle(
@@ -210,7 +210,7 @@ class _SummaryCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 20),
+          SizedBox(height: 20),
           ClipRRect(
             borderRadius: BorderRadius.circular(6),
             child: SizedBox(
@@ -235,7 +235,7 @@ class _SummaryCard extends StatelessWidget {
               ),
             ),
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16),
           Row(
             children: [
               _StatItem(
@@ -243,7 +243,7 @@ class _SummaryCard extends StatelessWidget {
                 label: 'INCOME',
                 value: '₹${_fmtNum(totalIncome.round())}',
               ),
-              const SizedBox(width: 24),
+              SizedBox(width: 24),
               _StatItem(
                 dot: AppColors.danger,
                 label: 'SPENT',
@@ -280,25 +280,25 @@ class _StatItem extends StatelessWidget {
               height: 7,
               decoration: BoxDecoration(color: dot, shape: BoxShape.circle),
             ),
-            const SizedBox(width: 5),
+            SizedBox(width: 5),
             Text(
               label,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 10,
                 fontWeight: FontWeight.w600,
-                color: AppColors.lightTextSecondary,
+                color: context.textSecondary,
                 letterSpacing: 0.5,
               ),
             ),
           ],
         ),
-        const SizedBox(height: 3),
+        SizedBox(height: 3),
         Text(
           value,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 15,
             fontWeight: FontWeight.w700,
-            color: AppColors.lightTextPrimary,
+            color: context.textPrimary,
           ),
         ),
       ],
@@ -315,10 +315,10 @@ class _LoadingCard extends StatelessWidget {
   Widget build(BuildContext context) => Container(
         height: 160,
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: context.bgSurface,
           borderRadius: BorderRadius.circular(20),
         ),
-        child: const Center(child: CircularProgressIndicator()),
+        child: Center(child: CircularProgressIndicator()),
       );
 }
 
@@ -329,13 +329,13 @@ class _ErrorCard extends StatelessWidget {
   Widget build(BuildContext context) => Container(
         height: 80,
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: context.bgSurface,
           borderRadius: BorderRadius.circular(20),
         ),
-        child: const Center(
+        child: Center(
           child: Text(
             'Could not load savings data',
-            style: TextStyle(color: AppColors.lightTextSecondary),
+            style: TextStyle(color: context.textSecondary),
           ),
         ),
       );

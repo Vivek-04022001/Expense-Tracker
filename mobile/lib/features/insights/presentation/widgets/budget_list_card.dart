@@ -12,7 +12,7 @@ class BudgetListCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.bgSurface,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -25,15 +25,15 @@ class BudgetListCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Budgets',
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w700,
-              color: AppColors.lightTextPrimary,
+              color: context.textPrimary,
             ),
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16),
           ...data.budgets.map((b) => _BudgetRow(item: b)),
         ],
       ),
@@ -63,13 +63,13 @@ class _BudgetRow extends StatelessWidget {
                 height: 10,
                 decoration: BoxDecoration(color: item.color, shape: BoxShape.circle),
               ),
-              const SizedBox(width: 8),
+              SizedBox(width: 8),
               Text(
                 item.category,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
-                  color: AppColors.lightTextPrimary,
+                  color: context.textPrimary,
                 ),
               ),
               const Spacer(),
@@ -81,14 +81,14 @@ class _BudgetRow extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
-                        color: isOver ? AppColors.danger : AppColors.lightTextPrimary,
+                        color: isOver ? AppColors.danger : context.textPrimary,
                       ),
                     ),
                     TextSpan(
                       text: ' / ${_fmtRupee(item.limit)}',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 13,
-                        color: AppColors.lightTextTertiary,
+                        color: context.textTertiary,
                       ),
                     ),
                   ],
@@ -96,13 +96,13 @@ class _BudgetRow extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: 8),
           ClipRRect(
             borderRadius: BorderRadius.circular(4),
             child: LinearProgressIndicator(
               value: ratio,
               minHeight: 5,
-              backgroundColor: AppColors.lightBorderSubtle,
+              backgroundColor: context.borderSubtle,
               valueColor: AlwaysStoppedAnimation<Color>(barColor),
             ),
           ),

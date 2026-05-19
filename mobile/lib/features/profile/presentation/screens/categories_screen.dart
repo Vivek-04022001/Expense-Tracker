@@ -27,12 +27,12 @@ class CategoriesScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.lightBgBase,
+      backgroundColor: context.bgBase,
       appBar: const InnerAppBar(title: 'Categories'),
       body: Container(
         margin: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: context.bgSurface,
           borderRadius: BorderRadius.circular(16),
           boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 10, offset: const Offset(0, 2))],
         ),
@@ -40,7 +40,7 @@ class CategoriesScreen extends StatelessWidget {
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
           itemCount: _cats.length,
-          separatorBuilder: (_, __) => const Divider(height: 1, indent: 64, color: AppColors.lightBorderSubtle),
+          separatorBuilder: (_, __) => Divider(height: 1, indent: 64, color: context.borderSubtle),
           itemBuilder: (_, i) {
             final c = _cats[i];
             return Padding(
@@ -52,9 +52,9 @@ class CategoriesScreen extends StatelessWidget {
                     decoration: BoxDecoration(color: c.color.withValues(alpha: 0.12), shape: BoxShape.circle),
                     child: Center(child: PhosphorIcon(c.icon, size: 18, color: c.color)),
                   ),
-                  const SizedBox(width: 14),
-                  Expanded(child: Text(c.name, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: AppColors.lightTextPrimary))),
-                  PhosphorIcon(PhosphorIcons.caretRight(PhosphorIconsStyle.bold), size: 14, color: AppColors.lightTextTertiary),
+                  SizedBox(width: 14),
+                  Expanded(child: Text(c.name, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: context.textPrimary))),
+                  PhosphorIcon(PhosphorIcons.caretRight(PhosphorIconsStyle.bold), size: 14, color: context.textTertiary),
                 ],
               ),
             );

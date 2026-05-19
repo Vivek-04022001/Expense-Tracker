@@ -10,7 +10,7 @@ class BudgetProgressCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.bgSurface,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -24,14 +24,14 @@ class BudgetProgressCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Header
-          const Row(
+          Row(
             children: [
               Text(
                 'April so far',
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
-                  color: AppColors.lightTextPrimary,
+                  color: context.textPrimary,
                 ),
               ),
               Spacer(),
@@ -39,41 +39,41 @@ class BudgetProgressCard extends StatelessWidget {
                 'Salary · Apr 15',
                 style: TextStyle(
                   fontSize: 12,
-                  color: AppColors.lightTextTertiary,
+                  color: context.textTertiary,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 14),
+          SizedBox(height: 14),
           // Income bar (full, near black)
           _ProgressBar(
             fraction: 1.0,
             color: const Color(0xFF1A1A2E),
           ),
-          const SizedBox(height: 5),
+          SizedBox(height: 5),
           // Savings bar (66%, green)
           _ProgressBar(
             fraction: 0.66,
             color: AppColors.accent500,
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16),
           // Metrics row
-          const Row(
+          Row(
             children: [
               Expanded(
                 child: _Metric(
                   dot: Color(0xFF1A1A2E),
                   label: 'INCOME',
                   value: '₹1,25,000',
-                  valueColor: AppColors.lightTextPrimary,
+                  valueColor: context.textPrimary,
                 ),
               ),
               Expanded(
                 child: _Metric(
-                  dot: AppColors.lightTextSecondary,
+                  dot: context.textSecondary,
                   label: 'SPENT',
                   value: '₹42,380',
-                  valueColor: AppColors.lightTextPrimary,
+                  valueColor: context.textPrimary,
                 ),
               ),
               Expanded(
@@ -108,7 +108,7 @@ class _ProgressBar extends StatelessWidget {
             width: constraints.maxWidth,
             height: 6,
             decoration: BoxDecoration(
-              color: AppColors.lightBorderSubtle,
+              color: context.borderSubtle,
               borderRadius: BorderRadius.circular(3),
             ),
           ),
@@ -153,19 +153,19 @@ class _Metric extends StatelessWidget {
               height: 7,
               decoration: BoxDecoration(shape: BoxShape.circle, color: dot),
             ),
-            const SizedBox(width: 4),
+            SizedBox(width: 4),
             Text(
               label,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 10,
                 fontWeight: FontWeight.w600,
-                color: AppColors.lightTextTertiary,
+                color: context.textTertiary,
                 letterSpacing: 0.3,
               ),
             ),
           ],
         ),
-        const SizedBox(height: 3),
+        SizedBox(height: 3),
         Text(
           value,
           style: TextStyle(
@@ -175,12 +175,12 @@ class _Metric extends StatelessWidget {
           ),
         ),
         if (subtitle != null) ...[
-          const SizedBox(height: 1),
+          SizedBox(height: 1),
           Text(
             subtitle!,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 10,
-              color: AppColors.lightTextTertiary,
+              color: context.textTertiary,
             ),
           ),
         ],

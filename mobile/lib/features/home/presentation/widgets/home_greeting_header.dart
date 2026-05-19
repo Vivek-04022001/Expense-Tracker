@@ -26,19 +26,19 @@ class HomeGreetingHeader extends StatelessWidget {
             children: [
               Text(
                 DateFormat('EEEE, d MMM').format(DateTime.now()),
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 13,
-                  color: AppColors.lightTextSecondary,
+                  color: context.textSecondary,
                   fontWeight: FontWeight.w400,
                 ),
               ),
-              const SizedBox(height: 2),
+              SizedBox(height: 2),
               Text(
                 '$_greeting, $name',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.lightTextPrimary,
+                  color: context.textPrimary,
                 ),
               ),
             ],
@@ -50,7 +50,7 @@ class HomeGreetingHeader extends StatelessWidget {
             width: 38,
             height: 38,
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: context.bgSurface,
               shape: BoxShape.circle,
               boxShadow: [
                 BoxShadow(
@@ -64,7 +64,7 @@ class HomeGreetingHeader extends StatelessWidget {
               child: PhosphorIcon(
                 PhosphorIcons.bell(),
                 size: 20,
-                color: AppColors.lightTextPrimary,
+                color: context.textPrimary,
               ),
             ),
           ),

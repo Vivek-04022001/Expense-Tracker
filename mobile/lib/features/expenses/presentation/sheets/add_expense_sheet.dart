@@ -174,8 +174,8 @@ class _AddExpenseSheetState extends ConsumerState<AddExpenseSheet> {
     final canSave = result != null && result > 0 && !_saving;
 
     return Container(
-      decoration: const BoxDecoration(
-        color: Colors.white,
+      decoration: BoxDecoration(
+        color: context.bgSurface,
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       padding: EdgeInsets.only(
@@ -188,7 +188,7 @@ class _AddExpenseSheetState extends ConsumerState<AddExpenseSheet> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const SizedBox(height: 10),
+                SizedBox(height: 10),
                 Container(
                   width: 36,
                   height: 4,
@@ -197,18 +197,18 @@ class _AddExpenseSheetState extends ConsumerState<AddExpenseSheet> {
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
-                const SizedBox(height: 14),
+                SizedBox(height: 14),
                 // Header
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: Row(
                     children: [
-                      const Text(
+                      Text(
                         'Add expense',
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w700,
-                          color: AppColors.lightTextPrimary,
+                          color: context.textPrimary,
                         ),
                       ),
                       const Spacer(),
@@ -217,21 +217,21 @@ class _AddExpenseSheetState extends ConsumerState<AddExpenseSheet> {
                         child: Container(
                           width: 30,
                           height: 30,
-                          decoration: const BoxDecoration(
-                            color: Color(0xFFF3F4F6),
+                          decoration: BoxDecoration(
+                            color: context.bgSubtle,
                             shape: BoxShape.circle,
                           ),
-                          child: const Icon(
+                          child: Icon(
                             Icons.close,
                             size: 16,
-                            color: AppColors.lightTextSecondary,
+                            color: context.textSecondary,
                           ),
                         ),
                       ),
                     ],
                   ),
                 ),
-                const SizedBox(height: 24),
+                SizedBox(height: 24),
                 // Amount / expression display
                 _AmountDisplay(
                   expr: _expr,
@@ -239,7 +239,7 @@ class _AddExpenseSheetState extends ConsumerState<AddExpenseSheet> {
                   hasFullExpression: _hasFullExpression,
                   fmtNum: _fmtNum,
                 ),
-                const SizedBox(height: 16),
+                SizedBox(height: 16),
                 // Category chips
                 SizedBox(
                   height: 36,
@@ -247,7 +247,7 @@ class _AddExpenseSheetState extends ConsumerState<AddExpenseSheet> {
                     padding: const EdgeInsets.symmetric(horizontal: 20),
                     scrollDirection: Axis.horizontal,
                     itemCount: ExpenseCategory.values.length,
-                    separatorBuilder: (_, __) => const SizedBox(width: 8),
+                    separatorBuilder: (_, __) => SizedBox(width: 8),
                     itemBuilder: (_, i) {
                       final cat = ExpenseCategory.values[i];
                       final color = CategoryMapper.color(cat);
@@ -268,7 +268,7 @@ class _AddExpenseSheetState extends ConsumerState<AddExpenseSheet> {
                             border: Border.all(
                               color: selected
                                   ? color
-                                  : AppColors.lightBorderSubtle,
+                                  : context.borderSubtle,
                             ),
                           ),
                           child: Row(
@@ -282,7 +282,7 @@ class _AddExpenseSheetState extends ConsumerState<AddExpenseSheet> {
                                   color: color,
                                 ),
                               ),
-                              const SizedBox(width: 6),
+                              SizedBox(width: 6),
                               Text(
                                 CategoryMapper.label(cat),
                                 style: TextStyle(
@@ -290,7 +290,7 @@ class _AddExpenseSheetState extends ConsumerState<AddExpenseSheet> {
                                   fontWeight: FontWeight.w500,
                                   color: selected
                                       ? color
-                                      : AppColors.lightTextPrimary,
+                                      : context.textPrimary,
                                 ),
                               ),
                             ],
@@ -300,13 +300,13 @@ class _AddExpenseSheetState extends ConsumerState<AddExpenseSheet> {
                     },
                   ),
                 ),
-                const SizedBox(height: 12),
+                SizedBox(height: 12),
                 // Merchant + Date
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: Container(
                     decoration: BoxDecoration(
-                      border: Border.all(color: AppColors.lightBorderSubtle),
+                      border: Border.all(color: context.borderSubtle),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Row(
@@ -314,14 +314,14 @@ class _AddExpenseSheetState extends ConsumerState<AddExpenseSheet> {
                         Expanded(
                           child: TextField(
                             controller: _merchantCtrl,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 14,
-                              color: AppColors.lightTextPrimary,
+                              color: context.textPrimary,
                             ),
-                            decoration: const InputDecoration(
+                            decoration: InputDecoration(
                               hintText: 'Merchant / Note',
                               hintStyle: TextStyle(
-                                color: AppColors.lightTextTertiary,
+                                color: context.textTertiary,
                                 fontSize: 14,
                               ),
                               border: InputBorder.none,
@@ -336,7 +336,7 @@ class _AddExpenseSheetState extends ConsumerState<AddExpenseSheet> {
                         Container(
                           width: 1,
                           height: 36,
-                          color: AppColors.lightBorderSubtle,
+                          color: context.borderSubtle,
                         ),
                         GestureDetector(
                           onTap: _pickDate,
@@ -349,16 +349,16 @@ class _AddExpenseSheetState extends ConsumerState<AddExpenseSheet> {
                                 PhosphorIcon(
                                   PhosphorIcons.calendarBlank(),
                                   size: 15,
-                                  color: AppColors.lightTextSecondary,
+                                  color: context.textSecondary,
                                 ),
-                                const SizedBox(width: 6),
+                                SizedBox(width: 6),
                                 Text(
                                   _isToday
                                       ? 'Today'
                                       : DateFormat('MMM d').format(_date),
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontSize: 14,
-                                    color: AppColors.lightTextPrimary,
+                                    color: context.textPrimary,
                                   ),
                                 ),
                               ],
@@ -369,14 +369,14 @@ class _AddExpenseSheetState extends ConsumerState<AddExpenseSheet> {
                     ),
                   ),
                 ),
-                const SizedBox(height: 10),
+                SizedBox(height: 10),
                 // Payment method
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: Container(
                     padding: const EdgeInsets.all(3),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFF3F4F6),
+                      color: context.bgSubtle,
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Row(
@@ -392,7 +392,7 @@ class _AddExpenseSheetState extends ConsumerState<AddExpenseSheet> {
                     ),
                   ),
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: 8),
                 // Calculator numpad
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -418,7 +418,7 @@ class _AddExpenseSheetState extends ConsumerState<AddExpenseSheet> {
                         elevation: 0,
                       ),
                       child: _saving
-                          ? const SizedBox(
+                          ? SizedBox(
                               width: 22,
                               height: 22,
                               child: CircularProgressIndicator(
@@ -430,7 +430,7 @@ class _AddExpenseSheetState extends ConsumerState<AddExpenseSheet> {
                               _hasFullExpression && result != null
                                   ? 'Save ₹${_fmtNum(result)}'
                                   : 'Save expense',
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w600,
                               ),
@@ -474,7 +474,7 @@ class _AmountDisplay extends StatelessWidget {
     final isEmpty = expr.isEmpty;
     final displayText = isEmpty ? '0' : expr;
     final textColor =
-        isEmpty ? AppColors.lightTextTertiary : AppColors.lightTextPrimary;
+        isEmpty ? context.textTertiary : context.textPrimary;
 
     return Column(
       children: [
@@ -502,25 +502,25 @@ class _AmountDisplay extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: 6),
+        SizedBox(height: 6),
         AnimatedSwitcher(
           duration: const Duration(milliseconds: 200),
           child: hasFullExpression && result != null
               ? Text(
                   '= ₹${fmtNum(result!)}',
                   key: const ValueKey('result'),
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 14,
-                    color: AppColors.lightTextSecondary,
+                    color: context.textSecondary,
                     fontWeight: FontWeight.w500,
                   ),
                 )
               : Text(
                   isEmpty ? 'Enter an amount' : '',
                   key: const ValueKey('hint'),
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 13,
-                    color: AppColors.lightTextTertiary,
+                    color: context.textTertiary,
                   ),
                 ),
         ),
@@ -565,19 +565,19 @@ class _SuccessOverlay extends StatelessWidget {
                   color: Colors.white.withValues(alpha: 0.2),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(Icons.check, color: Colors.white, size: 36),
+                child: Icon(Icons.check, color: Colors.white, size: 36),
               ),
-              const SizedBox(height: 20),
+              SizedBox(height: 20),
               Text(
                 '₹$amount',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 48,
                   fontWeight: FontWeight.w800,
                   color: Colors.white,
                   height: 1,
                 ),
               ),
-              const SizedBox(height: 8),
+              SizedBox(height: 8),
               Text(
                 label,
                 style: TextStyle(
@@ -628,7 +628,7 @@ class _PaymentTab extends StatelessWidget {
                     selected ? FontWeight.w600 : FontWeight.w400,
                 color: selected
                     ? Colors.white
-                    : AppColors.lightTextSecondary,
+                    : context.textSecondary,
               ),
             ),
           ),

@@ -18,7 +18,7 @@ class BudgetsScreen extends ConsumerWidget {
     final spentAsync = ref.watch(spentForBudgetMonthProvider(selectedMonth));
 
     return Scaffold(
-      backgroundColor: AppColors.lightBgBase,
+      backgroundColor: context.bgBase,
       body: SafeArea(
         child: Column(
           children: [
@@ -49,11 +49,11 @@ class BudgetsScreen extends ConsumerWidget {
             Expanded(
               child: budgetsAsync.when(
                 loading: () =>
-                    const Center(child: CircularProgressIndicator()),
+                    Center(child: CircularProgressIndicator()),
                 error: (e, _) => Center(
                   child: Text(
                     'Could not load budgets',
-                    style: const TextStyle(color: AppColors.lightTextSecondary),
+                    style: TextStyle(color: context.textSecondary),
                   ),
                 ),
                 data: (budgets) {
@@ -66,7 +66,7 @@ class BudgetsScreen extends ConsumerWidget {
                   return ListView.separated(
                     padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
                     itemCount: budgets.length,
-                    separatorBuilder: (_, __) => const SizedBox(height: 12),
+                    separatorBuilder: (_, __) => SizedBox(height: 12),
                     itemBuilder: (_, i) => _BudgetCard(
                       budget: budgets[i],
                       spent: spent[budgets[i].category] ?? 0,
@@ -106,23 +106,23 @@ class BudgetsScreen extends ConsumerWidget {
       context: context,
       builder: (_) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text(
+        title: Text(
           'Delete budget?',
           style: TextStyle(fontWeight: FontWeight.w700, fontSize: 17),
         ),
         content: Text(
           'Remove the ${CategoryMapper.label(budget.category)} budget of ₹${_fmtNum(budget.limitAmount.round())}?',
-          style: const TextStyle(
-            color: AppColors.lightTextSecondary,
+          style: TextStyle(
+            color: context.textSecondary,
             fontSize: 14,
           ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text(
+            child: Text(
               'Cancel',
-              style: TextStyle(color: AppColors.lightTextSecondary),
+              style: TextStyle(color: context.textSecondary),
             ),
           ),
           TextButton(
@@ -132,7 +132,7 @@ class BudgetsScreen extends ConsumerWidget {
                   .read(budgetListNotifierProvider.notifier)
                   .delete(budget.id);
             },
-            child: const Text(
+            child: Text(
               'Delete',
               style: TextStyle(
                 color: AppColors.danger,
@@ -174,12 +174,12 @@ class _Header extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
       child: Row(
         children: [
-          const Text(
+          Text(
             'Budgets',
             style: TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.w700,
-              color: AppColors.lightTextPrimary,
+              color: context.textPrimary,
             ),
           ),
           const Spacer(),
@@ -188,7 +188,7 @@ class _Header extends StatelessWidget {
             icon: PhosphorIcons.caretLeft(PhosphorIconsStyle.bold),
             onTap: onPrev,
           ),
-          const SizedBox(width: 6),
+          SizedBox(width: 6),
           GestureDetector(
             onTap: isCurrentMonth ? null : onReset,
             child: Text(
@@ -197,17 +197,17 @@ class _Header extends StatelessWidget {
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
                 color: isCurrentMonth
-                    ? AppColors.lightTextPrimary
+                    ? context.textPrimary
                     : AppColors.primary500,
               ),
             ),
           ),
-          const SizedBox(width: 6),
+          SizedBox(width: 6),
           _MonthNavBtn(
             icon: PhosphorIcons.caretRight(PhosphorIconsStyle.bold),
             onTap: onNext,
           ),
-          const SizedBox(width: 12),
+          SizedBox(width: 12),
           // Add button
           GestureDetector(
             onTap: onAdd,
@@ -218,7 +218,7 @@ class _Header extends StatelessWidget {
                 color: AppColors.primary500,
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: const Icon(Icons.add, color: Colors.white, size: 20),
+              child: Icon(Icons.add, color: Colors.white, size: 20),
             ),
           ),
         ],
@@ -240,12 +240,12 @@ class _MonthNavBtn extends StatelessWidget {
         width: 28,
         height: 28,
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: context.bgSurface,
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: AppColors.lightBorderSubtle),
+          border: Border.all(color: context.borderSubtle),
         ),
         child: Center(
-          child: PhosphorIcon(icon, size: 14, color: AppColors.lightTextSecondary),
+          child: PhosphorIcon(icon, size: 14, color: context.textSecondary),
         ),
       ),
     );
@@ -287,7 +287,7 @@ class _BudgetCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: context.bgSurface,
           borderRadius: BorderRadius.circular(16),
           border: isOver
               ? Border.all(color: AppColors.danger.withValues(alpha: 0.3))
@@ -321,24 +321,24 @@ class _BudgetCard extends StatelessWidget {
                     ),
                   ),
                 ),
-                const SizedBox(width: 12),
+                SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         CategoryMapper.label(budget.category),
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.w600,
-                          color: AppColors.lightTextPrimary,
+                          color: context.textPrimary,
                         ),
                       ),
                       Text(
                         'Limit: ₹${_fmtNum(limit.round())}',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 12,
-                          color: AppColors.lightTextSecondary,
+                          color: context.textSecondary,
                         ),
                       ),
                     ],
@@ -352,7 +352,7 @@ class _BudgetCard extends StatelessWidget {
                       color: AppColors.danger.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(20),
                     ),
-                    child: const Text(
+                    child: Text(
                       'Over budget',
                       style: TextStyle(
                         fontSize: 11,
@@ -361,21 +361,21 @@ class _BudgetCard extends StatelessWidget {
                       ),
                     ),
                   ),
-                const SizedBox(width: 8),
+                SizedBox(width: 8),
                 GestureDetector(
                   onTap: onDelete,
-                  child: const Padding(
+                  child: Padding(
                     padding: EdgeInsets.all(4),
                     child: PhosphorIcon(
                       PhosphorIconsRegular.trash,
                       size: 16,
-                      color: AppColors.lightTextTertiary,
+                      color: context.textTertiary,
                     ),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 14),
+            SizedBox(height: 14),
             // Progress bar
             ClipRRect(
               borderRadius: BorderRadius.circular(4),
@@ -388,15 +388,15 @@ class _BudgetCard extends StatelessWidget {
                 ),
               ),
             ),
-            const SizedBox(height: 10),
+            SizedBox(height: 10),
             Row(
               children: [
                 Text(
                   '₹${_fmtNum(spent.round())} spent',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w500,
-                    color: AppColors.lightTextPrimary,
+                    color: context.textPrimary,
                   ),
                 ),
                 const Spacer(),
@@ -407,7 +407,7 @@ class _BudgetCard extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w500,
-                    color: isOver ? AppColors.danger : AppColors.lightTextSecondary,
+                    color: isOver ? AppColors.danger : context.textSecondary,
                   ),
                 ),
               ],
@@ -440,7 +440,7 @@ class _EmptyState extends StatelessWidget {
                 color: AppColors.primary100,
                 shape: BoxShape.circle,
               ),
-              child: const Center(
+              child: Center(
                 child: PhosphorIcon(
                   PhosphorIconsRegular.piggyBank,
                   size: 32,
@@ -448,26 +448,26 @@ class _EmptyState extends StatelessWidget {
                 ),
               ),
             ),
-            const SizedBox(height: 16),
-            const Text(
+            SizedBox(height: 16),
+            Text(
               'No budgets yet',
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
-                color: AppColors.lightTextPrimary,
+                color: context.textPrimary,
               ),
             ),
-            const SizedBox(height: 8),
-            const Text(
+            SizedBox(height: 8),
+            Text(
               'Set monthly limits per category to track your spending.',
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 14,
-                color: AppColors.lightTextSecondary,
+                color: context.textSecondary,
                 height: 1.4,
               ),
             ),
-            const SizedBox(height: 24),
+            SizedBox(height: 24),
             ElevatedButton(
               onPressed: onAdd,
               style: ElevatedButton.styleFrom(
@@ -480,7 +480,7 @@ class _EmptyState extends StatelessWidget {
                 ),
                 elevation: 0,
               ),
-              child: const Text(
+              child: Text(
                 'Set a budget',
                 style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
               ),

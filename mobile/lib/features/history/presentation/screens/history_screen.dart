@@ -175,7 +175,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen>
     final nextDt = DateTime(_month.year, _month.month + 1);
 
     return Scaffold(
-      backgroundColor: AppColors.lightBgBase,
+      backgroundColor: context.bgBase,
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -183,12 +183,12 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen>
             // ── Header ──────────────────────────────────────────────────────
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
-              child: const Text(
+              child: Text(
                 'Statistics',
                 style: TextStyle(
                   fontSize: 26,
                   fontWeight: FontWeight.w800,
-                  color: AppColors.lightTextPrimary,
+                  color: context.textPrimary,
                   letterSpacing: -0.5,
                 ),
               )
@@ -196,7 +196,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen>
                   .fadeIn(duration: 300.ms)
                   .slideY(begin: -0.15, curve: Curves.easeOut),
             ),
-            const SizedBox(height: 20),
+            SizedBox(height: 20),
             // ── Scrollable body ─────────────────────────────────────────────
             Expanded(
               child: SingleChildScrollView(
@@ -208,13 +208,13 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen>
                       margin: const EdgeInsets.symmetric(horizontal: 20),
                       padding: const EdgeInsets.all(3),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFF3F4F6),
+                        color: context.bgSubtle,
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: TabBar(
                         controller: _tabController,
                         indicator: BoxDecoration(
-                          color: Colors.white,
+                          color: context.bgSurface,
                           borderRadius: BorderRadius.circular(7),
                           boxShadow: [
                             BoxShadow(
@@ -226,13 +226,13 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen>
                         ),
                         indicatorSize: TabBarIndicatorSize.tab,
                         dividerColor: Colors.transparent,
-                        labelColor: AppColors.lightTextPrimary,
-                        unselectedLabelColor: AppColors.lightTextSecondary,
-                        labelStyle: const TextStyle(
+                        labelColor: context.textPrimary,
+                        unselectedLabelColor: context.textSecondary,
+                        labelStyle: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
                         ),
-                        unselectedLabelStyle: const TextStyle(
+                        unselectedLabelStyle: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w400,
                         ),
@@ -245,7 +245,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen>
                         .animate()
                         .fadeIn(duration: 350.ms, delay: 60.ms)
                         .slideY(begin: 0.12, curve: Curves.easeOut),
-                    const SizedBox(height: 16),
+                    SizedBox(height: 16),
                     // Period pills
                     _PeriodPills(
                       selected: _periodIdx,
@@ -254,7 +254,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen>
                         .animate()
                         .fadeIn(duration: 350.ms, delay: 120.ms)
                         .slideY(begin: 0.12, curve: Curves.easeOut),
-                    const SizedBox(height: 20),
+                    SizedBox(height: 20),
                     // Month navigator
                     _MonthNav(
                       prev: prevDt,
@@ -267,7 +267,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen>
                         .animate()
                         .fadeIn(duration: 350.ms, delay: 160.ms)
                         .slideY(begin: 0.12, curve: Curves.easeOut),
-                    const SizedBox(height: 28),
+                    SizedBox(height: 28),
                     // Ring chart + legend — key triggers re-animation on
                     // tab switch or month change
                     Column(
@@ -286,7 +286,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen>
                               duration: 500.ms,
                               curve: Curves.easeOutBack,
                             ),
-                        const SizedBox(height: 28),
+                        SizedBox(height: 28),
                         if (slices.isNotEmpty)
                           Padding(
                             padding:
@@ -295,7 +295,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen>
                           ),
                       ],
                     ),
-                    const SizedBox(height: 32),
+                    SizedBox(height: 32),
                     // History button
                     _HistoryButton(onTap: () => context.push('/expenses'))
                         .animate()
@@ -338,7 +338,7 @@ class _PeriodPills extends StatelessWidget {
               borderRadius: BorderRadius.circular(20),
               border: active
                   ? null
-                  : Border.all(color: AppColors.lightBorderSubtle),
+                  : Border.all(color: context.borderSubtle),
             ),
             child: Text(
               _labels[i],
@@ -347,7 +347,7 @@ class _PeriodPills extends StatelessWidget {
                 fontWeight: active ? FontWeight.w600 : FontWeight.w400,
                 color: active
                     ? Colors.white
-                    : AppColors.lightTextSecondary,
+                    : context.textSecondary,
               ),
             ),
           ),
@@ -384,13 +384,13 @@ class _MonthNav extends StatelessWidget {
           onTap: onPrev,
           child: Text(
             _fmt(prev),
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 15,
-              color: AppColors.lightTextTertiary,
+              color: context.textTertiary,
             ),
           ),
         ),
-        const SizedBox(width: 24),
+        SizedBox(width: 24),
         AnimatedSwitcher(
           duration: const Duration(milliseconds: 300),
           transitionBuilder: (child, anim) => FadeTransition(
@@ -408,14 +408,14 @@ class _MonthNav extends StatelessWidget {
           child: Text(
             _fmt(current),
             key: ValueKey(_fmt(current)),
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.w700,
-              color: AppColors.lightTextPrimary,
+              color: context.textPrimary,
             ),
           ),
         ),
-        const SizedBox(width: 24),
+        SizedBox(width: 24),
         GestureDetector(
           onTap: canGoNext ? onNext : null,
           child: Text(
@@ -423,8 +423,8 @@ class _MonthNav extends StatelessWidget {
             style: TextStyle(
               fontSize: 15,
               color: canGoNext
-                  ? AppColors.lightTextTertiary
-                  : AppColors.lightTextTertiary.withValues(alpha: 0.3),
+                  ? context.textTertiary
+                  : context.textTertiary.withValues(alpha: 0.3),
             ),
           ),
         ),
@@ -449,14 +449,14 @@ class _RingChart extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (slices.isEmpty) {
-      return const SizedBox(
+      return SizedBox(
         height: 260,
         child: Center(
           child: Text(
             'No data for this period',
             style: TextStyle(
               fontSize: 14,
-              color: AppColors.lightTextTertiary,
+              color: context.textTertiary,
             ),
           ),
         ),
@@ -483,7 +483,7 @@ class _RingChart extends StatelessWidget {
                   radius: 56,
                   title: '',
                   borderSide: s.isOverBudget
-                      ? const BorderSide(
+                      ? BorderSide(
                           color: AppColors.danger,
                           width: 2,
                         )
@@ -505,19 +505,19 @@ class _RingChart extends StatelessWidget {
             children: [
               Text(
                 fmtCompact(total),
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.w800,
-                  color: AppColors.lightTextPrimary,
+                  color: context.textPrimary,
                   height: 1,
                 ),
               ),
-              const SizedBox(height: 4),
-              const Text(
+              SizedBox(height: 4),
+              Text(
                 'Total',
                 style: TextStyle(
                   fontSize: 12,
-                  color: AppColors.lightTextTertiary,
+                  color: context.textTertiary,
                 ),
               ),
             ],
@@ -548,7 +548,7 @@ class _SegmentBadge extends StatelessWidget {
       children: [
         Text(
           '$pct%',
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.w700,
             color: Colors.white,
@@ -556,7 +556,7 @@ class _SegmentBadge extends StatelessWidget {
           ),
         ),
         if (budgetPct != null) ...[
-          const SizedBox(height: 2),
+          SizedBox(height: 2),
           Container(
             padding: const EdgeInsets.symmetric(
               horizontal: 5,
@@ -570,7 +570,7 @@ class _SegmentBadge extends StatelessWidget {
             ),
             child: Text(
               '$budgetPct%',
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 9,
                 fontWeight: FontWeight.w700,
                 color: Colors.white,
@@ -617,7 +617,7 @@ class _LegendGrid extends StatelessWidget {
             ),
           ),
         ),
-        const SizedBox(width: 12),
+        SizedBox(width: 12),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -664,7 +664,7 @@ class _LegendItem extends StatelessWidget {
               ),
             ),
           ),
-          const SizedBox(width: 8),
+          SizedBox(width: 8),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -674,26 +674,26 @@ class _LegendItem extends StatelessWidget {
                     Expanded(
                       child: Text(
                         slice.label,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 12,
-                          color: AppColors.lightTextSecondary,
+                          color: context.textSecondary,
                         ),
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                    const SizedBox(width: 6),
+                    SizedBox(width: 6),
                     Text(
                       _fmtLegendAmt(slice.amount),
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
-                        color: AppColors.lightTextPrimary,
+                        color: context.textPrimary,
                       ),
                     ),
                   ],
                 ),
                 if (slice.hasBudget) ...[
-                  const SizedBox(height: 2),
+                  SizedBox(height: 2),
                   Text(
                     'of ${_fmtLegendAmt(slice.budget!)} · ${slice.budgetPct}%',
                     style: TextStyle(
@@ -701,7 +701,7 @@ class _LegendItem extends StatelessWidget {
                       fontWeight: FontWeight.w500,
                       color: slice.isOverBudget
                           ? AppColors.danger
-                          : AppColors.lightTextTertiary,
+                          : context.textTertiary,
                     ),
                   ),
                 ],
@@ -735,15 +735,15 @@ class _HistoryButton extends StatelessWidget {
             const EdgeInsets.symmetric(horizontal: 44, vertical: 14),
         decoration: BoxDecoration(
           border:
-              Border.all(color: AppColors.lightBorderSubtle, width: 1.5),
+              Border.all(color: context.borderSubtle, width: 1.5),
           borderRadius: BorderRadius.circular(40),
         ),
-        child: const Text(
+        child: Text(
           'View history',
           style: TextStyle(
             fontSize: 15,
             fontWeight: FontWeight.w600,
-            color: AppColors.lightTextPrimary,
+            color: context.textPrimary,
             letterSpacing: 0.2,
           ),
         ),

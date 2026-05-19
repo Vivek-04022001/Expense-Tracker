@@ -42,7 +42,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: context.bgSurface,
       body: SafeArea(
         child: Column(
           children: [
@@ -50,10 +50,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               alignment: Alignment.centerRight,
               child: TextButton(
                 onPressed: _finish,
-                child: const Text(
+                child: Text(
                   'Skip',
                   style: TextStyle(
-                    color: AppColors.lightTextSecondary,
+                    color: context.textSecondary,
                     fontSize: 16,
                   ),
                 ),
@@ -74,7 +74,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: List.generate(3, (i) => _Dot(active: i == _page)),
             ),
-            const SizedBox(height: 28),
+            SizedBox(height: 28),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: SizedBox(
@@ -92,7 +92,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   ),
                   child: Text(
                     _page < 2 ? 'Next' : 'Get started',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 17,
                       fontWeight: FontWeight.w600,
                     ),
@@ -100,7 +100,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 ),
               ),
             ),
-            const SizedBox(height: 36),
+            SizedBox(height: 36),
           ],
         ),
       ),
@@ -144,19 +144,19 @@ class _PageContent extends StatelessWidget {
               children: [
                 Text(
                   _titles[index],
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 30,
                     fontWeight: FontWeight.w800,
                     height: 1.2,
-                    color: AppColors.lightTextPrimary,
+                    color: context.textPrimary,
                   ),
                 ),
-                const SizedBox(height: 14),
+                SizedBox(height: 14),
                 Text(
                   _subtitles[index],
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 16,
-                    color: AppColors.lightTextSecondary,
+                    color: context.textSecondary,
                     height: 1.55,
                   ),
                 ),
@@ -205,7 +205,7 @@ class _SmsIllustration extends StatelessWidget {
           Container(
             width: 240,
             height: 240,
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: Color(0xFFF0F3FF),
             ),
@@ -226,24 +226,24 @@ class _SmsIllustration extends StatelessWidget {
                       Container(
                         width: 9,
                         height: 9,
-                        decoration: const BoxDecoration(
+                        decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           color: Color(0xFFFF4D6A),
                         ),
                       ),
-                      const SizedBox(width: 6),
+                      SizedBox(width: 6),
                       _Bar(width: 56, color: Colors.white54, height: 6),
                     ],
                   ),
-                  const SizedBox(height: 10),
+                  SizedBox(height: 10),
                   _Bar(width: 88, color: Colors.white38, height: 7),
-                  const SizedBox(height: 5),
+                  SizedBox(height: 5),
                   _Bar(width: 66, color: Colors.white24, height: 7),
-                  const SizedBox(height: 5),
+                  SizedBox(height: 5),
                   _Bar(width: 78, color: Colors.white38, height: 7),
-                  const SizedBox(height: 5),
+                  SizedBox(height: 5),
                   _Bar(width: 52, color: Colors.white24, height: 7),
-                  const SizedBox(height: 5),
+                  SizedBox(height: 5),
                   _Bar(width: 70, color: Colors.white38, height: 7),
                 ],
               ),
@@ -267,8 +267,8 @@ class _SmsIllustration extends StatelessWidget {
                     ),
                   ),
                 ),
-                const SizedBox(width: 2),
-                const Icon(
+                SizedBox(width: 2),
+                Icon(
                   Icons.arrow_forward_rounded,
                   size: 14,
                   color: AppColors.primary500,
@@ -297,7 +297,7 @@ class _SmsIllustration extends StatelessWidget {
                       color: AppColors.primary500,
                       borderRadius: BorderRadius.circular(5),
                     ),
-                    child: const Text(
+                    child: Text(
                       'AUTO',
                       style: TextStyle(
                         color: Colors.white,
@@ -307,23 +307,23 @@ class _SmsIllustration extends StatelessWidget {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 10),
+                  SizedBox(height: 10),
                   _Bar(width: 88, color: Colors.black12, height: 7),
-                  const SizedBox(height: 5),
+                  SizedBox(height: 5),
                   _Bar(
                     width: 52,
                     color: AppColors.categoryFood.withOpacity(0.45),
                     height: 7,
                   ),
-                  const SizedBox(height: 5),
+                  SizedBox(height: 5),
                   _Bar(width: 72, color: Colors.black12, height: 7),
-                  const SizedBox(height: 5),
+                  SizedBox(height: 5),
                   _Bar(
                     width: 60,
                     color: AppColors.primary500.withOpacity(0.35),
                     height: 7,
                   ),
-                  const SizedBox(height: 5),
+                  SizedBox(height: 5),
                   _Bar(
                     width: 80,
                     color: AppColors.categoryTransport.withOpacity(0.35),
@@ -372,7 +372,7 @@ class _AutoImportIllustration extends StatelessWidget {
           Container(
             width: 220,
             height: 220,
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: Color(0xFFF2EFFE),
             ),
@@ -390,7 +390,7 @@ class _AutoImportIllustration extends StatelessWidget {
           Container(
             width: 58,
             height: 58,
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: AppColors.primary500,
             ),
@@ -471,7 +471,7 @@ class _BudgetIllustration extends StatelessWidget {
                   ],
                 ),
               ),
-              const Column(
+              Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
@@ -479,7 +479,7 @@ class _BudgetIllustration extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 28,
                       fontWeight: FontWeight.w800,
-                      color: AppColors.lightTextPrimary,
+                      color: context.textPrimary,
                       height: 1,
                     ),
                   ),
@@ -488,7 +488,7 @@ class _BudgetIllustration extends StatelessWidget {
                     'of ₹60,000',
                     style: TextStyle(
                       fontSize: 12,
-                      color: AppColors.lightTextSecondary,
+                      color: context.textSecondary,
                     ),
                   ),
                 ],
@@ -511,13 +511,13 @@ class _BudgetIllustration extends StatelessWidget {
                       Container(
                         width: 6,
                         height: 6,
-                        decoration: const BoxDecoration(
+                        decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           color: AppColors.accent500,
                         ),
                       ),
-                      const SizedBox(width: 4),
-                      const Text(
+                      SizedBox(width: 4),
+                      Text(
                         'On track',
                         style: TextStyle(
                           fontSize: 11,
@@ -532,7 +532,7 @@ class _BudgetIllustration extends StatelessWidget {
             ],
           ),
         ),
-        const SizedBox(height: 20),
+        SizedBox(height: 20),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: const [
@@ -640,7 +640,7 @@ class _TxCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.bgSurface,
         borderRadius: BorderRadius.circular(10),
         boxShadow: [
           BoxShadow(
@@ -658,13 +658,13 @@ class _TxCard extends StatelessWidget {
             height: 8,
             decoration: BoxDecoration(shape: BoxShape.circle, color: color),
           ),
-          const SizedBox(width: 6),
+          SizedBox(width: 6),
           Text(
             amount,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w600,
-              color: AppColors.lightTextPrimary,
+              color: context.textPrimary,
             ),
           ),
         ],
@@ -689,12 +689,12 @@ class _Legend extends StatelessWidget {
           height: 8,
           decoration: BoxDecoration(shape: BoxShape.circle, color: color),
         ),
-        const SizedBox(width: 5),
+        SizedBox(width: 5),
         Text(
           label,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 12,
-            color: AppColors.lightTextSecondary,
+            color: context.textSecondary,
           ),
         ),
       ],

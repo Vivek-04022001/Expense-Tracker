@@ -12,7 +12,7 @@ class TopMerchantsCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.bgSurface,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -25,22 +25,22 @@ class TopMerchantsCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Top merchants',
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w700,
-              color: AppColors.lightTextPrimary,
+              color: context.textPrimary,
             ),
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16),
           ListView.separated(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             itemCount: data.merchants.length,
-            separatorBuilder: (_, __) => const Divider(
+            separatorBuilder: (_, __) => Divider(
               height: 1,
-              color: AppColors.lightBorderSubtle,
+              color: context.borderSubtle,
             ),
             itemBuilder: (_, i) => _MerchantRow(item: data.merchants[i]),
           ),
@@ -64,40 +64,40 @@ class _MerchantRow extends StatelessWidget {
             width: 36,
             height: 36,
             decoration: BoxDecoration(
-              color: AppColors.lightBgBase,
+              color: context.bgBase,
               borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: AppColors.lightBorderSubtle),
+              border: Border.all(color: context.borderSubtle),
             ),
             child: Center(
               child: Text(
                 item.name[0].toUpperCase(),
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.lightTextSecondary,
+                  color: context.textSecondary,
                 ),
               ),
             ),
           ),
-          const SizedBox(width: 12),
+          SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   item.name,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
-                    color: AppColors.lightTextPrimary,
+                    color: context.textPrimary,
                   ),
                 ),
-                const SizedBox(height: 2),
+                SizedBox(height: 2),
                 Text(
                   '${item.txCount} transaction${item.txCount == 1 ? '' : 's'}',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 12,
-                    color: AppColors.lightTextTertiary,
+                    color: context.textTertiary,
                   ),
                 ),
               ],
@@ -105,10 +105,10 @@ class _MerchantRow extends StatelessWidget {
           ),
           Text(
             _fmtRupee(item.amount),
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w600,
-              color: AppColors.lightTextPrimary,
+              color: context.textPrimary,
             ),
           ),
         ],

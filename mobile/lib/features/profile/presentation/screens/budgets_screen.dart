@@ -32,7 +32,7 @@ class _BudgetsScreenState extends State<BudgetsScreen> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.white,
+      backgroundColor: context.bgSurface,
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
       builder: (ctx) => Padding(
         padding: EdgeInsets.fromLTRB(20, 20, 20, MediaQuery.of(ctx).viewInsets.bottom + 32),
@@ -41,25 +41,25 @@ class _BudgetsScreenState extends State<BudgetsScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text('Edit ${b.category} Budget',
-                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.lightTextPrimary)),
-            const SizedBox(height: 16),
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: context.textPrimary)),
+            SizedBox(height: 16),
             TextField(
               controller: ctrl,
               keyboardType: TextInputType.number,
               autofocus: true,
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w600, color: AppColors.lightTextPrimary),
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600, color: context.textPrimary),
               decoration: InputDecoration(
                 prefixText: '₹ ',
-                prefixStyle: const TextStyle(fontSize: 20, fontWeight: FontWeight.w600, color: AppColors.lightTextSecondary),
+                prefixStyle: TextStyle(fontSize: 20, fontWeight: FontWeight.w600, color: context.textSecondary),
                 filled: true,
-                fillColor: AppColors.lightBgBase,
+                fillColor: context.bgBase,
                 contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: AppColors.lightBorderSubtle)),
-                enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: AppColors.lightBorderSubtle)),
-                focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: AppColors.primary500)),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: context.borderSubtle)),
+                enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: context.borderSubtle)),
+                focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: AppColors.primary500)),
               ),
             ),
-            const SizedBox(height: 20),
+            SizedBox(height: 20),
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
@@ -75,7 +75,7 @@ class _BudgetsScreenState extends State<BudgetsScreen> {
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   elevation: 0,
                 ),
-                child: const Text('Save', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
+                child: Text('Save', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
               ),
             ),
           ],
@@ -87,12 +87,12 @@ class _BudgetsScreenState extends State<BudgetsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.lightBgBase,
+      backgroundColor: context.bgBase,
       appBar: const InnerAppBar(title: 'Budgets'),
       body: ListView.separated(
         padding: const EdgeInsets.all(16),
         itemCount: _budgets.length,
-        separatorBuilder: (_, __) => const SizedBox(height: 12),
+        separatorBuilder: (_, __) => SizedBox(height: 12),
         itemBuilder: (_, i) {
           final b = _budgets[i];
           final ratio = (b.spent / b.limit).clamp(0.0, 1.0);
@@ -100,7 +100,7 @@ class _BudgetsScreenState extends State<BudgetsScreen> {
           return Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: context.bgSurface,
               borderRadius: BorderRadius.circular(16),
               boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 10, offset: const Offset(0, 2))],
             ),
@@ -109,37 +109,37 @@ class _BudgetsScreenState extends State<BudgetsScreen> {
                 Row(
                   children: [
                     Container(width: 10, height: 10, decoration: BoxDecoration(color: b.color, shape: BoxShape.circle)),
-                    const SizedBox(width: 10),
-                    Text(b.category, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.lightTextPrimary)),
+                    SizedBox(width: 10),
+                    Text(b.category, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: context.textPrimary)),
                     const Spacer(),
                     GestureDetector(
                       onTap: () => _editBudget(b),
-                      child: PhosphorIcon(PhosphorIcons.pencilSimple(PhosphorIconsStyle.regular), size: 18, color: AppColors.lightTextTertiary),
+                      child: PhosphorIcon(PhosphorIcons.pencilSimple(PhosphorIconsStyle.regular), size: 18, color: context.textTertiary),
                     ),
                   ],
                 ),
-                const SizedBox(height: 10),
+                SizedBox(height: 10),
                 ClipRRect(
                   borderRadius: BorderRadius.circular(4),
                   child: LinearProgressIndicator(
                     value: ratio,
                     minHeight: 6,
-                    backgroundColor: AppColors.lightBorderSubtle,
+                    backgroundColor: context.borderSubtle,
                     valueColor: AlwaysStoppedAnimation<Color>(isOver ? AppColors.danger : b.color),
                   ),
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: 8),
                 Row(
                   children: [
                     Text(_fmtR(b.spent),
-                        style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: isOver ? AppColors.danger : AppColors.lightTextPrimary)),
-                    Text(' / ${_fmtR(b.limit)}', style: const TextStyle(fontSize: 13, color: AppColors.lightTextTertiary)),
+                        style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: isOver ? AppColors.danger : context.textPrimary)),
+                    Text(' / ${_fmtR(b.limit)}', style: TextStyle(fontSize: 13, color: context.textTertiary)),
                     const Spacer(),
                     if (isOver)
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
                         decoration: BoxDecoration(color: AppColors.danger.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(6)),
-                        child: const Text('Over budget', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.danger)),
+                        child: Text('Over budget', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.danger)),
                       ),
                   ],
                 ),
@@ -152,7 +152,7 @@ class _BudgetsScreenState extends State<BudgetsScreen> {
         onPressed: () {},
         backgroundColor: AppColors.primary500,
         shape: const CircleBorder(),
-        child: const Icon(Icons.add, color: Colors.white, size: 24),
+        child: Icon(Icons.add, color: Colors.white, size: 24),
       ),
     );
   }

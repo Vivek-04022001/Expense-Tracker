@@ -21,16 +21,16 @@ class _ExportCsvScreenState extends State<ExportCsvScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.lightBgBase,
+      backgroundColor: context.bgBase,
       appBar: const InnerAppBar(title: 'Export CSV'),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
           _SectionHeader(title: 'Date Range'),
-          const SizedBox(height: 10),
+          SizedBox(height: 10),
           Container(
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: context.bgSurface,
               borderRadius: BorderRadius.circular(16),
               boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 10, offset: const Offset(0, 2))],
             ),
@@ -46,38 +46,38 @@ class _ExportCsvScreenState extends State<ExportCsvScreen> {
                         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                         child: Row(
                           children: [
-                            Text(r, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: isSelected ? AppColors.primary500 : AppColors.lightTextPrimary)),
+                            Text(r, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: isSelected ? AppColors.primary500 : context.textPrimary)),
                             const Spacer(),
                             if (isSelected) PhosphorIcon(PhosphorIcons.check(PhosphorIconsStyle.bold), size: 16, color: AppColors.primary500),
                           ],
                         ),
                       ),
-                      if (r != _ranges.last) const Divider(height: 1, indent: 16, color: AppColors.lightBorderSubtle),
+                      if (r != _ranges.last) Divider(height: 1, indent: 16, color: context.borderSubtle),
                     ],
                   ),
                 );
               }).toList(),
             ),
           ),
-          const SizedBox(height: 24),
+          SizedBox(height: 24),
           _SectionHeader(title: 'Options'),
-          const SizedBox(height: 10),
+          SizedBox(height: 10),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: context.bgSurface,
               borderRadius: BorderRadius.circular(16),
               boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 10, offset: const Offset(0, 2))],
             ),
             child: Column(
               children: [
                 _SwitchRow(label: 'Include income', value: _includeIncome, onChanged: (v) => setState(() => _includeIncome = v)),
-                const Divider(height: 1, color: AppColors.lightBorderSubtle),
+                Divider(height: 1, color: context.borderSubtle),
                 _SwitchRow(label: 'Group by category', value: _groupByCategory, onChanged: (v) => setState(() => _groupByCategory = v)),
               ],
             ),
           ),
-          const SizedBox(height: 32),
+          SizedBox(height: 32),
           ElevatedButton(
             onPressed: _exporting
                 ? null
@@ -100,13 +100,13 @@ class _ExportCsvScreenState extends State<ExportCsvScreen> {
               elevation: 0,
             ),
             child: _exporting
-                ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                ? SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
                 : Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       PhosphorIcon(PhosphorIcons.downloadSimple(PhosphorIconsStyle.bold), size: 18, color: Colors.white),
-                      const SizedBox(width: 8),
-                      const Text('Export CSV', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
+                      SizedBox(width: 8),
+                      Text('Export CSV', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
                     ],
                   ),
           ),
@@ -124,7 +124,7 @@ class _SectionHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       title.toUpperCase(),
-      style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.lightTextTertiary, letterSpacing: 0.8),
+      style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: context.textTertiary, letterSpacing: 0.8),
     );
   }
 }
@@ -141,7 +141,7 @@ class _SwitchRow extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
         children: [
-          Text(label, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: AppColors.lightTextPrimary)),
+          Text(label, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: context.textPrimary)),
           const Spacer(),
           Switch(value: value, onChanged: onChanged, activeThumbColor: AppColors.primary500),
         ],

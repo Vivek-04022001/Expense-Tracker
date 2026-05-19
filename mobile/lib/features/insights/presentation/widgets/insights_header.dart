@@ -21,12 +21,12 @@ class InsightsHeader extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
       child: Row(
         children: [
-          const Text(
+          Text(
             'Insights',
             style: TextStyle(
               fontSize: 26,
               fontWeight: FontWeight.w700,
-              color: AppColors.lightTextPrimary,
+              color: context.textPrimary,
             ),
           ),
           const Spacer(),
@@ -35,26 +35,26 @@ class InsightsHeader extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: context.bgSurface,
                 borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: AppColors.lightBorderSubtle),
+                border: Border.all(color: context.borderSubtle),
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
                     selected.label,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
-                      color: AppColors.lightTextPrimary,
+                      color: context.textPrimary,
                     ),
                   ),
-                  const SizedBox(width: 4),
+                  SizedBox(width: 4),
                   PhosphorIcon(
                     PhosphorIcons.caretDown(PhosphorIconsStyle.bold),
                     size: 12,
-                    color: AppColors.lightTextSecondary,
+                    color: context.textSecondary,
                   ),
                 ],
               ),
@@ -68,7 +68,7 @@ class InsightsHeader extends StatelessWidget {
   void _showPicker(BuildContext context) {
     showModalBottomSheet(
       context: context,
-      backgroundColor: Colors.white,
+      backgroundColor: context.bgSurface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -103,15 +103,15 @@ class _MonthPickerSheet extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Select Month',
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w700,
-              color: AppColors.lightTextPrimary,
+              color: context.textPrimary,
             ),
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16),
           ...months.map((m) {
             final isSelected =
                 m.month == selected.month && m.year == selected.year;
@@ -130,7 +130,7 @@ class _MonthPickerSheet extends StatelessWidget {
                   border: Border.all(
                     color: isSelected
                         ? AppColors.primary500.withValues(alpha: 0.4)
-                        : AppColors.lightBorderSubtle,
+                        : context.borderSubtle,
                   ),
                 ),
                 child: Row(
@@ -142,7 +142,7 @@ class _MonthPickerSheet extends StatelessWidget {
                         fontWeight: FontWeight.w600,
                         color: isSelected
                             ? AppColors.primary500
-                            : AppColors.lightTextPrimary,
+                            : context.textPrimary,
                       ),
                     ),
                     const Spacer(),

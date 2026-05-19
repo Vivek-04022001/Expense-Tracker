@@ -149,7 +149,7 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen> {
     );
 
     return Scaffold(
-      backgroundColor: AppColors.lightBgBase,
+      backgroundColor: context.bgBase,
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.only(bottom: 40),
@@ -165,18 +165,18 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Column(
                 children: [
-                  const SizedBox(height: 16),
+                  SizedBox(height: 16),
                   TotalSpendCard(data: data),
-                  const SizedBox(height: 14),
+                  SizedBox(height: 14),
                   CategoryDonutCard(data: data),
-                  const SizedBox(height: 14),
+                  SizedBox(height: 14),
                   DailySpendChart(data: data, month: currentInsightsMonth),
-                  const SizedBox(height: 14),
+                  SizedBox(height: 14),
                   BudgetListCard(data: data),
-                  const SizedBox(height: 14),
+                  SizedBox(height: 14),
                   TopMerchantsCard(data: data),
                   if (data.aiInsights.isNotEmpty) ...[
-                    const SizedBox(height: 14),
+                    SizedBox(height: 14),
                     ...data.aiInsights.map(
                       (i) => Padding(
                         padding: const EdgeInsets.only(bottom: 10),

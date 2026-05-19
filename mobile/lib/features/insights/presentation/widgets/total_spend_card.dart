@@ -23,24 +23,24 @@ class TotalSpendCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Total spend',
-            style: TextStyle(fontSize: 13, color: AppColors.lightTextSecondary),
+            style: TextStyle(fontSize: 13, color: context.textSecondary),
           ),
-          const SizedBox(height: 6),
+          SizedBox(height: 6),
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Text(
                 _fmtRupee(data.totalSpend),
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.lightTextPrimary,
+                  color: context.textPrimary,
                   letterSpacing: -0.5,
                 ),
               ),
-              const SizedBox(width: 10),
+              SizedBox(width: 10),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
                 decoration: BoxDecoration(
@@ -51,7 +51,7 @@ class TotalSpendCard extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     PhosphorIcon(pctIcon, size: 11, color: pctColor),
-                    const SizedBox(width: 2),
+                    SizedBox(width: 2),
                     Text(
                       '${pct.abs()}%',
                       style: TextStyle(
@@ -63,10 +63,10 @@ class TotalSpendCard extends StatelessWidget {
                   ],
                 ),
               ),
-              const SizedBox(width: 6),
+              SizedBox(width: 6),
               Text(
                 'vs ${data.prevMonthLabel}',
-                style: const TextStyle(fontSize: 12, color: AppColors.lightTextTertiary),
+                style: TextStyle(fontSize: 12, color: context.textTertiary),
               ),
             ],
           ),
@@ -88,7 +88,7 @@ class _Card extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.bgSurface,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(

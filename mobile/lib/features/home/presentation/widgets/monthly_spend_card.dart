@@ -21,7 +21,7 @@ class MonthlySpendCard extends ConsumerWidget {
 
     if (isLoading) {
       return _Card(
-        child: const SizedBox(
+        child: SizedBox(
           height: 110,
           child: Center(child: CircularProgressIndicator()),
         ),
@@ -30,12 +30,12 @@ class MonthlySpendCard extends ConsumerWidget {
 
     if (hasError) {
       return _Card(
-        child: const SizedBox(
+        child: SizedBox(
           height: 110,
           child: Center(
             child: Text(
               'Could not load financial data',
-              style: TextStyle(color: AppColors.lightTextSecondary),
+              style: TextStyle(color: context.textSecondary),
             ),
           ),
         ),
@@ -75,25 +75,25 @@ class MonthlySpendCard extends ConsumerWidget {
             children: [
               Text(
                 '$monthLabel so far',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
-                  color: AppColors.lightTextPrimary,
+                  color: context.textPrimary,
                 ),
               ),
               const Spacer(),
               if (subLabel != null)
                 Text(
                   subLabel,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 12,
-                    color: AppColors.lightTextSecondary,
+                    color: context.textSecondary,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
             ],
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: 12),
           // Progress bar: red spent | green saved
           ClipRRect(
             borderRadius: BorderRadius.circular(6),
@@ -119,7 +119,7 @@ class MonthlySpendCard extends ConsumerWidget {
               ),
             ),
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16),
           // Three-stat row
           Row(
             children: [
@@ -127,16 +127,16 @@ class MonthlySpendCard extends ConsumerWidget {
                 dot: const Color(0xFF1A1A2E),
                 label: 'INCOME',
                 value: '₹${_fmtNum(income.round())}',
-                valueColor: AppColors.lightTextPrimary,
+                valueColor: context.textPrimary,
               ),
-              const SizedBox(width: 20),
+              SizedBox(width: 20),
               _StatCol(
                 dot: AppColors.danger,
                 label: 'SPENT',
                 value: '₹${_fmtNum(spent.round())}',
-                valueColor: AppColors.lightTextPrimary,
+                valueColor: context.textPrimary,
               ),
-              const SizedBox(width: 20),
+              SizedBox(width: 20),
               _StatCol(
                 dot: AppColors.success,
                 label: 'SAVED',
@@ -182,19 +182,19 @@ class _StatCol extends StatelessWidget {
               height: 7,
               decoration: BoxDecoration(color: dot, shape: BoxShape.circle),
             ),
-            const SizedBox(width: 5),
+            SizedBox(width: 5),
             Text(
               label,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 10,
                 fontWeight: FontWeight.w600,
-                color: AppColors.lightTextSecondary,
+                color: context.textSecondary,
                 letterSpacing: 0.5,
               ),
             ),
           ],
         ),
-        const SizedBox(height: 4),
+        SizedBox(height: 4),
         Text(
           value,
           style: TextStyle(
@@ -204,12 +204,12 @@ class _StatCol extends StatelessWidget {
           ),
         ),
         if (subtitle != null) ...[
-          const SizedBox(height: 2),
+          SizedBox(height: 2),
           Text(
             subtitle!,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 11,
-              color: AppColors.lightTextSecondary,
+              color: context.textSecondary,
             ),
           ),
         ],
@@ -230,7 +230,7 @@ class _Card extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.bgSurface,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(

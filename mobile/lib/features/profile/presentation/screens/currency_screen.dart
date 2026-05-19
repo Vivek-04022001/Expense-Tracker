@@ -55,7 +55,7 @@ class _CurrencyScreenState extends State<CurrencyScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.lightBgBase,
+      backgroundColor: context.bgBase,
       appBar: const InnerAppBar(title: 'Currency'),
       body: Column(
         children: [
@@ -63,18 +63,18 @@ class _CurrencyScreenState extends State<CurrencyScreen> {
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
             child: Container(
               height: 44,
-              decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12), border: Border.all(color: AppColors.lightBorderSubtle)),
+              decoration: BoxDecoration(color: context.bgSurface, borderRadius: BorderRadius.circular(12), border: Border.all(color: context.borderSubtle)),
               child: Row(
                 children: [
-                  const SizedBox(width: 12),
-                  PhosphorIcon(PhosphorIcons.magnifyingGlass(PhosphorIconsStyle.regular), size: 18, color: AppColors.lightTextTertiary),
-                  const SizedBox(width: 8),
+                  SizedBox(width: 12),
+                  PhosphorIcon(PhosphorIcons.magnifyingGlass(PhosphorIconsStyle.regular), size: 18, color: context.textTertiary),
+                  SizedBox(width: 8),
                   Expanded(
                     child: TextField(
                       controller: _ctrl,
                       onChanged: (v) => setState(() => _query = v),
-                      decoration: const InputDecoration(hintText: 'Search currency…', hintStyle: TextStyle(color: AppColors.lightTextTertiary, fontSize: 14), border: InputBorder.none, isDense: true),
-                      style: const TextStyle(fontSize: 14, color: AppColors.lightTextPrimary),
+                      decoration: InputDecoration(hintText: 'Search currency…', hintStyle: TextStyle(color: context.textTertiary, fontSize: 14), border: InputBorder.none, isDense: true),
+                      style: TextStyle(fontSize: 14, color: context.textPrimary),
                     ),
                   ),
                 ],
@@ -84,10 +84,10 @@ class _CurrencyScreenState extends State<CurrencyScreen> {
           Expanded(
             child: Container(
               margin: const EdgeInsets.fromLTRB(16, 4, 16, 16),
-              decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16), boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 10, offset: const Offset(0, 2))]),
+              decoration: BoxDecoration(color: context.bgSurface, borderRadius: BorderRadius.circular(16), boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 10, offset: const Offset(0, 2))]),
               child: ListView.separated(
                 itemCount: _filtered.length,
-                separatorBuilder: (_, __) => const Divider(height: 1, indent: 16, color: AppColors.lightBorderSubtle),
+                separatorBuilder: (_, __) => Divider(height: 1, indent: 16, color: context.borderSubtle),
                 itemBuilder: (_, i) {
                   final c = _filtered[i];
                   final isSelected = c.code == widget.current;
@@ -100,16 +100,16 @@ class _CurrencyScreenState extends State<CurrencyScreen> {
                         children: [
                           Container(
                             width: 40, height: 40,
-                            decoration: BoxDecoration(color: AppColors.lightBgBase, borderRadius: BorderRadius.circular(10), border: Border.all(color: AppColors.lightBorderSubtle)),
-                            child: Center(child: Text(c.symbol, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: isSelected ? AppColors.primary500 : AppColors.lightTextPrimary))),
+                            decoration: BoxDecoration(color: context.bgBase, borderRadius: BorderRadius.circular(10), border: Border.all(color: context.borderSubtle)),
+                            child: Center(child: Text(c.symbol, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: isSelected ? AppColors.primary500 : context.textPrimary))),
                           ),
-                          const SizedBox(width: 14),
+                          SizedBox(width: 14),
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(c.code, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: isSelected ? AppColors.primary500 : AppColors.lightTextPrimary)),
-                                Text(c.name, style: const TextStyle(fontSize: 12, color: AppColors.lightTextSecondary)),
+                                Text(c.code, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: isSelected ? AppColors.primary500 : context.textPrimary)),
+                                Text(c.name, style: TextStyle(fontSize: 12, color: context.textSecondary)),
                               ],
                             ),
                           ),

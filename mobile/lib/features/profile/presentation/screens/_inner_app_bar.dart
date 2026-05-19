@@ -13,7 +13,7 @@ class InnerAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      backgroundColor: AppColors.lightBgBase,
+      backgroundColor: context.bgBase,
       elevation: 0,
       scrolledUnderElevation: 0,
       automaticallyImplyLeading: false,
@@ -25,15 +25,15 @@ class InnerAppBar extends StatelessWidget implements PreferredSizeWidget {
             height: 38,
             margin: const EdgeInsets.only(left: 12),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: context.bgSurface,
               borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: AppColors.lightBorderSubtle),
+              border: Border.all(color: context.borderSubtle),
             ),
             child: Center(
               child: PhosphorIcon(
                 PhosphorIcons.caretLeft(PhosphorIconsStyle.bold),
                 size: 18,
-                color: AppColors.lightTextSecondary,
+                color: context.textSecondary,
               ),
             ),
           ),
@@ -41,7 +41,7 @@ class InnerAppBar extends StatelessWidget implements PreferredSizeWidget {
       ),
       title: Text(
         title,
-        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: AppColors.lightTextPrimary),
+        style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: context.textPrimary),
       ),
       actions: actions,
     );

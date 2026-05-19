@@ -14,7 +14,7 @@ class IncomeDetailScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
-      backgroundColor: AppColors.lightBgBase,
+      backgroundColor: context.bgBase,
       body: SafeArea(
         child: Column(
           children: [
@@ -24,13 +24,13 @@ class IncomeDetailScreen extends ConsumerWidget {
                 padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
                 child: Column(
                   children: [
-                    const SizedBox(height: 24),
+                    SizedBox(height: 24),
                     _HeroSection(income: income),
-                    const SizedBox(height: 28),
+                    SizedBox(height: 28),
                     _DetailsCard(income: income),
-                    const SizedBox(height: 28),
+                    SizedBox(height: 28),
                     _ActionRow(income: income),
-                    const SizedBox(height: 16),
+                    SizedBox(height: 16),
                   ],
                 ),
               ),
@@ -77,12 +77,12 @@ class _NavBtn extends StatelessWidget {
         width: 38,
         height: 38,
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: context.bgSurface,
           borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: AppColors.lightBorderSubtle),
+          border: Border.all(color: context.borderSubtle),
         ),
         child: Center(
-          child: PhosphorIcon(icon, size: 18, color: AppColors.lightTextSecondary),
+          child: PhosphorIcon(icon, size: 18, color: context.textSecondary),
         ),
       ),
     );
@@ -127,7 +127,7 @@ class _HeroSection extends StatelessWidget {
             ),
           ),
         ),
-        const SizedBox(height: 14),
+        SizedBox(height: 14),
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
           decoration: BoxDecoration(
@@ -136,39 +136,39 @@ class _HeroSection extends StatelessWidget {
           ),
           child: Text(
             income.incomeType.displayLabel,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w600,
               color: AppColors.success,
             ),
           ),
         ),
-        const SizedBox(height: 10),
+        SizedBox(height: 10),
         Text(
           name,
           textAlign: TextAlign.center,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 22,
             fontWeight: FontWeight.w700,
-            color: AppColors.lightTextPrimary,
+            color: context.textPrimary,
           ),
         ),
-        const SizedBox(height: 6),
+        SizedBox(height: 6),
         Text(
           '+₹${_fmtNum(income.amount.round())}',
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 34,
             fontWeight: FontWeight.w700,
             color: AppColors.success,
             letterSpacing: -0.5,
           ),
         ),
-        const SizedBox(height: 6),
+        SizedBox(height: 6),
         Text(
           '$dateLabel · $timeStr',
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 13,
-            color: AppColors.lightTextSecondary,
+            color: context.textSecondary,
           ),
         ),
       ],
@@ -214,7 +214,7 @@ class _DetailsCard extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.bgSurface,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -229,7 +229,7 @@ class _DetailsCard extends StatelessWidget {
         physics: const NeverScrollableScrollPhysics(),
         itemCount: rows.length,
         separatorBuilder: (_, __) =>
-            const Divider(height: 1, color: AppColors.lightBorderSubtle),
+            Divider(height: 1, color: context.borderSubtle),
         itemBuilder: (_, i) => _DetailRowTile(row: rows[i]),
       ),
     );
@@ -254,9 +254,9 @@ class _DetailRowTile extends StatelessWidget {
         children: [
           Text(
             row.label,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 14,
-              color: AppColors.lightTextSecondary,
+              color: context.textSecondary,
             ),
           ),
           const Spacer(),
@@ -264,10 +264,10 @@ class _DetailRowTile extends StatelessWidget {
             child: Text(
               row.value,
               textAlign: TextAlign.end,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
-                color: AppColors.lightTextPrimary,
+                color: context.textPrimary,
               ),
             ),
           ),
@@ -294,7 +294,7 @@ class _ActionRow extends ConsumerWidget {
             onTap: () => _showChangeType(context, ref),
           ),
         ),
-        const SizedBox(width: 12),
+        SizedBox(width: 12),
         Expanded(
           child: _ActionBtn(
             icon: PhosphorIcons.trash(PhosphorIconsStyle.regular),
@@ -310,7 +310,7 @@ class _ActionRow extends ConsumerWidget {
   void _showChangeType(BuildContext context, WidgetRef ref) {
     showModalBottomSheet(
       context: context,
-      backgroundColor: Colors.white,
+      backgroundColor: context.bgSurface,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
@@ -331,23 +331,23 @@ class _ActionRow extends ConsumerWidget {
       context: context,
       builder: (_) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text(
+        title: Text(
           'Delete income?',
           style: TextStyle(fontWeight: FontWeight.w700, fontSize: 17),
         ),
         content: Text(
           'This will permanently remove "${income.description ?? income.incomeType.displayLabel}".',
-          style: const TextStyle(
-            color: AppColors.lightTextSecondary,
+          style: TextStyle(
+            color: context.textSecondary,
             fontSize: 14,
           ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text(
+            child: Text(
               'Cancel',
-              style: TextStyle(color: AppColors.lightTextSecondary),
+              style: TextStyle(color: context.textSecondary),
             ),
           ),
           TextButton(
@@ -358,7 +358,7 @@ class _ActionRow extends ConsumerWidget {
                   .delete(income.id);
               if (context.mounted) Navigator.pop(context);
             },
-            child: const Text(
+            child: Text(
               'Delete',
               style: TextStyle(
                 color: AppColors.danger,
@@ -392,12 +392,12 @@ class _ActionBtn extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 14),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: context.bgSurface,
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
             color: isDestructive
                 ? AppColors.danger.withValues(alpha: 0.25)
-                : AppColors.lightBorderSubtle,
+                : context.borderSubtle,
           ),
           boxShadow: [
             BoxShadow(
@@ -415,9 +415,9 @@ class _ActionBtn extends StatelessWidget {
               size: 16,
               color: isDestructive
                   ? AppColors.danger
-                  : AppColors.lightTextSecondary,
+                  : context.textSecondary,
             ),
-            const SizedBox(width: 6),
+            SizedBox(width: 6),
             Text(
               label,
               style: TextStyle(
@@ -425,7 +425,7 @@ class _ActionBtn extends StatelessWidget {
                 fontWeight: FontWeight.w600,
                 color: isDestructive
                     ? AppColors.danger
-                    : AppColors.lightTextPrimary,
+                    : context.textPrimary,
               ),
             ),
           ],
@@ -469,15 +469,15 @@ class _ChangeTypeSheetState extends State<_ChangeTypeSheet> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Change income type',
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w700,
-              color: AppColors.lightTextPrimary,
+              color: context.textPrimary,
             ),
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16),
           Wrap(
             spacing: 8,
             runSpacing: 8,
@@ -496,7 +496,7 @@ class _ChangeTypeSheetState extends State<_ChangeTypeSheet> {
                     border: Border.all(
                       color: isActive
                           ? AppColors.success
-                          : AppColors.lightBorderSubtle,
+                          : context.borderSubtle,
                     ),
                   ),
                   child: Text(
@@ -506,14 +506,14 @@ class _ChangeTypeSheetState extends State<_ChangeTypeSheet> {
                       fontWeight: FontWeight.w600,
                       color: isActive
                           ? Colors.white
-                          : AppColors.lightTextSecondary,
+                          : context.textSecondary,
                     ),
                   ),
                 ),
               );
             }).toList(),
           ),
-          const SizedBox(height: 20),
+          SizedBox(height: 20),
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
@@ -534,7 +534,7 @@ class _ChangeTypeSheetState extends State<_ChangeTypeSheet> {
                 elevation: 0,
               ),
               child: _saving
-                  ? const SizedBox(
+                  ? SizedBox(
                       width: 20,
                       height: 20,
                       child: CircularProgressIndicator(
@@ -542,7 +542,7 @@ class _ChangeTypeSheetState extends State<_ChangeTypeSheet> {
                         color: Colors.white,
                       ),
                     )
-                  : const Text(
+                  : Text(
                       'Save',
                       style: TextStyle(
                         fontSize: 15,

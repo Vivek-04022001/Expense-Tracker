@@ -89,18 +89,18 @@ class RecentTransactionsList extends ConsumerWidget {
       children: [
         Row(
           children: [
-            const Text(
+            Text(
               'Recent',
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
-                color: AppColors.lightTextPrimary,
+                color: context.textPrimary,
               ),
             ),
             const Spacer(),
             GestureDetector(
               onTap: () => context.go('/expenses'),
-              child: const Text(
+              child: Text(
                 'See all',
                 style: TextStyle(
                   fontSize: 14,
@@ -111,24 +111,25 @@ class RecentTransactionsList extends ConsumerWidget {
             ),
           ],
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: 12),
         if (isLoading)
-          const SizedBox(
+          SizedBox(
             height: 120,
             child: Center(child: CircularProgressIndicator()),
           )
         else if (hasError)
-          const SizedBox(
+          SizedBox(
             height: 80,
             child: Center(
               child: Text(
                 'Could not load transactions',
-                style: TextStyle(color: AppColors.lightTextSecondary),
+                style: TextStyle(color: context.textSecondary),
               ),
             ),
           )
         else
           _buildList(
+            context,
             expensesAsync.value ?? [],
             incomesAsync.value ?? [],
           ),
@@ -136,7 +137,7 @@ class RecentTransactionsList extends ConsumerWidget {
     );
   }
 
-  Widget _buildList(List<ExpenseModel> expenses, List<IncomeModel> incomes) {
+  Widget _buildList(BuildContext context, List<ExpenseModel> expenses, List<IncomeModel> incomes) {
     final all = [
       ...expenses.map(_Tx.fromExpense),
       ...incomes.map(_Tx.fromIncome),
@@ -145,12 +146,12 @@ class RecentTransactionsList extends ConsumerWidget {
     final recent = all.take(5).toList();
 
     if (recent.isEmpty) {
-      return const SizedBox(
+      return SizedBox(
         height: 80,
         child: Center(
           child: Text(
             'No transactions this month',
-            style: TextStyle(color: AppColors.lightTextSecondary),
+            style: TextStyle(color: context.textSecondary),
           ),
         ),
       );
@@ -158,7 +159,7 @@ class RecentTransactionsList extends ConsumerWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.bgSurface,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -172,10 +173,10 @@ class RecentTransactionsList extends ConsumerWidget {
         physics: const NeverScrollableScrollPhysics(),
         shrinkWrap: true,
         itemCount: recent.length,
-        separatorBuilder: (_, __) => const Divider(
+        separatorBuilder: (context, __) => Divider(
           height: 1,
           indent: 60,
-          color: AppColors.lightBorderSubtle,
+          color: context.borderSubtle,
         ),
         itemBuilder: (_, i) => _TransactionTile(tx: recent[i]),
       ),
@@ -207,7 +208,7 @@ class _TransactionTile extends StatelessWidget {
               child: PhosphorIcon(tx.icon, size: 18, color: tx.iconColor),
             ),
           ),
-          const SizedBox(width: 12),
+          SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -216,18 +217,18 @@ class _TransactionTile extends StatelessWidget {
                   tx.name,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
-                    color: AppColors.lightTextPrimary,
+                    color: context.textPrimary,
                   ),
                 ),
-                const SizedBox(height: 2),
+                SizedBox(height: 2),
                 Text(
                   tx.subtitle,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 12,
-                    color: AppColors.lightTextSecondary,
+                    color: context.textSecondary,
                   ),
                 ),
               ],

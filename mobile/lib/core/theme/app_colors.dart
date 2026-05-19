@@ -1,5 +1,26 @@
 import 'package:flutter/material.dart';
 
+extension AppThemeColors on BuildContext {
+  bool get _isDark => Theme.of(this).brightness == Brightness.dark;
+
+  Color get bgBase =>
+      _isDark ? AppColors.darkBgBase : AppColors.lightBgBase;
+  Color get bgSurface =>
+      _isDark ? AppColors.darkBgSurface : AppColors.lightBgSurface;
+  Color get bgSubtle =>
+      _isDark ? AppColors.darkBgSubtle : AppColors.lightBgSubtle;
+  Color get bgElevated =>
+      _isDark ? AppColors.darkBgElevated : AppColors.lightBgElevated;
+  Color get borderSubtle =>
+      _isDark ? AppColors.darkBorderSubtle : AppColors.lightBorderSubtle;
+  Color get textPrimary =>
+      _isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary;
+  Color get textSecondary =>
+      _isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary;
+  Color get textTertiary =>
+      _isDark ? AppColors.darkTextTertiary : AppColors.lightTextTertiary;
+}
+
 abstract class AppColors {
   // Primary
   static const primary500 = Color(0xFF0B5FFF);
@@ -16,6 +37,7 @@ abstract class AppColors {
 
   // Light theme surfaces
   static const lightBgBase = Color(0xFFFAFAFB);
+  static const lightBgSubtle = Color(0xFFF3F4F6);
   static const lightBgSurface = Color(0xFFFFFFFF);
   static const lightBgElevated = Color(0xFFFFFFFF);
   static const lightBorderSubtle = Color(0xFFECEDF0);
@@ -25,6 +47,7 @@ abstract class AppColors {
 
   // Dark theme surfaces
   static const darkBgBase = Color(0xFF0E0F12);
+  static const darkBgSubtle = Color(0xFF1C1E26);
   static const darkBgSurface = Color(0xFF17191F);
   static const darkBgElevated = Color(0xFF1F222A);
   static const darkBorderSubtle = Color(0xFF252830);

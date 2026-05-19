@@ -24,18 +24,18 @@ class RecurringExpensesScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.lightBgBase,
+      backgroundColor: context.bgBase,
       appBar: const InnerAppBar(title: 'Recurring Expenses'),
       body: ListView.separated(
         padding: const EdgeInsets.all(16),
         itemCount: _items.length,
-        separatorBuilder: (_, __) => const SizedBox(height: 12),
+        separatorBuilder: (_, __) => SizedBox(height: 12),
         itemBuilder: (_, i) {
           final item = _items[i];
           return Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: context.bgSurface,
               borderRadius: BorderRadius.circular(16),
               boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 10, offset: const Offset(0, 2))],
             ),
@@ -46,18 +46,18 @@ class RecurringExpensesScreen extends StatelessWidget {
                   decoration: BoxDecoration(color: item.color.withValues(alpha: 0.12), shape: BoxShape.circle),
                   child: Center(child: PhosphorIcon(PhosphorIcons.arrowsClockwise(PhosphorIconsStyle.fill), size: 18, color: item.color)),
                 ),
-                const SizedBox(width: 12),
+                SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(item.name, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.lightTextPrimary)),
-                      const SizedBox(height: 3),
-                      Text('${item.freq} · Next: ${item.next}', style: const TextStyle(fontSize: 12, color: AppColors.lightTextSecondary)),
+                      Text(item.name, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: context.textPrimary)),
+                      SizedBox(height: 3),
+                      Text('${item.freq} · Next: ${item.next}', style: TextStyle(fontSize: 12, color: context.textSecondary)),
                     ],
                   ),
                 ),
-                Text(_fmtR(item.amount), style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.lightTextPrimary)),
+                Text(_fmtR(item.amount), style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: context.textPrimary)),
               ],
             ),
           );
@@ -67,7 +67,7 @@ class RecurringExpensesScreen extends StatelessWidget {
         onPressed: () {},
         backgroundColor: AppColors.primary500,
         shape: const CircleBorder(),
-        child: const Icon(Icons.add, color: Colors.white, size: 24),
+        child: Icon(Icons.add, color: Colors.white, size: 24),
       ),
     );
   }

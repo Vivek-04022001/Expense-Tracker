@@ -144,11 +144,11 @@ class _AddIncomeSheetState extends ConsumerState<AddIncomeSheet> {
     final canSave = result != null && result > 0 && !_saving;
     final isEmpty = _expr.isEmpty;
     final textColor =
-        isEmpty ? AppColors.lightTextTertiary : AppColors.lightTextPrimary;
+        isEmpty ? context.textTertiary : context.textPrimary;
 
     return Container(
-      decoration: const BoxDecoration(
-        color: Colors.white,
+      decoration: BoxDecoration(
+        color: context.bgSurface,
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       padding: EdgeInsets.only(
@@ -161,7 +161,7 @@ class _AddIncomeSheetState extends ConsumerState<AddIncomeSheet> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const SizedBox(height: 10),
+                SizedBox(height: 10),
                 Container(
                   width: 36,
                   height: 4,
@@ -170,18 +170,18 @@ class _AddIncomeSheetState extends ConsumerState<AddIncomeSheet> {
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
-                const SizedBox(height: 14),
+                SizedBox(height: 14),
                 // Header
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: Row(
                     children: [
-                      const Text(
+                      Text(
                         'Add income',
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w700,
-                          color: AppColors.lightTextPrimary,
+                          color: context.textPrimary,
                         ),
                       ),
                       const Spacer(),
@@ -190,21 +190,21 @@ class _AddIncomeSheetState extends ConsumerState<AddIncomeSheet> {
                         child: Container(
                           width: 30,
                           height: 30,
-                          decoration: const BoxDecoration(
-                            color: Color(0xFFF3F4F6),
+                          decoration: BoxDecoration(
+                            color: context.bgSubtle,
                             shape: BoxShape.circle,
                           ),
-                          child: const Icon(
+                          child: Icon(
                             Icons.close,
                             size: 16,
-                            color: AppColors.lightTextSecondary,
+                            color: context.textSecondary,
                           ),
                         ),
                       ),
                     ],
                   ),
                 ),
-                const SizedBox(height: 24),
+                SizedBox(height: 24),
                 // Amount / expression display
                 Column(
                   children: [
@@ -232,31 +232,31 @@ class _AddIncomeSheetState extends ConsumerState<AddIncomeSheet> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 6),
+                    SizedBox(height: 6),
                     AnimatedSwitcher(
                       duration: const Duration(milliseconds: 200),
                       child: _hasFullExpression && result != null
                           ? Text(
                               '= ₹${_fmtNum(result)}',
                               key: const ValueKey('result'),
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 14,
-                                color: AppColors.lightTextSecondary,
+                                color: context.textSecondary,
                                 fontWeight: FontWeight.w500,
                               ),
                             )
                           : Text(
                               isEmpty ? 'Enter an amount' : '',
                               key: const ValueKey('hint'),
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 13,
-                                color: AppColors.lightTextTertiary,
+                                color: context.textTertiary,
                               ),
                             ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 16),
+                SizedBox(height: 16),
                 // Income type chips
                 SizedBox(
                   height: 36,
@@ -264,7 +264,7 @@ class _AddIncomeSheetState extends ConsumerState<AddIncomeSheet> {
                     padding: const EdgeInsets.symmetric(horizontal: 20),
                     scrollDirection: Axis.horizontal,
                     itemCount: IncomeType.values.length,
-                    separatorBuilder: (_, __) => const SizedBox(width: 8),
+                    separatorBuilder: (_, __) => SizedBox(width: 8),
                     itemBuilder: (_, i) {
                       final type = IncomeType.values[i];
                       final selected = _incomeType == type;
@@ -284,7 +284,7 @@ class _AddIncomeSheetState extends ConsumerState<AddIncomeSheet> {
                             border: Border.all(
                               color: selected
                                   ? AppColors.success
-                                  : AppColors.lightBorderSubtle,
+                                  : context.borderSubtle,
                             ),
                           ),
                           child: Row(
@@ -297,10 +297,10 @@ class _AddIncomeSheetState extends ConsumerState<AddIncomeSheet> {
                                   shape: BoxShape.circle,
                                   color: selected
                                       ? AppColors.success
-                                      : AppColors.lightTextTertiary,
+                                      : context.textTertiary,
                                 ),
                               ),
-                              const SizedBox(width: 6),
+                              SizedBox(width: 6),
                               Text(
                                 type.displayLabel,
                                 style: TextStyle(
@@ -308,7 +308,7 @@ class _AddIncomeSheetState extends ConsumerState<AddIncomeSheet> {
                                   fontWeight: FontWeight.w500,
                                   color: selected
                                       ? AppColors.success
-                                      : AppColors.lightTextPrimary,
+                                      : context.textPrimary,
                                 ),
                               ),
                             ],
@@ -318,25 +318,25 @@ class _AddIncomeSheetState extends ConsumerState<AddIncomeSheet> {
                     },
                   ),
                 ),
-                const SizedBox(height: 12),
+                SizedBox(height: 12),
                 // Description
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: Container(
                     decoration: BoxDecoration(
-                      border: Border.all(color: AppColors.lightBorderSubtle),
+                      border: Border.all(color: context.borderSubtle),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: TextField(
                       controller: _descCtrl,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 14,
-                        color: AppColors.lightTextPrimary,
+                        color: context.textPrimary,
                       ),
-                      decoration: const InputDecoration(
+                      decoration: InputDecoration(
                         hintText: 'Note (optional)',
                         hintStyle: TextStyle(
-                          color: AppColors.lightTextTertiary,
+                          color: context.textTertiary,
                           fontSize: 14,
                         ),
                         border: InputBorder.none,
@@ -349,7 +349,7 @@ class _AddIncomeSheetState extends ConsumerState<AddIncomeSheet> {
                     ),
                   ),
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: 8),
                 // Calculator numpad
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -375,7 +375,7 @@ class _AddIncomeSheetState extends ConsumerState<AddIncomeSheet> {
                         elevation: 0,
                       ),
                       child: _saving
-                          ? const SizedBox(
+                          ? SizedBox(
                               width: 22,
                               height: 22,
                               child: CircularProgressIndicator(
@@ -387,7 +387,7 @@ class _AddIncomeSheetState extends ConsumerState<AddIncomeSheet> {
                               _hasFullExpression && result != null
                                   ? 'Save ₹${_fmtNum(result)}'
                                   : 'Save income',
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w600,
                               ),
@@ -425,7 +425,7 @@ class _SuccessOverlay extends StatelessWidget {
         curve: Curves.easeOut,
         builder: (context, v, child) => Opacity(opacity: v, child: child),
         child: Container(
-          decoration: const BoxDecoration(
+          decoration: BoxDecoration(
             color: AppColors.success,
             borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
           ),
@@ -440,19 +440,19 @@ class _SuccessOverlay extends StatelessWidget {
                   shape: BoxShape.circle,
                 ),
                 child:
-                    const Icon(Icons.check, color: Colors.white, size: 36),
+                    Icon(Icons.check, color: Colors.white, size: 36),
               ),
-              const SizedBox(height: 20),
+              SizedBox(height: 20),
               Text(
                 '₹$amount',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 48,
                   fontWeight: FontWeight.w800,
                   color: Colors.white,
                   height: 1,
                 ),
               ),
-              const SizedBox(height: 8),
+              SizedBox(height: 8),
               Text(
                 'Income saved',
                 style: TextStyle(

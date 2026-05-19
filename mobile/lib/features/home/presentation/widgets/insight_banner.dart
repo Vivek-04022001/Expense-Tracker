@@ -29,7 +29,7 @@ class _InsightBannerState extends State<InsightBanner> {
           Container(
             width: 36,
             height: 36,
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               color: AppColors.primary500,
               shape: BoxShape.circle,
             ),
@@ -41,7 +41,7 @@ class _InsightBannerState extends State<InsightBanner> {
               ),
             ),
           ),
-          const SizedBox(width: 12),
+          SizedBox(width: 12),
           // Content
           Expanded(
             child: Column(
@@ -49,7 +49,7 @@ class _InsightBannerState extends State<InsightBanner> {
               children: [
                 Row(
                   children: [
-                    const Text(
+                    Text(
                       'INSIGHT · THIS WEEK',
                       style: TextStyle(
                         fontSize: 10,
@@ -61,24 +61,24 @@ class _InsightBannerState extends State<InsightBanner> {
                     const Spacer(),
                     GestureDetector(
                       onTap: () => setState(() => _dismissed = true),
-                      child: const Icon(
+                      child: Icon(
                         Icons.close,
                         size: 16,
-                        color: AppColors.lightTextTertiary,
+                        color: context.textTertiary,
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 6),
-                const Text(
+                SizedBox(height: 6),
+                Text(
                   'Food spend is 30% higher than last week, mostly from weekend delivery orders.',
                   style: TextStyle(
                     fontSize: 13,
-                    color: AppColors.lightTextPrimary,
+                    color: context.textPrimary,
                     height: 1.4,
                   ),
                 ),
-                const SizedBox(height: 10),
+                SizedBox(height: 10),
                 Align(
                   alignment: Alignment.centerRight,
                   child: GestureDetector(
@@ -89,7 +89,7 @@ class _InsightBannerState extends State<InsightBanner> {
                         color: AppColors.primary500,
                         borderRadius: BorderRadius.circular(20),
                       ),
-                      child: const Text(
+                      child: Text(
                         'View details',
                         style: TextStyle(
                           fontSize: 12,

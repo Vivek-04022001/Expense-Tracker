@@ -39,31 +39,31 @@ class PrivacyPolicyScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.lightBgBase,
+      backgroundColor: context.bgBase,
       appBar: const InnerAppBar(title: 'Privacy Policy'),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
           Text(
             'Last updated: May 2026',
-            style: TextStyle(fontSize: 12, color: AppColors.lightTextTertiary),
+            style: TextStyle(fontSize: 12, color: context.textTertiary),
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16),
           ..._sections.map((s) => Padding(
             padding: const EdgeInsets.only(bottom: 20),
             child: Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: context.bgSurface,
                 borderRadius: BorderRadius.circular(14),
                 boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 10, offset: const Offset(0, 2))],
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(s.title, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.lightTextPrimary)),
-                  const SizedBox(height: 8),
-                  Text(s.body, style: const TextStyle(fontSize: 14, color: AppColors.lightTextSecondary, height: 1.6)),
+                  Text(s.title, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: context.textPrimary)),
+                  SizedBox(height: 8),
+                  Text(s.body, style: TextStyle(fontSize: 14, color: context.textSecondary, height: 1.6)),
                 ],
               ),
             ),

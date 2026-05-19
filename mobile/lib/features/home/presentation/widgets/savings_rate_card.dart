@@ -19,7 +19,7 @@ class SavingsRateCard extends ConsumerWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: context.bgSurface,
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
@@ -71,19 +71,19 @@ class _CardContent extends StatelessWidget {
             ),
           ),
         ),
-        const SizedBox(width: 14),
+        SizedBox(width: 14),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
+              Text(
                 'Savings rate this month',
                 style: TextStyle(
                   fontSize: 13,
-                  color: AppColors.lightTextSecondary,
+                  color: context.textSecondary,
                 ),
               ),
-              const SizedBox(height: 2),
+              SizedBox(height: 2),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.baseline,
                 textBaseline: TextBaseline.alphabetic,
@@ -97,14 +97,14 @@ class _CardContent extends StatelessWidget {
                       letterSpacing: -0.3,
                     ),
                   ),
-                  const SizedBox(width: 8),
+                  SizedBox(width: 8),
                   Text(
                     '${isPositive ? '+' : '−'}₹${_fmtNum(s.netSavings.abs().round())} saved',
                     style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w500,
                       color: isPositive
-                          ? AppColors.lightTextSecondary
+                          ? context.textSecondary
                           : AppColors.danger,
                     ),
                   ),
@@ -113,10 +113,10 @@ class _CardContent extends StatelessWidget {
             ],
           ),
         ),
-        const PhosphorIcon(
+        PhosphorIcon(
           PhosphorIconsRegular.caretRight,
           size: 16,
-          color: AppColors.lightTextTertiary,
+          color: context.textTertiary,
         ),
       ],
     );
@@ -136,11 +136,11 @@ class _CardShimmer extends StatelessWidget {
           width: 42,
           height: 42,
           decoration: BoxDecoration(
-            color: AppColors.lightBorderSubtle,
+            color: context.borderSubtle,
             shape: BoxShape.circle,
           ),
         ),
-        const SizedBox(width: 14),
+        SizedBox(width: 14),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -149,16 +149,16 @@ class _CardShimmer extends StatelessWidget {
                 height: 12,
                 width: 130,
                 decoration: BoxDecoration(
-                  color: AppColors.lightBorderSubtle,
+                  color: context.borderSubtle,
                   borderRadius: BorderRadius.circular(6),
                 ),
               ),
-              const SizedBox(height: 8),
+              SizedBox(height: 8),
               Container(
                 height: 18,
                 width: 90,
                 decoration: BoxDecoration(
-                  color: AppColors.lightBorderSubtle,
+                  color: context.borderSubtle,
                   borderRadius: BorderRadius.circular(6),
                 ),
               ),
@@ -183,19 +183,19 @@ class _CardError extends StatelessWidget {
           width: 42,
           height: 42,
           decoration: BoxDecoration(
-            color: AppColors.lightBorderSubtle,
+            color: context.borderSubtle,
             shape: BoxShape.circle,
           ),
-          child: const Center(
+          child: Center(
             child: PhosphorIcon(
               PhosphorIconsRegular.piggyBank,
               size: 20,
-              color: AppColors.lightTextTertiary,
+              color: context.textTertiary,
             ),
           ),
         ),
-        const SizedBox(width: 14),
-        const Expanded(
+        SizedBox(width: 14),
+        Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -203,7 +203,7 @@ class _CardError extends StatelessWidget {
                 'Savings rate this month',
                 style: TextStyle(
                   fontSize: 13,
-                  color: AppColors.lightTextSecondary,
+                  color: context.textSecondary,
                 ),
               ),
               SizedBox(height: 2),
@@ -211,16 +211,16 @@ class _CardError extends StatelessWidget {
                 'Could not load — tap to retry',
                 style: TextStyle(
                   fontSize: 13,
-                  color: AppColors.lightTextTertiary,
+                  color: context.textTertiary,
                 ),
               ),
             ],
           ),
         ),
-        const PhosphorIcon(
+        PhosphorIcon(
           PhosphorIconsRegular.caretRight,
           size: 16,
-          color: AppColors.lightTextTertiary,
+          color: context.textTertiary,
         ),
       ],
     );

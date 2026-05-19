@@ -17,7 +17,7 @@ class _SmsImportScreenState extends State<SmsImportScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.lightBgBase,
+      backgroundColor: context.bgBase,
       appBar: const InnerAppBar(title: 'SMS Auto-Import'),
       body: ListView(
         padding: const EdgeInsets.all(16),
@@ -26,7 +26,7 @@ class _SmsImportScreenState extends State<SmsImportScreen> {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: context.bgSurface,
               borderRadius: BorderRadius.circular(16),
               boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 10, offset: const Offset(0, 2))],
             ),
@@ -41,10 +41,10 @@ class _SmsImportScreenState extends State<SmsImportScreen> {
                   onChanged: (v) => setState(() => _enabled = v),
                 ),
                 if (_enabled) ...[
-                  const Divider(height: 24, color: AppColors.lightBorderSubtle),
+                  Divider(height: 24, color: context.borderSubtle),
                   _ToggleRow(
                     icon: PhosphorIcons.question(PhosphorIconsStyle.fill),
-                    iconBg: AppColors.lightTextTertiary,
+                    iconBg: context.textTertiary,
                     label: 'Show unrecognised SMS',
                     subtitle: 'Review SMS that could not be parsed',
                     value: _showUnknown,
@@ -55,35 +55,35 @@ class _SmsImportScreenState extends State<SmsImportScreen> {
             ),
           ),
           if (_enabled) ...[
-            const SizedBox(height: 24),
-            const Text('ACCURACY', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.lightTextTertiary, letterSpacing: 0.8)),
-            const SizedBox(height: 10),
+            SizedBox(height: 24),
+            Text('ACCURACY', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: context.textTertiary, letterSpacing: 0.8)),
+            SizedBox(height: 10),
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: context.bgSurface,
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 10, offset: const Offset(0, 2))],
               ),
               child: Column(
                 children: [
                   _StatRow(label: 'SMS scanned this month', value: '143'),
-                  const Divider(height: 20, color: AppColors.lightBorderSubtle),
+                  Divider(height: 20, color: context.borderSubtle),
                   _StatRow(label: 'Transactions imported', value: '87'),
-                  const Divider(height: 20, color: AppColors.lightBorderSubtle),
+                  Divider(height: 20, color: context.borderSubtle),
                   _StatRow(label: 'Parse accuracy', value: '98%', valueColor: AppColors.success),
-                  const Divider(height: 20, color: AppColors.lightBorderSubtle),
+                  Divider(height: 20, color: context.borderSubtle),
                   _StatRow(label: 'Unrecognised', value: '3'),
                 ],
               ),
             ),
-            const SizedBox(height: 24),
-            const Text('SUPPORTED BANKS', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.lightTextTertiary, letterSpacing: 0.8)),
-            const SizedBox(height: 10),
+            SizedBox(height: 24),
+            Text('SUPPORTED BANKS', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: context.textTertiary, letterSpacing: 0.8)),
+            SizedBox(height: 10),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: context.bgSurface,
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 10, offset: const Offset(0, 2))],
               ),
@@ -95,19 +95,19 @@ class _SmsImportScreenState extends State<SmsImportScreen> {
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         child: Row(
                           children: [
-                            PhosphorIcon(PhosphorIcons.bank(PhosphorIconsStyle.fill), size: 18, color: AppColors.lightTextSecondary),
-                            const SizedBox(width: 14),
-                            Text(bank, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: AppColors.lightTextPrimary)),
+                            PhosphorIcon(PhosphorIcons.bank(PhosphorIconsStyle.fill), size: 18, color: context.textSecondary),
+                            SizedBox(width: 14),
+                            Text(bank, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: context.textPrimary)),
                             const Spacer(),
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                               decoration: BoxDecoration(color: AppColors.success.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(6)),
-                              child: const Text('Active', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.success)),
+                              child: Text('Active', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.success)),
                             ),
                           ],
                         ),
                       ),
-                      if (bank != 'IndusInd') const Divider(height: 1, indent: 46, color: AppColors.lightBorderSubtle),
+                      if (bank != 'IndusInd') Divider(height: 1, indent: 46, color: context.borderSubtle),
                     ],
                   );
                 }).toList(),
@@ -134,13 +134,13 @@ class _ToggleRow extends StatelessWidget {
     return Row(
       children: [
         Container(width: 36, height: 36, decoration: BoxDecoration(color: iconBg, borderRadius: BorderRadius.circular(9)), child: Center(child: PhosphorIcon(icon, size: 17, color: Colors.white))),
-        const SizedBox(width: 14),
+        SizedBox(width: 14),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(label, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: AppColors.lightTextPrimary)),
-              Text(subtitle, style: const TextStyle(fontSize: 12, color: AppColors.lightTextSecondary)),
+              Text(label, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: context.textPrimary)),
+              Text(subtitle, style: TextStyle(fontSize: 12, color: context.textSecondary)),
             ],
           ),
         ),
@@ -160,9 +160,9 @@ class _StatRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Text(label, style: const TextStyle(fontSize: 14, color: AppColors.lightTextSecondary)),
+        Text(label, style: TextStyle(fontSize: 14, color: context.textSecondary)),
         const Spacer(),
-        Text(value, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: valueColor ?? AppColors.lightTextPrimary)),
+        Text(value, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: valueColor ?? context.textPrimary)),
       ],
     );
   }

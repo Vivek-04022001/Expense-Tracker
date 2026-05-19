@@ -24,7 +24,7 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.lightBgBase,
+      backgroundColor: context.bgBase,
       appBar: const InnerAppBar(title: 'Help & Support'),
       body: ListView(
         padding: const EdgeInsets.all(16),
@@ -43,14 +43,14 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
                   decoration: BoxDecoration(color: AppColors.primary500, borderRadius: BorderRadius.circular(12)),
                   child: Center(child: PhosphorIcon(PhosphorIcons.envelope(PhosphorIconsStyle.fill), size: 22, color: Colors.white)),
                 ),
-                const SizedBox(width: 14),
-                const Expanded(
+                SizedBox(width: 14),
+                Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text('Contact support', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.primary500)),
                       SizedBox(height: 2),
-                      Text('We typically reply within 24 hours', style: TextStyle(fontSize: 12, color: AppColors.lightTextSecondary)),
+                      Text('We typically reply within 24 hours', style: TextStyle(fontSize: 12, color: context.textSecondary)),
                     ],
                   ),
                 ),
@@ -58,12 +58,12 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
               ],
             ),
           ),
-          const SizedBox(height: 24),
-          const Text('FREQUENTLY ASKED', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.lightTextTertiary, letterSpacing: 0.8)),
-          const SizedBox(height: 10),
+          SizedBox(height: 24),
+          Text('FREQUENTLY ASKED', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: context.textTertiary, letterSpacing: 0.8)),
+          SizedBox(height: 10),
           Container(
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: context.bgSurface,
               borderRadius: BorderRadius.circular(16),
               boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 10, offset: const Offset(0, 2))],
             ),
@@ -71,7 +71,7 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               itemCount: _faqs.length,
-              separatorBuilder: (_, __) => const Divider(height: 1, color: AppColors.lightBorderSubtle),
+              separatorBuilder: (_, __) => Divider(height: 1, color: context.borderSubtle),
               itemBuilder: (_, i) {
                 final isOpen = _expanded.contains(i);
                 return GestureDetector(
@@ -86,13 +86,13 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
                       children: [
                         Row(
                           children: [
-                            Expanded(child: Text(_faqs[i].q, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: isOpen ? AppColors.primary500 : AppColors.lightTextPrimary))),
-                            PhosphorIcon(isOpen ? PhosphorIcons.caretUp(PhosphorIconsStyle.bold) : PhosphorIcons.caretDown(PhosphorIconsStyle.bold), size: 14, color: AppColors.lightTextTertiary),
+                            Expanded(child: Text(_faqs[i].q, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: isOpen ? AppColors.primary500 : context.textPrimary))),
+                            PhosphorIcon(isOpen ? PhosphorIcons.caretUp(PhosphorIconsStyle.bold) : PhosphorIcons.caretDown(PhosphorIconsStyle.bold), size: 14, color: context.textTertiary),
                           ],
                         ),
                         if (isOpen) ...[
-                          const SizedBox(height: 10),
-                          Text(_faqs[i].a, style: const TextStyle(fontSize: 13, color: AppColors.lightTextSecondary, height: 1.5)),
+                          SizedBox(height: 10),
+                          Text(_faqs[i].a, style: TextStyle(fontSize: 13, color: context.textSecondary, height: 1.5)),
                         ],
                       ],
                     ),

@@ -21,7 +21,7 @@ class ProfileUserCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.bgSurface,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -43,7 +43,7 @@ class ProfileUserCard extends StatelessWidget {
             child: Center(
               child: Text(
                 initials.toUpperCase(),
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 17,
                   fontWeight: FontWeight.w700,
                   color: Colors.white,
@@ -51,25 +51,25 @@ class ProfileUserCard extends StatelessWidget {
               ),
             ),
           ),
-          const SizedBox(width: 14),
+          SizedBox(width: 14),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   name,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w700,
-                    color: AppColors.lightTextPrimary,
+                    color: context.textPrimary,
                   ),
                 ),
-                const SizedBox(height: 2),
+                SizedBox(height: 2),
                 Text(
                   phone,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 13,
-                    color: AppColors.lightTextSecondary,
+                    color: context.textSecondary,
                   ),
                 ),
               ],
@@ -80,7 +80,7 @@ class ProfileUserCard extends StatelessWidget {
             child: PhosphorIcon(
               PhosphorIcons.pencilSimple(PhosphorIconsStyle.regular),
               size: 20,
-              color: AppColors.lightTextSecondary,
+              color: context.textSecondary,
             ),
           ),
         ],

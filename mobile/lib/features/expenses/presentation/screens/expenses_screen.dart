@@ -46,8 +46,8 @@ class _ExpensesScreenState extends ConsumerState<ExpensesScreen>
     return all.where((e) {
       if (_searchQuery.isNotEmpty &&
           !(e.description ?? '').toLowerCase().contains(
-                _searchQuery.toLowerCase(),
-              )) {
+            _searchQuery.toLowerCase(),
+          )) {
         return false;
       }
       if (_activeCategories.isNotEmpty &&
@@ -83,7 +83,8 @@ class _ExpensesScreenState extends ConsumerState<ExpensesScreen>
   void _openMonthPicker(DateTime selected, List<DateTime> months) {
     showModalBottomSheet(
       context: context,
-      backgroundColor: Colors.white,
+      useRootNavigator: true,
+      backgroundColor: context.bgSurface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -103,7 +104,8 @@ class _ExpensesScreenState extends ConsumerState<ExpensesScreen>
   void _openFilterSheet() {
     showModalBottomSheet(
       context: context,
-      backgroundColor: Colors.white,
+      useRootNavigator: true,
+      backgroundColor: context.bgSurface,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
@@ -140,7 +142,7 @@ class _ExpensesScreenState extends ConsumerState<ExpensesScreen>
     });
 
     return Scaffold(
-      backgroundColor: AppColors.lightBgBase,
+      backgroundColor: context.bgBase,
       body: SafeArea(
         child: Column(
           children: [
@@ -150,13 +152,13 @@ class _ExpensesScreenState extends ConsumerState<ExpensesScreen>
               margin: const EdgeInsets.fromLTRB(20, 12, 20, 0),
               padding: const EdgeInsets.all(3),
               decoration: BoxDecoration(
-                color: const Color(0xFFF3F4F6),
+                color: context.bgSubtle,
                 borderRadius: BorderRadius.circular(10),
               ),
               child: TabBar(
                 controller: _tabController,
                 indicator: BoxDecoration(
-                  color: Colors.white,
+                  color: context.bgSurface,
                   borderRadius: BorderRadius.circular(7),
                   boxShadow: [
                     BoxShadow(
@@ -168,17 +170,20 @@ class _ExpensesScreenState extends ConsumerState<ExpensesScreen>
                 ),
                 indicatorSize: TabBarIndicatorSize.tab,
                 dividerColor: Colors.transparent,
-                labelColor: AppColors.lightTextPrimary,
-                unselectedLabelColor: AppColors.lightTextSecondary,
-                labelStyle: const TextStyle(
+                labelColor: context.textPrimary,
+                unselectedLabelColor: context.textSecondary,
+                labelStyle: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
                 ),
-                unselectedLabelStyle: const TextStyle(
+                unselectedLabelStyle: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w400,
                 ),
-                tabs: const [Tab(text: 'Expenses'), Tab(text: 'Income')],
+                tabs: const [
+                  Tab(text: 'Expenses'),
+                  Tab(text: 'Income'),
+                ],
               ),
             ),
             Expanded(
@@ -191,15 +196,15 @@ class _ExpensesScreenState extends ConsumerState<ExpensesScreen>
                       if (_searchOpen) _buildSearchBar(),
                       _buildMonthRow(selectedMonth, months),
                       expensesAsync.when(
-                        loading: () => const Expanded(
+                        loading: () => Expanded(
                           child: Center(child: CircularProgressIndicator()),
                         ),
-                        error: (_, __) => const Expanded(
+                        error: (_, __) => Expanded(
                           child: Center(
                             child: Text(
                               'Failed to load expenses',
                               style: TextStyle(
-                                color: AppColors.lightTextSecondary,
+                                color: context.textSecondary,
                               ),
                             ),
                           ),
@@ -208,8 +213,10 @@ class _ExpensesScreenState extends ConsumerState<ExpensesScreen>
                           final filtered = _filter(all);
                           final grouped = _group(filtered);
                           final dateKeys = grouped.keys.toList();
-                          final totalExpenses =
-                              filtered.fold(0.0, (s, e) => s + e.amount);
+                          final totalExpenses = filtered.fold(
+                            0.0,
+                            (s, e) => s + e.amount,
+                          );
                           return Expanded(
                             child: Column(
                               children: [
@@ -245,6 +252,7 @@ class _ExpensesScreenState extends ConsumerState<ExpensesScreen>
                           );
                         },
                       ),
+                      // SizedBox(height: 100),
                     ],
                   ),
                   // ── Income tab ────────────────────────────────────────────
@@ -263,12 +271,12 @@ class _ExpensesScreenState extends ConsumerState<ExpensesScreen>
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
       child: Row(
         children: [
-          const Text(
+          Text(
             'Transactions',
             style: TextStyle(
               fontSize: 26,
               fontWeight: FontWeight.w700,
-              color: AppColors.lightTextPrimary,
+              color: context.textPrimary,
             ),
           ),
           const Spacer(),
@@ -277,7 +285,7 @@ class _ExpensesScreenState extends ConsumerState<ExpensesScreen>
             onTap: _toggleSearch,
             active: _searchOpen,
           ),
-          const SizedBox(width: 8),
+          SizedBox(width: 8),
           Stack(
             children: [
               _IconBtn(
@@ -292,7 +300,7 @@ class _ExpensesScreenState extends ConsumerState<ExpensesScreen>
                   child: Container(
                     width: 8,
                     height: 8,
-                    decoration: const BoxDecoration(
+                    decoration: BoxDecoration(
                       color: AppColors.primary500,
                       shape: BoxShape.circle,
                     ),
@@ -311,31 +319,31 @@ class _ExpensesScreenState extends ConsumerState<ExpensesScreen>
       child: Container(
         height: 44,
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: context.bgSurface,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppColors.lightBorderSubtle),
+          border: Border.all(color: context.borderSubtle),
         ),
         child: Row(
           children: [
-            const SizedBox(width: 12),
+            SizedBox(width: 12),
             PhosphorIcon(
               PhosphorIcons.magnifyingGlass(PhosphorIconsStyle.regular),
               size: 18,
-              color: AppColors.lightTextTertiary,
+              color: context.textTertiary,
             ),
-            const SizedBox(width: 8),
+            SizedBox(width: 8),
             Expanded(
               child: TextField(
                 controller: _searchCtrl,
                 autofocus: true,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 14,
-                  color: AppColors.lightTextPrimary,
+                  color: context.textPrimary,
                 ),
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   hintText: 'Search expenses…',
                   hintStyle: TextStyle(
-                    color: AppColors.lightTextTertiary,
+                    color: context.textTertiary,
                     fontSize: 14,
                   ),
                   border: InputBorder.none,
@@ -355,7 +363,7 @@ class _ExpensesScreenState extends ConsumerState<ExpensesScreen>
                   child: PhosphorIcon(
                     PhosphorIcons.x(PhosphorIconsStyle.bold),
                     size: 16,
-                    color: AppColors.lightTextTertiary,
+                    color: context.textTertiary,
                   ),
                 ),
               ),
@@ -373,29 +381,28 @@ class _ExpensesScreenState extends ConsumerState<ExpensesScreen>
           GestureDetector(
             onTap: () => _openMonthPicker(selected, months),
             child: Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: context.bgSurface,
                 borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: AppColors.lightBorderSubtle),
+                border: Border.all(color: context.borderSubtle),
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
                     DateFormat('MMMM yyyy').format(selected),
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
-                      color: AppColors.lightTextPrimary,
+                      color: context.textPrimary,
                     ),
                   ),
-                  const SizedBox(width: 4),
+                  SizedBox(width: 4),
                   PhosphorIcon(
                     PhosphorIcons.caretDown(PhosphorIconsStyle.bold),
                     size: 12,
-                    color: AppColors.lightTextSecondary,
+                    color: context.textSecondary,
                   ),
                 ],
               ),
@@ -413,9 +420,9 @@ class _ExpensesScreenState extends ConsumerState<ExpensesScreen>
         children: [
           Text(
             '${_fmtRupee(total)} across $count expenses',
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 13,
-              color: AppColors.lightTextSecondary,
+              color: context.textSecondary,
             ),
           ),
         ],
@@ -431,14 +438,14 @@ class _ExpensesScreenState extends ConsumerState<ExpensesScreen>
           PhosphorIcon(
             PhosphorIcons.receipt(PhosphorIconsStyle.light),
             size: 56,
-            color: AppColors.lightTextTertiary,
+            color: context.textTertiary,
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: 12),
           Text(
             label,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 15,
-              color: AppColors.lightTextSecondary,
+              color: context.textSecondary,
             ),
           ),
         ],
@@ -471,10 +478,10 @@ class _DaySection extends StatelessWidget {
             children: [
               Text(
                 label,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.lightTextTertiary,
+                  color: context.textTertiary,
                   letterSpacing: 0.4,
                 ),
               ),
@@ -482,10 +489,10 @@ class _DaySection extends StatelessWidget {
               if (total > 0)
                 Text(
                   _fmtRupee(total),
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
-                    color: AppColors.lightTextSecondary,
+                    color: context.textSecondary,
                   ),
                 ),
             ],
@@ -494,7 +501,7 @@ class _DaySection extends StatelessWidget {
         Container(
           margin: const EdgeInsets.symmetric(horizontal: 16),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: context.bgSurface,
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
@@ -508,10 +515,10 @@ class _DaySection extends StatelessWidget {
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             itemCount: entries.length,
-            separatorBuilder: (_, __) => const Divider(
+            separatorBuilder: (_, __) => Divider(
               height: 1,
               indent: 62,
-              color: AppColors.lightBorderSubtle,
+              color: context.borderSubtle,
             ),
             itemBuilder: (_, i) => _EntryTile(expense: entries[i]),
           ),
@@ -529,9 +536,7 @@ class _EntryTile extends StatelessWidget {
 
   void _openDetail(BuildContext context) {
     Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => ExpenseDetailScreen(expense: expense),
-      ),
+      MaterialPageRoute(builder: (_) => ExpenseDetailScreen(expense: expense)),
     );
   }
 
@@ -565,7 +570,7 @@ class _EntryTile extends StatelessWidget {
                 ),
               ),
             ),
-            const SizedBox(width: 12),
+            SizedBox(width: 12),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -574,27 +579,27 @@ class _EntryTile extends StatelessWidget {
                     name,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
-                      color: AppColors.lightTextPrimary,
+                      color: context.textPrimary,
                     ),
                   ),
-                  const SizedBox(height: 2),
+                  SizedBox(height: 2),
                   Text(
                     '$label · $timeStr · $paymentLabel',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 12,
-                      color: AppColors.lightTextSecondary,
+                      color: context.textSecondary,
                     ),
                   ),
                 ],
               ),
             ),
-            const SizedBox(width: 8),
+            SizedBox(width: 8),
             Text(
               '-${_fmtRupee(expense.amount)}',
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
                 color: AppColors.danger,
@@ -632,15 +637,14 @@ class _IconBtn extends StatelessWidget {
           border: Border.all(
             color: active
                 ? AppColors.primary500.withValues(alpha: 0.3)
-                : AppColors.lightBorderSubtle,
+                : context.borderSubtle,
           ),
         ),
         child: Center(
           child: PhosphorIcon(
             icon,
             size: 18,
-            color:
-                active ? AppColors.primary500 : AppColors.lightTextSecondary,
+            color: active ? AppColors.primary500 : context.textSecondary,
           ),
         ),
       ),
@@ -669,15 +673,15 @@ class _MonthPickerSheet extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Select Month',
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w700,
-              color: AppColors.lightTextPrimary,
+              color: context.textPrimary,
             ),
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16),
           ...months.take(6).map((m) {
             final isSelected =
                 m.month == selected.month && m.year == selected.year;
@@ -696,7 +700,7 @@ class _MonthPickerSheet extends StatelessWidget {
                   border: Border.all(
                     color: isSelected
                         ? AppColors.primary500.withValues(alpha: 0.4)
-                        : AppColors.lightBorderSubtle,
+                        : context.borderSubtle,
                   ),
                 ),
                 child: Row(
@@ -708,7 +712,7 @@ class _MonthPickerSheet extends StatelessWidget {
                         fontWeight: FontWeight.w600,
                         color: isSelected
                             ? AppColors.primary500
-                            : AppColors.lightTextPrimary,
+                            : context.textPrimary,
                       ),
                     ),
                     const Spacer(),
@@ -764,19 +768,19 @@ class _FilterSheetState extends State<_FilterSheet> {
         children: [
           Row(
             children: [
-              const Text(
+              Text(
                 'Filter by Category',
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.lightTextPrimary,
+                  color: context.textPrimary,
                 ),
               ),
               const Spacer(),
               if (_selected.isNotEmpty)
                 GestureDetector(
                   onTap: () => setState(() => _selected.clear()),
-                  child: const Text(
+                  child: Text(
                     'Clear',
                     style: TextStyle(
                       fontSize: 13,
@@ -787,7 +791,7 @@ class _FilterSheetState extends State<_FilterSheet> {
                 ),
             ],
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16),
           Wrap(
             spacing: 8,
             runSpacing: 8,
@@ -812,7 +816,7 @@ class _FilterSheetState extends State<_FilterSheet> {
                     border: Border.all(
                       color: isActive
                           ? AppColors.primary500
-                          : AppColors.lightBorderSubtle,
+                          : context.borderSubtle,
                     ),
                   ),
                   child: Text(
@@ -822,14 +826,14 @@ class _FilterSheetState extends State<_FilterSheet> {
                       fontWeight: FontWeight.w600,
                       color: isActive
                           ? Colors.white
-                          : AppColors.lightTextSecondary,
+                          : context.textSecondary,
                     ),
                   ),
                 ),
               );
             }).toList(),
           ),
-          const SizedBox(height: 20),
+          SizedBox(height: 20),
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
@@ -848,7 +852,7 @@ class _FilterSheetState extends State<_FilterSheet> {
               ),
               child: Text(
                 _selected.isEmpty ? 'Show All' : 'Apply Filter',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w600,
                 ),
@@ -872,7 +876,8 @@ class _IncomeTabState extends ConsumerState<_IncomeTab> {
   void _openMonthPicker(DateTime selected, List<DateTime> months) {
     showModalBottomSheet(
       context: context,
-      backgroundColor: Colors.white,
+      useRootNavigator: true,
+      backgroundColor: context.bgSurface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -908,29 +913,31 @@ class _IncomeTabState extends ConsumerState<_IncomeTab> {
               GestureDetector(
                 onTap: () => _openMonthPicker(selectedMonth, months),
                 child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 7,
+                  ),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: context.bgSurface,
                     borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: AppColors.lightBorderSubtle),
+                    border: Border.all(color: context.borderSubtle),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
                         DateFormat('MMMM yyyy').format(selectedMonth),
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
-                          color: AppColors.lightTextPrimary,
+                          color: context.textPrimary,
                         ),
                       ),
-                      const SizedBox(width: 4),
+                      SizedBox(width: 4),
                       PhosphorIcon(
                         PhosphorIcons.caretDown(PhosphorIconsStyle.bold),
                         size: 12,
-                        color: AppColors.lightTextSecondary,
+                        color: context.textSecondary,
                       ),
                     ],
                   ),
@@ -940,14 +947,13 @@ class _IncomeTabState extends ConsumerState<_IncomeTab> {
           ),
         ),
         incomesAsync.when(
-          loading: () => const Expanded(
-            child: Center(child: CircularProgressIndicator()),
-          ),
-          error: (_, __) => const Expanded(
+          loading: () =>
+              Expanded(child: Center(child: CircularProgressIndicator())),
+          error: (_, __) => Expanded(
             child: Center(
               child: Text(
                 'Failed to load income',
-                style: TextStyle(color: AppColors.lightTextSecondary),
+                style: TextStyle(color: context.textSecondary),
               ),
             ),
           ),
@@ -961,14 +967,14 @@ class _IncomeTabState extends ConsumerState<_IncomeTab> {
                       PhosphorIcon(
                         PhosphorIcons.trendUp(PhosphorIconsStyle.light),
                         size: 56,
-                        color: AppColors.lightTextTertiary,
+                        color: context.textTertiary,
                       ),
-                      const SizedBox(height: 12),
-                      const Text(
+                      SizedBox(height: 12),
+                      Text(
                         'No income this month',
                         style: TextStyle(
                           fontSize: 15,
-                          color: AppColors.lightTextSecondary,
+                          color: context.textSecondary,
                         ),
                       ),
                     ],
@@ -976,8 +982,7 @@ class _IncomeTabState extends ConsumerState<_IncomeTab> {
                 ),
               );
             }
-            final totalIncome =
-                incomes.fold(0.0, (s, e) => s + e.amount);
+            final totalIncome = incomes.fold(0.0, (s, e) => s + e.amount);
             return Expanded(
               child: Column(
                 children: [
@@ -987,9 +992,9 @@ class _IncomeTabState extends ConsumerState<_IncomeTab> {
                       children: [
                         Text(
                           '${_fmtRupee(totalIncome)} across ${incomes.length} entries',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 13,
-                            color: AppColors.lightTextSecondary,
+                            color: context.textSecondary,
                           ),
                         ),
                       ],
@@ -1017,18 +1022,16 @@ class _IncomeTile extends StatelessWidget {
   final IncomeModel income;
 
   static PhosphorIconData _icon(IncomeType t) => switch (t) {
-        IncomeType.salary => PhosphorIcons.briefcase(),
-        IncomeType.freelance => PhosphorIcons.laptop(),
-        IncomeType.investment => PhosphorIcons.chartLineUp(),
-        IncomeType.reward => PhosphorIcons.gift(),
-        IncomeType.other => PhosphorIcons.dotsThree(),
-      };
+    IncomeType.salary => PhosphorIcons.briefcase(),
+    IncomeType.freelance => PhosphorIcons.laptop(),
+    IncomeType.investment => PhosphorIcons.chartLineUp(),
+    IncomeType.reward => PhosphorIcons.gift(),
+    IncomeType.other => PhosphorIcons.dotsThree(),
+  };
 
   void _openDetail(BuildContext context) {
     Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => IncomeDetailScreen(income: income),
-      ),
+      MaterialPageRoute(builder: (_) => IncomeDetailScreen(income: income)),
     );
   }
 
@@ -1044,7 +1047,7 @@ class _IncomeTile extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 8),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: context.bgSurface,
           borderRadius: BorderRadius.circular(14),
           boxShadow: [
             BoxShadow(
@@ -1071,7 +1074,7 @@ class _IncomeTile extends StatelessWidget {
                 ),
               ),
             ),
-            const SizedBox(width: 12),
+            SizedBox(width: 12),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -1080,27 +1083,27 @@ class _IncomeTile extends StatelessWidget {
                     name,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
-                      color: AppColors.lightTextPrimary,
+                      color: context.textPrimary,
                     ),
                   ),
-                  const SizedBox(height: 2),
+                  SizedBox(height: 2),
                   Text(
                     '${income.incomeType.displayLabel} · $timeStr',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 12,
-                      color: AppColors.lightTextSecondary,
+                      color: context.textSecondary,
                     ),
                   ),
                 ],
               ),
             ),
-            const SizedBox(width: 8),
+            SizedBox(width: 8),
             Text(
               '+${_fmtRupee(income.amount)}',
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
                 color: AppColors.success,

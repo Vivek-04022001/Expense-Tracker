@@ -22,7 +22,8 @@ class ShellScreen extends StatelessWidget {
   Future<void> _onAddTap(BuildContext context) async {
     final type = await showModalBottomSheet<_EntryType>(
       context: context,
-      backgroundColor: Colors.white,
+      useRootNavigator: true,
+      backgroundColor: context.bgSurface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -33,6 +34,7 @@ class ShellScreen extends StatelessWidget {
     if (type == _EntryType.expense) {
       final saved = await showModalBottomSheet<bool>(
         context: context,
+        useRootNavigator: true,
         isScrollControlled: true,
         backgroundColor: Colors.transparent,
         builder: (_) => const AddExpenseSheet(),
@@ -43,6 +45,7 @@ class ShellScreen extends StatelessWidget {
     } else {
       final saved = await showModalBottomSheet<bool>(
         context: context,
+        useRootNavigator: true,
         isScrollControlled: true,
         backgroundColor: Colors.transparent,
         builder: (_) => const AddIncomeSheet(),
@@ -108,7 +111,7 @@ class _FloatingNavBar extends StatelessWidget {
     return Container(
           margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: context.bgSurface,
             borderRadius: BorderRadius.circular(40),
             boxShadow: [
               BoxShadow(
@@ -248,17 +251,6 @@ class _NavTab extends StatelessWidget {
                     borderRadius: const BorderRadius.vertical(
                       bottom: Radius.circular(8),
                     ),
-                    boxShadow: isActive
-                        ? [
-                            BoxShadow(
-                              color: AppColors.primary500.withValues(
-                                alpha: 0.45,
-                              ),
-                              blurRadius: 10,
-                              spreadRadius: 1,
-                            ),
-                          ]
-                        : null,
                   ),
                 ),
               ),
@@ -287,11 +279,11 @@ class _NavTab extends StatelessWidget {
                             size: 22,
                             color: isActive
                                 ? AppColors.primary500
-                                : AppColors.lightTextTertiary,
+                                : context.textTertiary,
                           ),
                         ),
                       ),
-                      const SizedBox(height: 3),
+                      SizedBox(height: 3),
                       AnimatedDefaultTextStyle(
                         duration: const Duration(milliseconds: 250),
                         curve: Curves.easeOut,
@@ -302,7 +294,7 @@ class _NavTab extends StatelessWidget {
                               : FontWeight.w500,
                           color: isActive
                               ? AppColors.primary500
-                              : AppColors.lightTextTertiary,
+                              : context.textTertiary,
                         ),
                         child: Text(label),
                       ),
@@ -350,20 +342,8 @@ class _RaisedFabState extends State<_RaisedFab> {
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             color: AppColors.primary500,
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.primary500.withValues(alpha: 0.30),
-                blurRadius: 18,
-                offset: const Offset(0, 8),
-              ),
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.08),
-                blurRadius: 4,
-                offset: const Offset(0, 2),
-              ),
-            ],
           ),
-          child: const Icon(Icons.add_rounded, color: Colors.white, size: 28),
+          child: Icon(Icons.add_rounded, color: Colors.white, size: 28),
         ),
       ),
     );
@@ -385,15 +365,15 @@ class _EntryTypePicker extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'What would you like to add?',
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w700,
-              color: AppColors.lightTextPrimary,
+              color: context.textPrimary,
             ),
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16),
           _TypeTile(
             icon: PhosphorIcons.arrowDown(PhosphorIconsStyle.bold),
             label: 'Expense',
@@ -401,7 +381,7 @@ class _EntryTypePicker extends StatelessWidget {
             color: AppColors.danger,
             onTap: () => Navigator.pop(context, _EntryType.expense),
           ).animate().fadeIn(duration: 220.ms).slideY(begin: 0.1, end: 0),
-          const SizedBox(height: 10),
+          SizedBox(height: 10),
           _TypeTile(
                 icon: PhosphorIcons.arrowUp(PhosphorIconsStyle.bold),
                 label: 'Income',
@@ -455,7 +435,7 @@ class _TypeTile extends StatelessWidget {
               ),
               child: Center(child: Icon(icon, size: 18, color: color)),
             ),
-            const SizedBox(width: 14),
+            SizedBox(width: 14),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -469,9 +449,9 @@ class _TypeTile extends StatelessWidget {
                 ),
                 Text(
                   subtitle,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 12,
-                    color: AppColors.lightTextSecondary,
+                    color: context.textSecondary,
                   ),
                 ),
               ],

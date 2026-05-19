@@ -80,7 +80,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final textSecondary =
-        isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary;
+        isDark ? AppColors.darkTextSecondary : context.textSecondary;
 
     return Scaffold(
       body: SafeArea(
@@ -91,36 +91,36 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             children: [
               if (context.canPop())
                 IconButton(
-                  icon: const Icon(Icons.arrow_back),
+                  icon: Icon(Icons.arrow_back),
                   onPressed: () => context.pop(),
                 ),
-              const SizedBox(height: 32),
+              SizedBox(height: 32),
               Text(
                 'Create account',
                 style: Theme.of(context).textTheme.headlineLarge,
               ),
-              const SizedBox(height: 8),
+              SizedBox(height: 8),
               Text(
                 'Start tracking your expenses',
                 style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                       color: textSecondary,
                     ),
               ),
-              const SizedBox(height: 32),
+              SizedBox(height: 32),
               AppInput(
                 label: 'Full name',
                 controller: _nameController,
                 errorText: _nameError,
                 keyboardType: TextInputType.name,
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: 16),
               AppInput(
                 label: 'Phone number',
                 controller: _phoneController,
                 errorText: _phoneError,
                 keyboardType: TextInputType.phone,
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: 16),
               AppInput(
                 label: 'Password',
                 controller: _passwordController,
@@ -128,7 +128,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 obscureText: true,
                 showToggle: true,
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: 16),
               AppInput(
                 label: 'Confirm password',
                 controller: _confirmPasswordController,
@@ -137,14 +137,14 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 showToggle: true,
                 textInputAction: TextInputAction.done,
               ),
-              const SizedBox(height: 24),
+              SizedBox(height: 24),
               AppButton(
                 label: 'Create account',
                 onPressed: isLoading ? null : _submit,
                 isLoading: isLoading,
               ),
               if (authError != null) ...[
-                const SizedBox(height: 8),
+                SizedBox(height: 8),
                 Text(
                   authError,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -152,7 +152,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       ),
                 ),
               ],
-              const SizedBox(height: 16),
+              SizedBox(height: 16),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -162,7 +162,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   ),
                   TextButton(
                     onPressed: () => context.go('/login'),
-                    child: const Text('Sign in'),
+                    child: Text('Sign in'),
                   ),
                 ],
               ),

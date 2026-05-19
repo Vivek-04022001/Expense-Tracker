@@ -67,8 +67,8 @@ class _AddBudgetSheetState extends ConsumerState<AddBudgetSheet> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: const BoxDecoration(
-        color: Colors.white,
+      decoration: BoxDecoration(
+        color: context.bgSurface,
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       padding: EdgeInsets.only(
@@ -79,7 +79,7 @@ class _AddBudgetSheetState extends ConsumerState<AddBudgetSheet> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const SizedBox(height: 10),
+            SizedBox(height: 10),
             Container(
               width: 36,
               height: 4,
@@ -88,17 +88,17 @@ class _AddBudgetSheetState extends ConsumerState<AddBudgetSheet> {
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
-            const SizedBox(height: 14),
+            SizedBox(height: 14),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Row(
                 children: [
-                  const Text(
+                  Text(
                     'Set budget',
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w700,
-                      color: AppColors.lightTextPrimary,
+                      color: context.textPrimary,
                     ),
                   ),
                   const Spacer(),
@@ -107,21 +107,21 @@ class _AddBudgetSheetState extends ConsumerState<AddBudgetSheet> {
                     child: Container(
                       width: 30,
                       height: 30,
-                      decoration: const BoxDecoration(
-                        color: Color(0xFFF3F4F6),
+                      decoration: BoxDecoration(
+                        color: context.bgSubtle,
                         shape: BoxShape.circle,
                       ),
-                      child: const Icon(
+                      child: Icon(
                         Icons.close,
                         size: 16,
-                        color: AppColors.lightTextSecondary,
+                        color: context.textSecondary,
                       ),
                     ),
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 20),
+            SizedBox(height: 20),
             // Amount display
             Column(
               children: [
@@ -136,8 +136,8 @@ class _AddBudgetSheetState extends ConsumerState<AddBudgetSheet> {
                         fontSize: 28,
                         fontWeight: FontWeight.w500,
                         color: _amount.isEmpty
-                            ? AppColors.lightTextTertiary
-                            : AppColors.lightTextPrimary,
+                            ? context.textTertiary
+                            : context.textPrimary,
                       ),
                     ),
                     Text(
@@ -147,23 +147,23 @@ class _AddBudgetSheetState extends ConsumerState<AddBudgetSheet> {
                         fontWeight: FontWeight.w800,
                         height: 1,
                         color: _amount.isEmpty
-                            ? AppColors.lightTextTertiary
-                            : AppColors.lightTextPrimary,
+                            ? context.textTertiary
+                            : context.textPrimary,
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 4),
-                const Text(
+                SizedBox(height: 4),
+                Text(
                   'Monthly limit',
                   style: TextStyle(
                     fontSize: 13,
-                    color: AppColors.lightTextTertiary,
+                    color: context.textTertiary,
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: 16),
             // Category chips
             SizedBox(
               height: 36,
@@ -171,7 +171,7 @@ class _AddBudgetSheetState extends ConsumerState<AddBudgetSheet> {
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 scrollDirection: Axis.horizontal,
                 itemCount: ExpenseCategory.values.length,
-                separatorBuilder: (_, __) => const SizedBox(width: 8),
+                separatorBuilder: (_, __) => SizedBox(width: 8),
                 itemBuilder: (_, i) {
                   final cat = ExpenseCategory.values[i];
                   final selected = _category == cat;
@@ -192,7 +192,7 @@ class _AddBudgetSheetState extends ConsumerState<AddBudgetSheet> {
                         border: Border.all(
                           color: selected
                               ? color
-                              : AppColors.lightBorderSubtle,
+                              : context.borderSubtle,
                         ),
                       ),
                       child: Row(
@@ -203,9 +203,9 @@ class _AddBudgetSheetState extends ConsumerState<AddBudgetSheet> {
                             size: 13,
                             color: selected
                                 ? color
-                                : AppColors.lightTextTertiary,
+                                : context.textTertiary,
                           ),
-                          const SizedBox(width: 5),
+                          SizedBox(width: 5),
                           Text(
                             CategoryMapper.label(cat),
                             style: TextStyle(
@@ -213,7 +213,7 @@ class _AddBudgetSheetState extends ConsumerState<AddBudgetSheet> {
                               fontWeight: FontWeight.w500,
                               color: selected
                                   ? color
-                                  : AppColors.lightTextPrimary,
+                                  : context.textPrimary,
                             ),
                           ),
                         ],
@@ -223,7 +223,7 @@ class _AddBudgetSheetState extends ConsumerState<AddBudgetSheet> {
                 },
               ),
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: 8),
             // Numpad
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -248,7 +248,7 @@ class _AddBudgetSheetState extends ConsumerState<AddBudgetSheet> {
                     elevation: 0,
                   ),
                   child: _saving
-                      ? const SizedBox(
+                      ? SizedBox(
                           width: 22,
                           height: 22,
                           child: CircularProgressIndicator(
@@ -256,7 +256,7 @@ class _AddBudgetSheetState extends ConsumerState<AddBudgetSheet> {
                             color: Colors.white,
                           ),
                         )
-                      : const Text(
+                      : Text(
                           'Save budget',
                           style: TextStyle(
                             fontSize: 16,
@@ -322,17 +322,17 @@ class _NumKey extends StatelessWidget {
         height: 54,
         child: Center(
           child: label == '⌫'
-              ? const Icon(
+              ? Icon(
                   Icons.backspace_outlined,
                   size: 22,
-                  color: AppColors.lightTextPrimary,
+                  color: context.textPrimary,
                 )
               : Text(
                   label,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.w500,
-                    color: AppColors.lightTextPrimary,
+                    color: context.textPrimary,
                   ),
                 ),
         ),

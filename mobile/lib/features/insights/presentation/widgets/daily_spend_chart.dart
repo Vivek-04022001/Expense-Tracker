@@ -27,7 +27,7 @@ class DailySpendChart extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.bgSurface,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -42,25 +42,25 @@ class DailySpendChart extends StatelessWidget {
         children: [
           Row(
             children: [
-              const Text(
+              Text(
                 'Daily spend',
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.lightTextPrimary,
+                  color: context.textPrimary,
                 ),
               ),
               const Spacer(),
               Text(
                 '$monthAbbr $firstDay–$lastDay',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 12,
-                  color: AppColors.lightTextTertiary,
+                  color: context.textTertiary,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16),
           SizedBox(
             height: 130,
             child: LineChart(
@@ -83,9 +83,9 @@ class DailySpendChart extends StatelessWidget {
                             padding: const EdgeInsets.only(top: 6),
                             child: Text(
                               '$monthAbbr $day',
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 11,
-                                color: AppColors.lightTextTertiary,
+                                color: context.textTertiary,
                               ),
                             ),
                           );
@@ -123,11 +123,11 @@ class DailySpendChart extends StatelessWidget {
                 ],
                 lineTouchData: LineTouchData(
                   touchTooltipData: LineTouchTooltipData(
-                    getTooltipColor: (_) => AppColors.lightTextPrimary,
+                    getTooltipColor: (_) => context.textPrimary,
                     getTooltipItems: (spots) => spots.map((s) {
                       return LineTooltipItem(
                         '₹${s.y.toInt()}',
-                        const TextStyle(
+                        TextStyle(
                           color: Colors.white,
                           fontSize: 11,
                           fontWeight: FontWeight.w600,

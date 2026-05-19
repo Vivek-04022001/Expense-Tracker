@@ -20,7 +20,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.lightBgBase,
+      backgroundColor: context.bgBase,
       appBar: const InnerAppBar(title: 'Notifications'),
       body: ListView(
         padding: const EdgeInsets.all(16),
@@ -46,7 +46,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
               ),
             ],
           ),
-          const SizedBox(height: 20),
+          SizedBox(height: 20),
           _GroupCard(
             title: 'Reports',
             rows: [
@@ -68,7 +68,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
               ),
             ],
           ),
-          const SizedBox(height: 20),
+          SizedBox(height: 20),
           _GroupCard(
             title: 'Activity',
             rows: [
@@ -98,11 +98,11 @@ class _GroupCard extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(title.toUpperCase(), style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.lightTextTertiary, letterSpacing: 0.8)),
-        const SizedBox(height: 10),
+        Text(title.toUpperCase(), style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: context.textTertiary, letterSpacing: 0.8)),
+        SizedBox(height: 10),
         Container(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: context.bgSurface,
             borderRadius: BorderRadius.circular(16),
             boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 10, offset: const Offset(0, 2))],
           ),
@@ -110,7 +110,7 @@ class _GroupCard extends StatelessWidget {
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             itemCount: rows.length,
-            separatorBuilder: (_, __) => const Divider(height: 1, indent: 64, color: AppColors.lightBorderSubtle),
+            separatorBuilder: (_, __) => Divider(height: 1, indent: 64, color: context.borderSubtle),
             itemBuilder: (_, i) => rows[i],
           ),
         ),
@@ -135,13 +135,13 @@ class _NotifRow extends StatelessWidget {
       child: Row(
         children: [
           Container(width: 36, height: 36, decoration: BoxDecoration(color: iconBg, borderRadius: BorderRadius.circular(9)), child: Center(child: PhosphorIcon(icon, size: 17, color: Colors.white))),
-          const SizedBox(width: 14),
+          SizedBox(width: 14),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(label, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: AppColors.lightTextPrimary)),
-                Text(subtitle, style: const TextStyle(fontSize: 12, color: AppColors.lightTextSecondary)),
+                Text(label, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: context.textPrimary)),
+                Text(subtitle, style: TextStyle(fontSize: 12, color: context.textSecondary)),
               ],
             ),
           ),

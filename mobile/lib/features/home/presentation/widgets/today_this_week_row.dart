@@ -14,7 +14,7 @@ class TodayThisWeekRow extends ConsumerWidget {
     final expensesAsync = ref.watch(currentMonthExpensesProvider);
 
     return expensesAsync.when(
-      loading: () => const Row(
+      loading: () => Row(
         children: [
           Expanded(child: _SkeletonCard()),
           SizedBox(width: 10),
@@ -27,7 +27,7 @@ class TodayThisWeekRow extends ConsumerWidget {
         return Row(
           children: [
             Expanded(child: _TodayCard(expenses: expenses, now: now)),
-            const SizedBox(width: 10),
+            SizedBox(width: 10),
             Expanded(child: _ThisWeekCard(expenses: expenses, now: now)),
           ],
         );
@@ -95,15 +95,15 @@ class _TodayCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              const Text(
+              Text(
                 'Today',
                 style: TextStyle(
                   fontSize: 12,
-                  color: AppColors.lightTextSecondary,
+                  color: context.textSecondary,
                   fontWeight: FontWeight.w500,
                 ),
               ),
-              const SizedBox(width: 6),
+              SizedBox(width: 6),
               if (showBadge)
                 Container(
                   padding:
@@ -125,7 +125,7 @@ class _TodayCard extends StatelessWidget {
                             ? AppColors.warning
                             : AppColors.success,
                       ),
-                      const SizedBox(width: 2),
+                      SizedBox(width: 2),
                       Text(
                         '₹${_fmt(diffVsAvg.abs().round())} vs avg',
                         style: TextStyle(
@@ -141,25 +141,25 @@ class _TodayCard extends StatelessWidget {
                 ),
             ],
           ),
-          const SizedBox(height: 6),
+          SizedBox(height: 6),
           Text(
             '₹${_fmt(todayTotal.round())}',
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.w800,
-              color: AppColors.lightTextPrimary,
+              color: context.textPrimary,
               height: 1,
             ),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: 8),
           Text(
             '$txCount txn${txCount == 1 ? '' : 's'} · last 7d',
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 10,
-              color: AppColors.lightTextTertiary,
+              color: context.textTertiary,
             ),
           ),
-          const SizedBox(height: 6),
+          SizedBox(height: 6),
           SizedBox(
             height: 36,
             child: LineChart(
@@ -246,25 +246,25 @@ class _ThisWeekCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'This week',
             style: TextStyle(
               fontSize: 12,
-              color: AppColors.lightTextSecondary,
+              color: context.textSecondary,
               fontWeight: FontWeight.w500,
             ),
           ),
-          const SizedBox(height: 6),
+          SizedBox(height: 6),
           Text(
             '₹${_fmt(weekSum.round())}',
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.w800,
-              color: AppColors.lightTextPrimary,
+              color: context.textPrimary,
               height: 1,
             ),
           ),
-          const SizedBox(height: 6),
+          SizedBox(height: 6),
           if (pctChange != null)
             Row(
               children: [
@@ -277,7 +277,7 @@ class _ThisWeekCard extends StatelessWidget {
                       ? AppColors.accent500
                       : AppColors.warning,
                 ),
-                const SizedBox(width: 2),
+                SizedBox(width: 2),
                 Text(
                   '${pctChange.abs()}% vs last wk',
                   style: TextStyle(
@@ -291,8 +291,8 @@ class _ThisWeekCard extends StatelessWidget {
               ],
             )
           else
-            const SizedBox(height: 14),
-          const SizedBox(height: 8),
+            SizedBox(height: 14),
+          SizedBox(height: 8),
           SizedBox(
             height: 48,
             child: BarChart(
@@ -338,7 +338,7 @@ class _ThisWeekCard extends StatelessWidget {
                             fontSize: 9,
                             color: idx == todayIndex
                                 ? AppColors.primary500
-                                : AppColors.lightTextTertiary,
+                                : context.textTertiary,
                             fontWeight: idx == todayIndex
                                 ? FontWeight.w700
                                 : FontWeight.w400,
@@ -369,7 +369,7 @@ class _Card extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.bgSurface,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(

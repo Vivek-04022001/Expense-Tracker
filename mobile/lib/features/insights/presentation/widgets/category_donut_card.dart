@@ -36,7 +36,7 @@ class _CategoryDonutCardState extends State<CategoryDonutCard> {
       width: double.infinity,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.bgSurface,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -58,7 +58,7 @@ class _CategoryDonutCardState extends State<CategoryDonutCard> {
                 style: GoogleFonts.inter(
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.lightTextPrimary,
+                  color: context.textPrimary,
                 ),
               ),
               Text(
@@ -66,12 +66,12 @@ class _CategoryDonutCardState extends State<CategoryDonutCard> {
                 style: GoogleFonts.inter(
                   fontSize: 12,
                   fontWeight: FontWeight.w500,
-                  color: AppColors.lightTextTertiary,
+                  color: context.textTertiary,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 24),
+          SizedBox(height: 24),
 
           // Donut chart
           SizedBox(
@@ -116,7 +116,7 @@ class _CategoryDonutCardState extends State<CategoryDonutCard> {
                         showTitle: false,
                         radius: isTouched ? 56.0 : 48.0,
                         borderSide: overBudget
-                            ? const BorderSide(
+                            ? BorderSide(
                                 color: AppColors.danger,
                                 width: 2,
                               )
@@ -144,18 +144,18 @@ class _CategoryDonutCardState extends State<CategoryDonutCard> {
                       style: GoogleFonts.inter(
                         fontSize: 20,
                         fontWeight: FontWeight.w800,
-                        color: AppColors.lightTextPrimary,
+                        color: context.textPrimary,
                         letterSpacing: -0.5,
                         fontFeatures: const [FontFeature.tabularFigures()],
                       ),
                     ),
-                    const SizedBox(height: 2),
+                    SizedBox(height: 2),
                     Text(
                       'Total Expenses',
                       style: GoogleFonts.inter(
                         fontSize: 11,
                         fontWeight: FontWeight.w500,
-                        color: AppColors.lightTextTertiary,
+                        color: context.textTertiary,
                       ),
                     ),
                   ],
@@ -163,11 +163,11 @@ class _CategoryDonutCardState extends State<CategoryDonutCard> {
               ],
             ),
           ),
-          const SizedBox(height: 20),
+          SizedBox(height: 20),
 
           // Divider
-          Container(height: 1, color: AppColors.lightBorderSubtle),
-          const SizedBox(height: 16),
+          Container(height: 1, color: context.borderSubtle),
+          SizedBox(height: 16),
 
           // Legend — 2-column grid
           _buildLegend(slices, total, budgetLimits),
@@ -187,18 +187,18 @@ class _CategoryDonutCardState extends State<CategoryDonutCard> {
         Row(
           children: [
             Expanded(child: _legendItem(slices[i], total, budgetLimits)),
-            const SizedBox(width: 12),
+            SizedBox(width: 12),
             if (i + 1 < slices.length)
               Expanded(
                 child: _legendItem(slices[i + 1], total, budgetLimits),
               )
             else
-              const Expanded(child: SizedBox()),
+              Expanded(child: SizedBox()),
           ],
         ),
       );
-      if (i + 2 < slices.length) const SizedBox(height: 0);
-      rows.add(const SizedBox(height: 12));
+      if (i + 2 < slices.length) SizedBox(height: 0);
+      rows.add(SizedBox(height: 12));
     }
     return Column(children: rows);
   }
@@ -226,7 +226,7 @@ class _CategoryDonutCardState extends State<CategoryDonutCard> {
             ),
           ),
         ),
-        const SizedBox(width: 8),
+        SizedBox(width: 8),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -239,7 +239,7 @@ class _CategoryDonutCardState extends State<CategoryDonutCard> {
                       style: GoogleFonts.inter(
                         fontSize: 12,
                         fontWeight: FontWeight.w500,
-                        color: AppColors.lightTextSecondary,
+                        color: context.textSecondary,
                       ),
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -249,23 +249,23 @@ class _CategoryDonutCardState extends State<CategoryDonutCard> {
                     style: GoogleFonts.inter(
                       fontSize: 11,
                       fontWeight: FontWeight.w600,
-                      color: AppColors.lightTextTertiary,
+                      color: context.textTertiary,
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 2),
+              SizedBox(height: 2),
               Text(
                 _fmtRupee(s.amount),
                 style: GoogleFonts.inter(
                   fontSize: 13,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.lightTextPrimary,
+                  color: context.textPrimary,
                   fontFeatures: const [FontFeature.tabularFigures()],
                 ),
               ),
               if (budget != null) ...[
-                const SizedBox(height: 1),
+                SizedBox(height: 1),
                 Text(
                   'Budget ${_fmtRupee(budget)}',
                   style: GoogleFonts.inter(
@@ -273,7 +273,7 @@ class _CategoryDonutCardState extends State<CategoryDonutCard> {
                     fontWeight: FontWeight.w400,
                     color: s.amount > budget
                         ? AppColors.danger
-                        : AppColors.lightTextTertiary,
+                        : context.textTertiary,
                   ),
                 ),
               ],
@@ -313,7 +313,7 @@ class _SegmentBadge extends StatelessWidget {
           ),
         ),
         if (budgetPct != null) ...[
-          const SizedBox(height: 1),
+          SizedBox(height: 1),
           Container(
             padding: const EdgeInsets.symmetric(
               horizontal: 4,

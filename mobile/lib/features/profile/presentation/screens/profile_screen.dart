@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/theme_provider.dart';
 import '../widgets/profile_row.dart';
 import '../widgets/profile_user_card.dart';
 import 'budgets_screen.dart';
@@ -14,24 +16,24 @@ import 'recurring_expenses_screen.dart';
 import 'sms_import_screen.dart';
 import 'theme_screen.dart';
 
-class ProfileScreen extends StatefulWidget {
+class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
 
   @override
-  State<ProfileScreen> createState() => _ProfileScreenState();
+  ConsumerState<ProfileScreen> createState() => _ProfileScreenState();
 }
 
-class _ProfileScreenState extends State<ProfileScreen> {
+class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   String _name = 'Vivek Sharma';
   String _phone = '+91 98765 43210';
-  String _theme = 'System';
   String _currency = 'INR';
 
   void _openEdit() {
     showModalBottomSheet(
       context: context,
+      useRootNavigator: true,
       isScrollControlled: true,
-      backgroundColor: Colors.white,
+      backgroundColor: context.bgSurface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -51,25 +53,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
       context: context,
       builder: (_) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text(
+        title: Text(
           'Clear all data?',
           style: TextStyle(fontWeight: FontWeight.w700, fontSize: 17),
         ),
-        content: const Text(
+        content: Text(
           'This will permanently delete all your expenses, budgets, and settings. This cannot be undone.',
-          style: TextStyle(color: AppColors.lightTextSecondary, fontSize: 14),
+          style: TextStyle(color: context.textSecondary, fontSize: 14),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text(
+            child: Text(
               'Cancel',
-              style: TextStyle(color: AppColors.lightTextSecondary),
+              style: TextStyle(color: context.textSecondary),
             ),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text(
+            child: Text(
               'Clear',
               style: TextStyle(
                 color: AppColors.danger,
@@ -88,22 +90,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.lightBgBase,
+      backgroundColor: context.bgBase,
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 40),
           children: [
-            const Text(
+            Text(
               'Profile',
               style: TextStyle(
                 fontSize: 26,
                 fontWeight: FontWeight.w700,
-                color: AppColors.lightTextPrimary,
+                color: context.textPrimary,
               ),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: 16),
             ProfileUserCard(name: _name, phone: _phone, onEdit: _openEdit),
-            const SizedBox(height: 24),
+            SizedBox(height: 24),
             ProfileSection(
               title: 'Finance',
               rows: [
@@ -130,7 +132,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
               ],
             ),
-            const SizedBox(height: 24),
+            SizedBox(height: 24),
             ProfileSection(
               title: 'Data',
               rows: [
@@ -156,7 +158,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
               ],
             ),
-            const SizedBox(height: 24),
+            SizedBox(height: 24),
             ProfileSection(
               title: 'Preferences',
               rows: [
@@ -164,14 +166,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   icon: PhosphorIcons.moon(PhosphorIconsStyle.fill),
                   iconBg: const Color(0xFF3D3D4E),
                   label: 'Theme',
-                  trailing: _theme,
+                  trailing: themeModeToLabel(ref.watch(themeModeProvider)),
                   onTap: () async {
+                    final current = themeModeToLabel(ref.read(themeModeProvider));
                     final result = await Navigator.of(context).push<String>(
                       MaterialPageRoute(
-                        builder: (_) => ThemeScreen(current: _theme),
+                        builder: (_) => ThemeScreen(current: current),
                       ),
                     );
-                    if (result != null) setState(() => _theme = result);
+                    if (result != null) {
+                      ref.read(themeModeProvider.notifier).setMode(
+                        labelToThemeMode(result),
+                      );
+                    }
                   },
                 ),
                 ProfileRow(
@@ -197,7 +204,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
               ],
             ),
-            const SizedBox(height: 24),
+            SizedBox(height: 24),
             ProfileSection(
               title: 'About',
               rows: [
@@ -215,6 +222,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
               ],
             ),
+            SizedBox(height: 100),
           ],
         ),
       ),
@@ -269,27 +277,27 @@ class _EditProfileSheetState extends State<_EditProfileSheet> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Edit Profile',
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w700,
-              color: AppColors.lightTextPrimary,
+              color: context.textPrimary,
             ),
           ),
-          const SizedBox(height: 20),
+          SizedBox(height: 20),
           _LabeledField(
             label: 'Full name',
             ctrl: _nameCtrl,
             type: TextInputType.name,
           ),
-          const SizedBox(height: 14),
+          SizedBox(height: 14),
           _LabeledField(
             label: 'Phone number',
             ctrl: _phoneCtrl,
             type: TextInputType.phone,
           ),
-          const SizedBox(height: 24),
+          SizedBox(height: 24),
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
@@ -306,7 +314,7 @@ class _EditProfileSheetState extends State<_EditProfileSheet> {
                 ),
                 elevation: 0,
               ),
-              child: const Text(
+              child: Text(
                 'Save',
                 style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
               ),
@@ -335,38 +343,38 @@ class _LabeledField extends StatelessWidget {
       children: [
         Text(
           label,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 13,
-            color: AppColors.lightTextSecondary,
+            color: context.textSecondary,
             fontWeight: FontWeight.w500,
           ),
         ),
-        const SizedBox(height: 6),
+        SizedBox(height: 6),
         TextField(
           controller: ctrl,
           keyboardType: type,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 15,
-            color: AppColors.lightTextPrimary,
+            color: context.textPrimary,
           ),
           decoration: InputDecoration(
             filled: true,
-            fillColor: AppColors.lightBgBase,
+            fillColor: context.bgBase,
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 14,
               vertical: 13,
             ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: AppColors.lightBorderSubtle),
+              borderSide: BorderSide(color: context.borderSubtle),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: AppColors.lightBorderSubtle),
+              borderSide: BorderSide(color: context.borderSubtle),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: AppColors.primary500),
+              borderSide: BorderSide(color: AppColors.primary500),
             ),
           ),
         ),

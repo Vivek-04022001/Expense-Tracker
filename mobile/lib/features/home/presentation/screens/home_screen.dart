@@ -20,7 +20,7 @@ class HomeScreen extends ConsumerWidget {
         : '';
 
     return Scaffold(
-      backgroundColor: AppColors.lightBgBase,
+      backgroundColor: context.bgBase,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
@@ -28,17 +28,17 @@ class HomeScreen extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               HomeGreetingHeader(name: name),
-              const SizedBox(height: 18),
+              SizedBox(height: 18),
               const MonthlySpendCard(),
-              const SizedBox(height: 12),
+              SizedBox(height: 12),
               const SavingsRateCard(),
-              const SizedBox(height: 12),
+              SizedBox(height: 12),
               const TodayThisWeekRow(),
-              const SizedBox(height: 24),
+              SizedBox(height: 24),
               const RecentTransactionsList(),
-              const SizedBox(height: 14),
+              SizedBox(height: 14),
               const InsightBanner(),
-              const SizedBox(height: 32),
+              SizedBox(height: 102),
             ],
           ),
         ),
@@ -46,4 +46,3 @@ class HomeScreen extends ConsumerWidget {
     );
   }
 }
-

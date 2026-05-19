@@ -22,7 +22,7 @@ class ProfileRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final labelColor = isDestructive ? AppColors.danger : AppColors.lightTextPrimary;
+    final labelColor = isDestructive ? AppColors.danger : context.textPrimary;
 
     return GestureDetector(
       onTap: onTap,
@@ -42,7 +42,7 @@ class ProfileRow extends StatelessWidget {
                 child: PhosphorIcon(icon, size: 17, color: Colors.white),
               ),
             ),
-            const SizedBox(width: 14),
+            SizedBox(width: 14),
             Expanded(
               child: Text(
                 label,
@@ -56,17 +56,17 @@ class ProfileRow extends StatelessWidget {
             if (trailing != null) ...[
               Text(
                 trailing!,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 13,
-                  color: AppColors.lightTextTertiary,
+                  color: context.textTertiary,
                 ),
               ),
-              const SizedBox(width: 4),
+              SizedBox(width: 4),
             ],
             PhosphorIcon(
               PhosphorIcons.caretRight(PhosphorIconsStyle.bold),
               size: 14,
-              color: AppColors.lightTextTertiary,
+              color: context.textTertiary,
             ),
           ],
         ),
@@ -94,17 +94,17 @@ class ProfileSection extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(4, 0, 0, 10),
           child: Text(
             title.toUpperCase(),
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.w700,
-              color: AppColors.lightTextTertiary,
+              color: context.textTertiary,
               letterSpacing: 0.8,
             ),
           ),
         ),
         Container(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: context.bgSurface,
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
@@ -118,10 +118,10 @@ class ProfileSection extends StatelessWidget {
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             itemCount: rows.length,
-            separatorBuilder: (_, __) => const Divider(
+            separatorBuilder: (_, __) => Divider(
               height: 1,
               indent: 64,
-              color: AppColors.lightBorderSubtle,
+              color: context.borderSubtle,
             ),
             itemBuilder: (_, i) => rows[i],
           ),
