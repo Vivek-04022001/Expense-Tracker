@@ -15,11 +15,11 @@ class _InsightBannerState extends State<InsightBanner> {
   @override
   Widget build(BuildContext context) {
     if (_dismissed) return const SizedBox.shrink();
-
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: AppColors.primary100,
+        color: isDark ? AppColors.darkBgElevated : AppColors.lightBgElevated,
         borderRadius: BorderRadius.circular(16),
       ),
       child: Row(
@@ -84,7 +84,10 @@ class _InsightBannerState extends State<InsightBanner> {
                   child: GestureDetector(
                     onTap: () {},
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
                       decoration: BoxDecoration(
                         color: AppColors.primary500,
                         borderRadius: BorderRadius.circular(20),

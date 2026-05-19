@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../sms_import/presentation/screens/sms_preview_screen.dart';
 import '_inner_app_bar.dart';
 
 class SmsImportScreen extends StatefulWidget {
@@ -22,7 +23,92 @@ class _SmsImportScreenState extends State<SmsImportScreen> {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          // Status card
+          // Scan-now CTA
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: context.bgSurface,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: context.borderSubtle),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      width: 36,
+                      height: 36,
+                      decoration: BoxDecoration(
+                        color: AppColors.success,
+                        borderRadius: BorderRadius.circular(9),
+                      ),
+                      child: Center(
+                        child: PhosphorIcon(
+                          PhosphorIcons.chatText(PhosphorIconsStyle.fill),
+                          size: 17,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Scan inbox for transactions',
+                            style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                              color: context.textPrimary,
+                            ),
+                          ),
+                          Text(
+                            'We read the last 30 days of bank SMS and let '
+                            'you review before importing.',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: context.textSecondary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 14),
+                SizedBox(
+                  width: double.infinity,
+                  height: 44,
+                  child: ElevatedButton(
+                    onPressed: () => Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => const SmsPreviewScreen(),
+                      ),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary500,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      elevation: 0,
+                    ),
+                    child: const Text(
+                      'Scan now',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+          // Options card
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(

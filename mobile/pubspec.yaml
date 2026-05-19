@@ -44,6 +44,12 @@ dependencies:
   # For generating app icons from a single image
   flutter_launcher_icons: ^0.14.4
 
+  # SMS inbox read (Android only) — maintained fork of telephony
+  another_telephony: ^0.4.1
+
+  # Runtime permissions (READ_SMS)
+  permission_handler: ^11.3.1
+
 flutter_launcher_icons:
   android: true
   image_path: "assets/images/app_logo.png" # Path to your logo file
