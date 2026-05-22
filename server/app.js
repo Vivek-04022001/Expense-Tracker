@@ -1,4 +1,5 @@
 import express from "express";
+import cors from "cors";
 import healthRoute from "./routes/health.route.js";
 import authRoute from "./routes/auth.route.js";
 import expenseRouter from "./routes/expense.route.js";
@@ -7,7 +8,7 @@ import savingsRouter from "./routes/savings.route.js";
 import incomeRouter from "./routes/income.route.js";
 
 const app = express();
-
+app.use(cors());
 app.use(express.json());
 
 app.use("/", healthRoute);
