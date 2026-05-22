@@ -17,6 +17,11 @@ class DioClient {
         headers: {'Content-Type': 'application/json'},
       ),
     );
+    // Debug: log the resolved base URL at runtime
+    // This helps confirm whether the app is targeting local or deployed server
+    // and is safe to remove once debugging is complete.
+    // ignore: avoid_print
+    print('Dio baseUrl => ${ApiConstants.baseUrl}');
     _dio.interceptors.add(
       InterceptorsWrapper(onRequest: _onRequest, onError: _onError),
     );
@@ -37,6 +42,11 @@ class DioClient {
     DioException err,
     ErrorInterceptorHandler handler,
   ) async {
+    // Debug: log error details to help diagnose network failures
+    // ignore: avoid_print
+    print(
+      'Dio error: type=${err.type} url=${err.requestOptions.uri} message=${err.message} status=${err.response?.statusCode}',
+    );
     if (err.response?.statusCode == 401 && !_isRefreshing) {
       _isRefreshing = true;
       try {
