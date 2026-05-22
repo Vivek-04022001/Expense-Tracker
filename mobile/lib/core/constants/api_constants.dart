@@ -3,7 +3,7 @@ import 'dart:io';
 class ApiConstants {
   static final String baseUrl = Platform.isAndroid
       ? 'http://10.0.2.2:3000'
-      : 'https://expense-tracker-production-8083.up.railway.app';
+      : 'https://www.expense-tracker-production-8083.up.railway.app';
 
   static const String registerEndpoint = '/auth/register';
   static const String loginEndpoint = '/auth/login';
