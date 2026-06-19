@@ -1,5 +1,6 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../../core/errors/app_exceptions.dart';
+import '../../../accounts/presentation/providers/account_provider.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../savings/presentation/providers/savings_provider.dart';
 import '../../data/models/expense_model.dart';
@@ -40,6 +41,7 @@ class ExpenseListNotifier extends _$ExpenseListNotifier {
     String? description,
     ExpenseCategory? category,
     ExpensePaymentMethod? paymentMethod,
+    String? accountId,
   }) async {
     try {
       final repo = ref.read(expenseRepositoryProvider);
@@ -48,6 +50,7 @@ class ExpenseListNotifier extends _$ExpenseListNotifier {
         description: description,
         category: category,
         paymentMethod: paymentMethod,
+        accountId: accountId,
       );
       final current = state.valueOrNull ?? [];
       state = AsyncValue.data([expense, ...current]);
@@ -93,6 +96,8 @@ class ExpenseListNotifier extends _$ExpenseListNotifier {
     ref.invalidate(expensesForMonthProvider);
     ref.invalidate(currentMonthSavingsProvider);
     ref.invalidate(allTimeSavingsProvider);
+    // Account balances change when an expense is added/edited/removed.
+    ref.invalidate(accountListNotifierProvider);
   }
 }
 

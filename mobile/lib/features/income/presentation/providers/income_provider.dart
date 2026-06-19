@@ -1,4 +1,5 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import '../../../accounts/presentation/providers/account_provider.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../expenses/presentation/providers/expense_provider.dart';
 import '../../../savings/presentation/providers/savings_provider.dart';
@@ -30,12 +31,14 @@ class IncomeListNotifier extends _$IncomeListNotifier {
     required double amount,
     IncomeType? incomeType,
     String? description,
+    String? accountId,
   }) async {
     final repo = ref.read(incomeRepositoryProvider);
     final income = await repo.createIncome(
       amount: amount,
       incomeType: incomeType,
       description: description,
+      accountId: accountId,
     );
     final current = state.valueOrNull ?? [];
     state = AsyncValue.data([income, ...current]);
@@ -75,6 +78,8 @@ class IncomeListNotifier extends _$IncomeListNotifier {
     ref.invalidate(expenseSummaryProvider);
     ref.invalidate(currentMonthSavingsProvider);
     ref.invalidate(allTimeSavingsProvider);
+    // Account balances change when income is added/edited/removed.
+    ref.invalidate(accountListNotifierProvider);
   }
 }
 

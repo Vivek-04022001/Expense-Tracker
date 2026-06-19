@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/errors/app_exceptions.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../shared/widgets/calculator_numpad.dart';
+import '../../../accounts/presentation/widgets/account_selector.dart';
 import '../../data/models/income_model.dart';
 import '../providers/income_provider.dart';
 
@@ -17,6 +18,7 @@ class _AddIncomeSheetState extends ConsumerState<AddIncomeSheet> {
   String _expr = '';
   IncomeType _incomeType = IncomeType.salary;
   final _descCtrl = TextEditingController();
+  String? _accountId;
   bool _saving = false;
   bool _showSuccess = false;
 
@@ -112,6 +114,7 @@ class _AddIncomeSheetState extends ConsumerState<AddIncomeSheet> {
             amount: value,
             incomeType: _incomeType,
             description: desc.isNotEmpty ? desc : null,
+            accountId: _accountId,
           );
       if (!mounted) return;
       setState(() {
@@ -317,6 +320,12 @@ class _AddIncomeSheetState extends ConsumerState<AddIncomeSheet> {
                       );
                     },
                   ),
+                ),
+                SizedBox(height: 10),
+                // Account selector
+                AccountSelector(
+                  selectedId: _accountId,
+                  onChanged: (id) => setState(() => _accountId = id),
                 ),
                 SizedBox(height: 12),
                 // Description

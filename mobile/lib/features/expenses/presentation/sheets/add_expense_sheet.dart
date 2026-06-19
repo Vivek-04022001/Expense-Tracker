@@ -6,6 +6,7 @@ import '../../../../core/errors/app_exceptions.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/category_mapper.dart';
 import '../../../../shared/widgets/calculator_numpad.dart';
+import '../../../accounts/presentation/widgets/account_selector.dart';
 import '../../data/models/expense_model.dart';
 import '../providers/expense_provider.dart';
 
@@ -22,6 +23,7 @@ class _AddExpenseSheetState extends ConsumerState<AddExpenseSheet> {
   final _merchantCtrl = TextEditingController();
   ExpensePaymentMethod _payment = ExpensePaymentMethod.upi;
   DateTime _date = DateTime.now();
+  String? _accountId;
   bool _saving = false;
   bool _showSuccess = false;
 
@@ -125,6 +127,7 @@ class _AddExpenseSheetState extends ConsumerState<AddExpenseSheet> {
             description: desc.length >= 5 ? desc : null,
             category: _category,
             paymentMethod: _payment,
+            accountId: _accountId,
           );
       if (!mounted) return;
       setState(() {
@@ -299,6 +302,12 @@ class _AddExpenseSheetState extends ConsumerState<AddExpenseSheet> {
                       );
                     },
                   ),
+                ),
+                SizedBox(height: 10),
+                // Account selector
+                AccountSelector(
+                  selectedId: _accountId,
+                  onChanged: (id) => setState(() => _accountId = id),
                 ),
                 SizedBox(height: 12),
                 // Merchant + Date

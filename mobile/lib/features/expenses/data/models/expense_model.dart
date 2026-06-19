@@ -68,6 +68,7 @@ class ExpenseModel {
     required this.userId,
     required this.createdAt,
     this.description,
+    this.accountId,
   });
 
   final String id;
@@ -77,6 +78,7 @@ class ExpenseModel {
   final String userId;
   final DateTime createdAt;
   final String? description;
+  final String? accountId;
 
   factory ExpenseModel.fromJson(Map<String, dynamic> json) => ExpenseModel(
         id: json['id'] as String,
@@ -88,5 +90,6 @@ class ExpenseModel {
         userId: json['userId'] as String,
         createdAt: DateTime.parse(json['createdAt'] as String),
         description: json['description'] as String?,
+        accountId: json['accountId'] as String?,
       );
 }

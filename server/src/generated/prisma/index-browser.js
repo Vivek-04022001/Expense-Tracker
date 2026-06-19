@@ -147,6 +147,7 @@ exports.Prisma.ExpenseScalarFieldEnum = {
   paymentMethod: 'paymentMethod',
   description: 'description',
   userId: 'userId',
+  accountId: 'accountId',
   createdAt: 'createdAt',
   deletedAt: 'deletedAt'
 };
@@ -157,7 +158,19 @@ exports.Prisma.IncomeScalarFieldEnum = {
   incomeType: 'incomeType',
   description: 'description',
   userId: 'userId',
+  accountId: 'accountId',
   createdAt: 'createdAt'
+};
+
+exports.Prisma.TransferScalarFieldEnum = {
+  id: 'id',
+  amount: 'amount',
+  description: 'description',
+  userId: 'userId',
+  fromAccountId: 'fromAccountId',
+  toAccountId: 'toAccountId',
+  createdAt: 'createdAt',
+  deletedAt: 'deletedAt'
 };
 
 exports.Prisma.BudgetScalarFieldEnum = {
@@ -235,6 +248,7 @@ exports.Prisma.ModelName = {
   Account: 'Account',
   Expense: 'Expense',
   Income: 'Income',
+  Transfer: 'Transfer',
   Budget: 'Budget',
   RefreshToken: 'RefreshToken'
 };

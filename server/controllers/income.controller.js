@@ -4,6 +4,7 @@ import {
   UpdateIncomeSchema,
   IncomeQuerySchema,
 } from "../src/validators/incomeValidator.js";
+import { applyDelta, ownsAccount } from "../services/balance.service.js";
 
 export const createIncome = async (req, res) => {
   const result = CreateIncomeSchema.safeParse(req.body);
@@ -14,16 +15,20 @@ export const createIncome = async (req, res) => {
       .json({ message: "Invalid income data", errors: result.error.errors });
   }
 
-  const { amount, incomeType, description } = result.data;
+  const { amount, incomeType, description, accountId } = result.data;
   const userId = req.user.userId;
 
-  const income = await prisma.income.create({
-    data: {
-      amount,
-      incomeType,
-      description,
-      userId,
-    },
+  if (!(await ownsAccount(prisma, userId, accountId))) {
+    return res.status(400).json({ message: "Invalid account" });
+  }
+
+  const income = await prisma.$transaction(async (tx) => {
+    const created = await tx.income.create({
+      data: { amount, incomeType, description, accountId, userId },
+    });
+    // Income increases the account balance.
+    await applyDelta(tx, accountId, amount);
+    return created;
   });
 
   return res
@@ -76,9 +81,26 @@ export const updateIncome = async (req, res) => {
 
   if (!income) return res.status(404).json({ message: "Income not found" });
 
-  const updated = await prisma.income.update({
-    where: { id },
-    data: result.data,
+  const data = result.data;
+  const newAccountId = "accountId" in data ? data.accountId : income.accountId;
+
+  if (
+    "accountId" in data &&
+    data.accountId &&
+    !(await ownsAccount(prisma, userId, data.accountId))
+  ) {
+    return res.status(400).json({ message: "Invalid account" });
+  }
+
+  const oldAmount = parseFloat(income.amount);
+  const newAmount = data.amount ?? oldAmount;
+
+  const updated = await prisma.$transaction(async (tx) => {
+    const result = await tx.income.update({ where: { id }, data });
+    // Reverse old effect, apply new (income increases balance).
+    await applyDelta(tx, income.accountId, -oldAmount);
+    await applyDelta(tx, newAccountId, newAmount);
+    return result;
   });
 
   return res
@@ -96,8 +118,10 @@ export const deleteIncome = async (req, res) => {
 
   if (!income) return res.status(404).json({ message: "Income not found" });
 
-  await prisma.income.delete({
-    where: { id },
+  await prisma.$transaction(async (tx) => {
+    await tx.income.delete({ where: { id } });
+    // Reverse the income: remove the amount from the account.
+    await applyDelta(tx, income.accountId, -parseFloat(income.amount));
   });
 
   return res.status(204).send();

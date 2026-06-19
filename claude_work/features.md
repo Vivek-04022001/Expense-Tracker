@@ -72,13 +72,27 @@ have this), plus a date/time footer (`Jan 21, 2021 — 2:00 PM`).
 
 **Depends on:** F1 (needs ≥2 accounts).
 
-**Lives in:** `features/expenses/presentation/sheets/` (generalize the existing sheet) +
-`features/navigation/.../shell_screen.dart` entry-type picker.
+**Lives in:** new `features/transfers/` module + account selector added to expense/income
+sheets + `features/navigation/.../shell_screen.dart` entry-type picker.
 
 **Acceptance:**
-- [ ] Transfer tab: pick From + To account, amount, optional note, date/time.
-- [ ] Transfer debits source, credits destination; excluded from expense/income totals.
-- [ ] Calculator keypad works for all three types.
+- [x] Transfer flow: pick From + To account (From≠To enforced), amount via numpad, optional note.
+- [x] Transfer debits source, credits destination; lives in its own `Transfer` table so it's
+      naturally excluded from expense/income totals.
+- [x] Numpad works for all three types (expense/income/transfer).
+- [x] **(F1 carryover)** Account selector now in add-expense & add-income sheets.
+- [x] **(F1 carryover)** Account balances auto-adjust on create/edit/delete of expense, income,
+      and transfer (atomic in a Prisma `$transaction`).
+- [~] Date+time picker — **deferred**: server create endpoints use `now()` and don't accept a
+      custom `createdAt`. Adding editable date/time needs a server change; tracked as a follow-up.
+
+**Implemented in F2 (`feature/transfer` branch):**
+- Server: `Transfer` model + `accountId` on Expense/Income (migration), `balance.service.js`
+  (atomic balance deltas + account-ownership check), transfer controller/validator/routes,
+  account-balance adjustments in expense/income controllers, registered `/transfers`.
+- Mobile: `features/transfers/` module (model, repo, notifier, transfer sheet), shared
+  `AccountSelector` widget, account selector in expense/income sheets, Transfer option in the
+  entry picker, balance refresh via provider invalidation after every mutation.
 
 ---
 

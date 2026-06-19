@@ -222,7 +222,7 @@ final selectedExpenseMonthProvider =
 
 typedef _$SelectedExpenseMonth = AutoDisposeNotifier<DateTime>;
 String _$expenseListNotifierHash() =>
-    r'd6aab7ae97b4fca09b3910f76c8fb95088eaf156';
+    r'afa462a10de612834ed2e974f10bbd2bde255b57';
 
 /// See also [ExpenseListNotifier].
 @ProviderFor(ExpenseListNotifier)
