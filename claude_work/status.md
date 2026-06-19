@@ -34,7 +34,7 @@ We are **not** copying the cream/yellow look. The goal is feature parity + a pol
 | # | Feature | Screens | Priority | Status |
 |---|---------|---------|----------|--------|
 | F1 | Accounts (wallets/cards/cash) | 7 | P0 | ✅ Done (merged to dev) |
-| F2 | Transfer transaction type | 4 | P0 | 🔍 In review (`feature/transfer`) |
+| F2 | Transfer transaction type | 4 | P0 | ✅ Done (merged to dev) |
 | F3 | Editable Categories (CRUD) | 8 | P1 | 📋 Planned |
 | F4 | Records: date-grouped list + month summary header | 1 | P1 | 📋 Planned |
 | F5 | Budget planner polish (limit-exceeded states) | 3 | P2 | 📋 Planned |
@@ -60,7 +60,8 @@ We are **not** copying the cream/yellow look. The goal is feature parity + a pol
 | Feature | Branch | Merged to dev? |
 |---------|--------|----------------|
 | F1 Accounts | `feature/accounts` | ✅ merged 2026-06-19 (--no-ff) |
-| F2 Transfer | `feature/transfer` | ⏳ awaiting approval |
+| F2 Transfer | `feature/transfer` | ✅ merged 2026-06-19 (--no-ff) |
+| F3 Categories CRUD | `feature/categories` (next) | — |
 
 ## ✅ F1 done
 
