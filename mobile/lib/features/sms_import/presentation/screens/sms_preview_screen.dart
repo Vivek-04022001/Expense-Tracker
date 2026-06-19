@@ -19,19 +19,6 @@ class SmsPreviewScreen extends ConsumerStatefulWidget {
 }
 
 class _SmsPreviewScreenState extends ConsumerState<SmsPreviewScreen> {
-  bool _autoScanned = false;
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!_autoScanned) {
-        _autoScanned = true;
-        ref.read(smsImportControllerProvider.notifier).scan();
-      }
-    });
-  }
-
   Future<void> _onImport() async {
     final notifier = ref.read(smsImportControllerProvider.notifier);
     await notifier.importSelected();
@@ -55,7 +42,7 @@ class _SmsPreviewScreenState extends ConsumerState<SmsPreviewScreen> {
       appBar: InnerAppBar(
         title: 'Review SMS',
         actions: [
-          if (state.rows.isNotEmpty && !state.scanning)
+          if (state.rows.isNotEmpty)
             TextButton(
               onPressed: () =>
                   notifier.selectAll(state.selectedCount != state.rows.length),
@@ -78,37 +65,8 @@ class _SmsPreviewScreenState extends ConsumerState<SmsPreviewScreen> {
   }
 
   Widget _buildBody(SmsImportState state, SmsImportController notifier) {
-    if (state.scanning) {
-      return Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const CircularProgressIndicator(strokeWidth: 2.4),
-            const SizedBox(height: 16),
-            Text(
-              'Scanning your inbox…',
-              style: TextStyle(fontSize: 14, color: context.textSecondary),
-            ),
-          ],
-        ),
-      );
-    }
-
-    if (state.error != null && state.rows.isEmpty) {
-      return _ErrorState(
-        message: state.error!,
-        permanentlyDenied: state.permanentlyDenied,
-        onRetry: () => notifier.scan(),
-        onOpenSettings: () => notifier.openPermissionSettings(),
-      );
-    }
-
     if (state.rows.isEmpty) {
-      return _EmptyState(
-        unparsed: state.unparsedCount,
-        totalScanned: state.totalScanned,
-        onRescan: () => notifier.scan(),
-      );
+      return _EmptyState(onAddMore: () => Navigator.of(context).pop());
     }
 
     final debits = <int>[];
@@ -120,17 +78,10 @@ class _SmsPreviewScreenState extends ConsumerState<SmsPreviewScreen> {
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 120),
       children: [
-        _Summary(
-          totalScanned: state.totalScanned,
-          parsed: state.rows.length,
-          unparsed: state.unparsedCount,
-          alreadyImported: state.alreadyImportedCount,
-        ),
-        if (state.error != null) ...[
+        if (state.parseError != null) ...[
+          _InlineWarning(message: state.parseError!),
           const SizedBox(height: 12),
-          _InlineWarning(message: state.error!),
         ],
-        const SizedBox(height: 16),
         if (debits.isNotEmpty) ...[
           _SectionHeader(label: 'EXPENSES', count: debits.length),
           const SizedBox(height: 8),
@@ -161,7 +112,7 @@ class _SmsPreviewScreenState extends ConsumerState<SmsPreviewScreen> {
   }
 
   Widget? _buildImportBar(SmsImportState state, SmsImportController notifier) {
-    if (state.scanning || state.rows.isEmpty) return null;
+    if (state.rows.isEmpty) return null;
     final disabled = state.selectedCount == 0 || state.importing;
 
     return SafeArea(
@@ -872,15 +823,9 @@ class _Checkbox extends StatelessWidget {
 // ── Empty + error states ──────────────────────────────────────────────────────
 
 class _EmptyState extends StatelessWidget {
-  const _EmptyState({
-    required this.unparsed,
-    required this.totalScanned,
-    required this.onRescan,
-  });
+  const _EmptyState({required this.onAddMore});
 
-  final int unparsed;
-  final int totalScanned;
-  final VoidCallback onRescan;
+  final VoidCallback onAddMore;
 
   @override
   Widget build(BuildContext context) {
@@ -897,9 +842,7 @@ class _EmptyState extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             Text(
-              totalScanned == 0
-                  ? 'No bank SMS found in the last 30 days'
-                  : 'No new transactions to import',
+              'No transactions to review',
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 15,
@@ -907,17 +850,15 @@ class _EmptyState extends StatelessWidget {
                 color: context.textPrimary,
               ),
             ),
-            if (unparsed > 0) ...[
-              const SizedBox(height: 6),
-              Text(
-                '$unparsed message${unparsed == 1 ? '' : 's'} could not be parsed.',
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 13, color: context.textSecondary),
-              ),
-            ],
+            const SizedBox(height: 6),
+            Text(
+              'Go back and paste a bank SMS to import a transaction.',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 13, color: context.textSecondary),
+            ),
             const SizedBox(height: 20),
             OutlinedButton(
-              onPressed: onRescan,
+              onPressed: onAddMore,
               style: OutlinedButton.styleFrom(
                 side: BorderSide(color: context.borderSubtle),
                 shape: RoundedRectangleBorder(
@@ -929,77 +870,11 @@ class _EmptyState extends StatelessWidget {
                 ),
               ),
               child: Text(
-                'Scan again',
+                'Add SMS',
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
                   color: context.textPrimary,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _ErrorState extends StatelessWidget {
-  const _ErrorState({
-    required this.message,
-    required this.permanentlyDenied,
-    required this.onRetry,
-    required this.onOpenSettings,
-  });
-
-  final String message;
-  final bool permanentlyDenied;
-  final VoidCallback onRetry;
-  final VoidCallback onOpenSettings;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(32),
-      child: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            PhosphorIcon(
-              PhosphorIcons.lockKey(PhosphorIconsStyle.fill),
-              size: 48,
-              color: AppColors.warning,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              message,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 14,
-                color: context.textPrimary,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            const SizedBox(height: 20),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: permanentlyDenied ? onOpenSettings : onRetry,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary500,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  elevation: 0,
-                ),
-                child: Text(
-                  permanentlyDenied ? 'Open settings' : 'Try again',
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700,
-                  ),
                 ),
               ),
             ),

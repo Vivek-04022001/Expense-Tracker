@@ -9,14 +9,12 @@ import '../../data/models/parsed_transaction.dart';
 import '../../data/parsers/bank_sms_parser.dart';
 import '../../services/sms_datasource.dart';
 import '../../services/sms_import_service.dart';
-import '../../services/sms_permission_handler.dart';
 
 part 'sms_import_provider.g.dart';
 
 @riverpod
 SmsImportService smsImportService(SmsImportServiceRef ref) {
   return SmsImportService(
-    permissions: SmsPermissionHandler(),
     datasource: SmsDatasource(),
     parser: BankSmsParser(),
   );
@@ -44,35 +42,20 @@ class SmsImportRow {
 @immutable
 class SmsImportState {
   const SmsImportState({
-    required this.scanning,
     required this.importing,
     required this.rows,
-    required this.totalScanned,
-    required this.unparsedCount,
-    required this.alreadyImportedCount,
-    this.error,
-    this.permanentlyDenied = false,
+    this.parseError,
     this.lastImportedCount,
   });
 
-  final bool scanning;
   final bool importing;
   final List<SmsImportRow> rows;
-  final int totalScanned;
-  final int unparsedCount;
-  /// Transactions hidden because they were already imported in a prior scan.
-  final int alreadyImportedCount;
-  final String? error;
-  final bool permanentlyDenied;
+  final String? parseError;
   final int? lastImportedCount;
 
   factory SmsImportState.initial() => const SmsImportState(
-        scanning: false,
         importing: false,
         rows: [],
-        totalScanned: 0,
-        unparsedCount: 0,
-        alreadyImportedCount: 0,
       );
 
   int get selectedCount => rows.where((r) => r.selected).length;
@@ -80,28 +63,18 @@ class SmsImportState {
   int get creditCount => rows.where((r) => r.txn.isCredit).length;
 
   SmsImportState copyWith({
-    bool? scanning,
     bool? importing,
     List<SmsImportRow>? rows,
-    int? totalScanned,
-    int? unparsedCount,
-    int? alreadyImportedCount,
-    String? error,
-    bool clearError = false,
-    bool? permanentlyDenied,
+    String? parseError,
+    bool clearParseError = false,
     int? lastImportedCount,
     bool clearLastImported = false,
   }) =>
       SmsImportState(
-        scanning: scanning ?? this.scanning,
         importing: importing ?? this.importing,
         rows: rows ?? this.rows,
-        totalScanned: totalScanned ?? this.totalScanned,
-        unparsedCount: unparsedCount ?? this.unparsedCount,
-        alreadyImportedCount:
-            alreadyImportedCount ?? this.alreadyImportedCount,
-        error: clearError ? null : (error ?? this.error),
-        permanentlyDenied: permanentlyDenied ?? this.permanentlyDenied,
+        parseError:
+            clearParseError ? null : (parseError ?? this.parseError),
         lastImportedCount: clearLastImported
             ? null
             : (lastImportedCount ?? this.lastImportedCount),
@@ -113,38 +86,49 @@ class SmsImportController extends _$SmsImportController {
   @override
   SmsImportState build() => SmsImportState.initial();
 
-  Future<void> scan() async {
-    state = state.copyWith(
-      scanning: true,
-      clearError: true,
-      clearLastImported: true,
-      permanentlyDenied: false,
-    );
-    try {
-      final result = await ref.read(smsImportServiceProvider).scan();
+  /// Parses a pasted bank SMS and, if successful, adds it to the pending list.
+  /// Returns true if a transaction was found, false if the text could not be
+  /// parsed.
+  Future<bool> parsePasted(String text) async {
+    if (text.trim().isEmpty) return false;
+
+    state = state.copyWith(clearParseError: true);
+
+    final txn = ref.read(smsImportServiceProvider).parsePasted(text);
+    if (txn == null) {
       state = state.copyWith(
-        scanning: false,
-        rows: result.transactions
-            .map((t) => SmsImportRow(txn: t, selected: true))
-            .toList(),
-        totalScanned: result.totalScanned,
-        unparsedCount: result.unparsedCount,
-        alreadyImportedCount: result.alreadyImportedCount,
+        parseError:
+            'Could not parse this SMS. Make sure it is a bank transaction message.',
       );
-    } on SmsPermissionDenied catch (e) {
-      state = state.copyWith(
-        scanning: false,
-        error: e.permanentlyDenied
-            ? 'SMS access is blocked. Enable it from app settings.'
-            : 'SMS access is required to scan transactions.',
-        permanentlyDenied: e.permanentlyDenied,
-      );
-    } catch (e) {
-      state = state.copyWith(
-        scanning: false,
-        error: 'Could not scan SMS: $e',
-      );
+      return false;
     }
+
+    // Skip if the fingerprint is already in the list this session.
+    if (state.rows.any((r) => r.txn.fingerprint == txn.fingerprint)) {
+      state = state.copyWith(
+        parseError: 'This transaction is already in the list.',
+      );
+      return false;
+    }
+
+    // Skip if previously imported.
+    final imported =
+        await ref.read(smsImportServiceProvider).loadImportedFingerprints();
+    if (imported.contains(txn.fingerprint)) {
+      state = state.copyWith(
+        parseError: 'This transaction was already imported previously.',
+      );
+      return false;
+    }
+
+    state = state.copyWith(
+      rows: [...state.rows, SmsImportRow(txn: txn, selected: true)],
+    );
+    return true;
+  }
+
+  void clearRows() {
+    state = SmsImportState.initial();
   }
 
   void toggleSelection(int index) {
@@ -186,7 +170,7 @@ class SmsImportController extends _$SmsImportController {
     final toImport = state.rows.where((r) => r.selected).toList();
     if (toImport.isEmpty) return;
 
-    state = state.copyWith(importing: true, clearError: true);
+    state = state.copyWith(importing: true, clearParseError: true);
 
     final expenses = ref.read(expenseListNotifierProvider.notifier);
     final incomes = ref.read(incomeListNotifierProvider.notifier);
@@ -219,14 +203,12 @@ class SmsImportController extends _$SmsImportController {
       }
     }
 
-    // Persist fingerprints so they're filtered out on the next scan.
     if (importedFingerprints.isNotEmpty) {
       await ref
           .read(smsImportServiceProvider)
           .recordImported(importedFingerprints);
     }
 
-    // Remove successfully-imported rows; keep failed ones with selection cleared.
     final remaining = state.rows
         .where((r) => !r.selected || failed.contains(r))
         .map((r) => failed.contains(r) ? r.copyWith(selected: false) : r)
@@ -236,11 +218,7 @@ class SmsImportController extends _$SmsImportController {
       importing: false,
       rows: remaining,
       lastImportedCount: ok,
-      error: failed.isEmpty
-          ? null
-          : '${failed.length} could not be imported.',
+      parseError: failed.isEmpty ? null : '${failed.length} could not be imported.',
     );
   }
-
-  Future<void> openPermissionSettings() => SmsPermissionHandler().openSettings();
 }

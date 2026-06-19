@@ -5,20 +5,16 @@ import 'package:paisa/features/sms_import/data/parsers/bank_sms_parser.dart';
 import 'package:paisa/features/sms_import/services/sms_datasource.dart';
 import 'package:paisa/features/sms_import/services/sms_import_history.dart';
 import 'package:paisa/features/sms_import/services/sms_import_service.dart';
-import 'package:paisa/features/sms_import/services/sms_permission_handler.dart';
 
-class MockPermissions extends Mock implements SmsPermissionHandler {}
 class MockDatasource extends Mock implements SmsDatasource {}
 class MockParser extends Mock implements BankSmsParser {}
 class MockHistory extends Mock implements SmsImportHistory {}
 
 void main() {
   setUpAll(() {
-    registerFallbackValue(const Duration(days: 30));
     registerFallbackValue(DateTime(2026));
   });
 
-  late MockPermissions permissions;
   late MockDatasource datasource;
   late MockParser parser;
   late MockHistory history;
@@ -27,89 +23,43 @@ void main() {
   final date = DateTime(2026, 5, 12);
 
   setUp(() {
-    permissions = MockPermissions();
     datasource = MockDatasource();
     parser = MockParser();
     history = MockHistory();
-    // Default: no previously imported fingerprints
     when(() => history.loadImported()).thenAnswer((_) async => {});
     service = SmsImportService(
-      permissions: permissions,
       datasource: datasource,
       parser: parser,
       history: history,
     );
   });
 
-  group('SmsImportService.scan()', () {
-    test('throws SmsPermissionDenied(false) when permission is denied', () async {
-      when(() => permissions.request())
-          .thenAnswer((_) async => SmsPermissionResult.denied);
+  group('SmsImportService.parsePasted()', () {
+    test('returns null when parser cannot recognise the SMS', () {
+      when(() => datasource.fromPasted(any())).thenReturn(
+        RawSms(body: 'Your OTP is 123456', sender: 'BANKMS', date: date),
+      );
+      when(
+        () => parser.parse(
+          body: any(named: 'body'),
+          sender: any(named: 'sender'),
+          date: any(named: 'date'),
+        ),
+      ).thenReturn(null);
 
-      expect(
-        () => service.scan(),
-        throwsA(
-          predicate<SmsPermissionDenied>((e) => !e.permanentlyDenied),
+      final result = service.parsePasted('Your OTP is 123456');
+      expect(result, isNull);
+    });
+
+    test('returns a ParsedTransaction for a valid bank SMS', () {
+      final txn = _makeDebit(amount: 450, date: date);
+      when(() => datasource.fromPasted(any())).thenReturn(
+        RawSms(
+          body: 'Rs.450 debited from a/c **4321. Info: Swiggy.',
+          sender: 'HDFCBK',
+          date: date,
         ),
       );
-    });
-
-    test('throws SmsPermissionDenied(true) when permanently denied', () async {
-      when(() => permissions.request())
-          .thenAnswer((_) async => SmsPermissionResult.permanentlyDenied);
-
-      expect(
-        () => service.scan(),
-        throwsA(
-          predicate<SmsPermissionDenied>((e) => e.permanentlyDenied),
-        ),
-      );
-    });
-
-    test('returns empty result when inbox is empty', () async {
-      when(() => permissions.request())
-          .thenAnswer((_) async => SmsPermissionResult.granted);
-      when(() => datasource.fetchRecent(lookback: any(named: 'lookback')))
-          .thenAnswer((_) async => []);
-
-      final result = await service.scan();
-
-      expect(result.transactions, isEmpty);
-      expect(result.totalScanned, 0);
-      expect(result.unparsedCount, 0);
-    });
-
-    test('unparseable SMS increments unparsedCount', () async {
-      when(() => permissions.request())
-          .thenAnswer((_) async => SmsPermissionResult.granted);
-      when(() => datasource.fetchRecent(lookback: any(named: 'lookback')))
-          .thenAnswer((_) async => [
-            RawSms(body: 'Your OTP is 123456', sender: 'ICICIB', date: date),
-          ]);
-      when(
-        () => parser.parse(
-          body: any(named: 'body'),
-          sender: any(named: 'sender'),
-          date: any(named: 'date'),
-        ),
-      ).thenReturn(null);
-
-      final result = await service.scan();
-
-      expect(result.transactions, isEmpty);
-      expect(result.totalScanned, 1);
-      expect(result.unparsedCount, 1);
-    });
-
-    test('successfully parsed SMS appears in result', () async {
-      final txn = _makeDebit(amount: 500, date: date);
-
-      when(() => permissions.request())
-          .thenAnswer((_) async => SmsPermissionResult.granted);
-      when(() => datasource.fetchRecent(lookback: any(named: 'lookback')))
-          .thenAnswer((_) async => [
-            RawSms(body: 'Rs.500 debited', sender: 'HDFCBK', date: date),
-          ]);
       when(
         () => parser.parse(
           body: any(named: 'body'),
@@ -118,146 +68,61 @@ void main() {
         ),
       ).thenReturn(txn);
 
-      final result = await service.scan();
-
-      expect(result.transactions, hasLength(1));
-      expect(result.transactions.first.amount, 500);
-      expect(result.totalScanned, 1);
-      expect(result.unparsedCount, 0);
+      final result = service.parsePasted('Rs.450 debited from a/c **4321. Info: Swiggy.');
+      expect(result, isNotNull);
+      expect(result!.amount, 450);
     });
 
-    test('duplicate transactions (same fingerprint) are deduplicated', () async {
-      final txn = _makeDebit(amount: 500, date: date);
-
-      when(() => permissions.request())
-          .thenAnswer((_) async => SmsPermissionResult.granted);
-      // Same transaction in inbox twice (e.g. delivery report duplicate)
-      when(() => datasource.fetchRecent(lookback: any(named: 'lookback')))
-          .thenAnswer((_) async => [
-            RawSms(body: 'Rs.500 debited', sender: 'HDFCBK', date: date),
-            RawSms(body: 'Rs.500 debited', sender: 'HDFCBK', date: date),
-          ]);
+    test('passes the body from datasource.fromPasted to the parser', () {
+      const smsText = 'Rs.750 debited';
+      final raw = RawSms(body: smsText, sender: 'HDFCBK', date: date);
+      when(() => datasource.fromPasted(smsText)).thenReturn(raw);
       when(
         () => parser.parse(
-          body: any(named: 'body'),
-          sender: any(named: 'sender'),
+          body: smsText,
+          sender: 'HDFCBK',
           date: any(named: 'date'),
         ),
-      ).thenReturn(txn);
+      ).thenReturn(_makeDebit(amount: 750, date: date));
 
-      final result = await service.scan();
+      service.parsePasted(smsText);
 
-      // Even though inbox had 2 rows, fingerprint dedup keeps only 1
-      expect(result.transactions, hasLength(1));
-      expect(result.totalScanned, 2);
+      verify(
+        () => parser.parse(
+          body: smsText,
+          sender: 'HDFCBK',
+          date: any(named: 'date'),
+        ),
+      ).called(1);
     });
 
-    test('different fingerprints are NOT deduplicated', () async {
-      final txn1 = _makeDebit(amount: 500, date: date);
-      final txn2 = _makeDebit(amount: 750, date: date);
-
-      when(() => permissions.request())
-          .thenAnswer((_) async => SmsPermissionResult.granted);
-      when(() => datasource.fetchRecent(lookback: any(named: 'lookback')))
-          .thenAnswer((_) async => [
-            RawSms(body: 'msg1', sender: 'HDFCBK', date: date),
-            RawSms(body: 'msg2', sender: 'HDFCBK', date: date),
-          ]);
-      when(
-        () => parser.parse(
-          body: 'msg1',
-          sender: any(named: 'sender'),
-          date: any(named: 'date'),
-        ),
-      ).thenReturn(txn1);
-      when(
-        () => parser.parse(
-          body: 'msg2',
-          sender: any(named: 'sender'),
-          date: any(named: 'date'),
-        ),
-      ).thenReturn(txn2);
-
-      final result = await service.scan();
-
-      expect(result.transactions, hasLength(2));
+    test('detects HDFC sender from body', () {
+      const body = 'HDFC Bank: Rs.200 debited';
+      final datasourceReal = SmsDatasource();
+      final raw = datasourceReal.fromPasted(body);
+      expect(raw.sender, 'HDFCBK');
     });
 
-    test('mix of parseable and unparseable SMS is counted correctly', () async {
-      final txn = _makeDebit(amount: 300, date: date);
-
-      when(() => permissions.request())
-          .thenAnswer((_) async => SmsPermissionResult.granted);
-      when(() => datasource.fetchRecent(lookback: any(named: 'lookback')))
-          .thenAnswer((_) async => [
-            RawSms(body: 'good', sender: 'HDFCBK', date: date),
-            RawSms(body: 'bad', sender: 'UNKNOWN', date: date),
-            RawSms(body: 'bad2', sender: 'UNKNOWN', date: date),
-          ]);
-      when(
-        () => parser.parse(body: 'good', sender: any(named: 'sender'), date: any(named: 'date')),
-      ).thenReturn(txn);
-      when(
-        () => parser.parse(body: 'bad', sender: any(named: 'sender'), date: any(named: 'date')),
-      ).thenReturn(null);
-      when(
-        () => parser.parse(body: 'bad2', sender: any(named: 'sender'), date: any(named: 'date')),
-      ).thenReturn(null);
-
-      final result = await service.scan();
-
-      expect(result.transactions, hasLength(1));
-      expect(result.totalScanned, 3);
-      expect(result.unparsedCount, 2);
+    test('detects ICICI sender from body', () {
+      const body = 'ICICI Bank Acct XX9876 debited Rs 899';
+      final datasourceReal = SmsDatasource();
+      final raw = datasourceReal.fromPasted(body);
+      expect(raw.sender, 'ICICIB');
     });
 
-    test('already-imported fingerprints are filtered out and counted', () async {
-      final txn = _makeDebit(amount: 500, date: date);
-
-      when(() => permissions.request())
-          .thenAnswer((_) async => SmsPermissionResult.granted);
-      when(() => datasource.fetchRecent(lookback: any(named: 'lookback')))
-          .thenAnswer((_) async => [
-            RawSms(body: 'msg', sender: 'HDFCBK', date: date),
-          ]);
-      when(
-        () => parser.parse(
-          body: any(named: 'body'),
-          sender: any(named: 'sender'),
-          date: any(named: 'date'),
-        ),
-      ).thenReturn(txn);
-      // Simulate that this fingerprint was already imported in a prior session
-      when(() => history.loadImported())
-          .thenAnswer((_) async => {txn.fingerprint});
-
-      final result = await service.scan();
-
-      expect(result.transactions, isEmpty);
-      expect(result.alreadyImportedCount, 1);
+    test('falls back to BANKMS for unknown bank', () {
+      const body = 'You have won a prize!';
+      final datasourceReal = SmsDatasource();
+      final raw = datasourceReal.fromPasted(body);
+      expect(raw.sender, 'BANKMS');
     });
+  });
 
-    test('new fingerprints pass through when history is empty', () async {
-      final txn = _makeDebit(amount: 500, date: date);
-
-      when(() => permissions.request())
-          .thenAnswer((_) async => SmsPermissionResult.granted);
-      when(() => datasource.fetchRecent(lookback: any(named: 'lookback')))
-          .thenAnswer((_) async => [
-            RawSms(body: 'msg', sender: 'HDFCBK', date: date),
-          ]);
-      when(
-        () => parser.parse(
-          body: any(named: 'body'),
-          sender: any(named: 'sender'),
-          date: any(named: 'date'),
-        ),
-      ).thenReturn(txn);
-
-      final result = await service.scan();
-
-      expect(result.transactions, hasLength(1));
-      expect(result.alreadyImportedCount, 0);
+  group('SmsImportService.recordImported()', () {
+    test('delegates to history', () async {
+      when(() => history.markImported(any())).thenAnswer((_) async {});
+      await service.recordImported(['fp1', 'fp2']);
+      verify(() => history.markImported(['fp1', 'fp2'])).called(1);
     });
   });
 }
