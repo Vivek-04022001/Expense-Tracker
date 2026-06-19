@@ -128,6 +128,18 @@ exports.Prisma.UserScalarFieldEnum = {
   createdAt: 'createdAt'
 };
 
+exports.Prisma.AccountScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  type: 'type',
+  balance: 'balance',
+  color: 'color',
+  userId: 'userId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  deletedAt: 'deletedAt'
+};
+
 exports.Prisma.ExpenseScalarFieldEnum = {
   id: 'id',
   amount: 'amount',
@@ -182,6 +194,16 @@ exports.Prisma.NullsOrder = {
   first: 'first',
   last: 'last'
 };
+exports.AccountType = exports.$Enums.AccountType = {
+  card: 'card',
+  cash: 'cash',
+  wallet: 'wallet',
+  bank: 'bank',
+  savings: 'savings',
+  investment: 'investment',
+  other: 'other'
+};
+
 exports.Category = exports.$Enums.Category = {
   food_and_drink: 'food_and_drink',
   transport: 'transport',
@@ -210,6 +232,7 @@ exports.IncomeType = exports.$Enums.IncomeType = {
 
 exports.Prisma.ModelName = {
   User: 'User',
+  Account: 'Account',
   Expense: 'Expense',
   Income: 'Income',
   Budget: 'Budget',

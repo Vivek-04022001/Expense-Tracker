@@ -40,13 +40,21 @@ with `EXPENSE SO FAR` / `INCOME SO FAR`. An `ADD NEW ACCOUNT` button at the bott
 - Riverpod `accountsProvider` (start local via shared_preferences/secure storage; wire to server if API exists).
 - Every expense/income references an `accountId`; balances recompute from transactions.
 
-**Lives in:** `features/accounts/`, new route `/accounts`, add as a nav destination OR Profile entry.
+**Lives in:** `features/accounts/`, entry via Profile → Finance → Accounts.
 
 **Acceptance:**
-- [ ] Can create, edit, delete accounts.
-- [ ] Account balances reflect transactions assigned to them.
-- [ ] Total balance header sums all accounts.
-- [ ] Add-expense/income sheet shows account selector defaulting to last used.
+- [x] Can create, edit, delete accounts. _(CRUD sheet + soft-delete)_
+- [x] Total balance header sums all accounts. _(gradient header)_
+- [~] Account balances reflect transactions — **deferred to F2** (user-set balance for now).
+- [~] Add-expense/income account selector — **deferred to F2** (needs accountId on txns).
+
+**Implemented in F1 (`feature/accounts` branch):**
+- Server: `AccountType` enum + `Account` model (Prisma), migration SQL, Zod validators,
+  `account.controller.js`, `/accounts` routes (GET/POST/PUT/DELETE), registered in `app.js`.
+- Mobile: `features/accounts/` module — model (type→icon/color), repository, Riverpod notifier,
+  Accounts screen (total header, cards, ⋯ edit/delete, empty/error states), add/edit sheet
+  with numpad. Profile entry row. Shared `formatRupee` (Indian grouping) util.
+- The two `[~]` items move to F2 since they require linking transactions to an account.
 
 ---
 

@@ -6,7 +6,7 @@ part of 'sms_import_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$smsImportServiceHash() => r'6044bb3edbda2f893896852dbff803a5f3845e4a';
+String _$smsImportServiceHash() => r'1b1208988ef6c24cfabb6f009c608b0865edcf65';
 
 /// See also [smsImportService].
 @ProviderFor(smsImportService)
@@ -24,7 +24,7 @@ final smsImportServiceProvider = AutoDisposeProvider<SmsImportService>.internal(
 // ignore: unused_element
 typedef SmsImportServiceRef = AutoDisposeProviderRef<SmsImportService>;
 String _$smsImportControllerHash() =>
-    r'e74e0a9d122b483a2e480addc111c909f18f0304';
+    r'37e107d34bdc1005a03fcada1bc43ec7b5366fbe';
 
 /// See also [SmsImportController].
 @ProviderFor(SmsImportController)
