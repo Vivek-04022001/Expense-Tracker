@@ -52,21 +52,26 @@ model User {
   incomes      Income[]
   budgets      Budget[]
   accounts     Account[]
+  transfers    Transfer[]
   refreshToken RefreshToken[]
   createdAt    DateTime       @default(now())
 }
 
 model Account {
-  id        String      @id @default(uuid())
-  name      String
-  type      AccountType @default(other)
-  balance   Decimal     @default(0)
-  color     String?
-  userId    String
-  user      User        @relation(fields: [userId], references: [id])
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
-  deletedAt DateTime?
+  id            String      @id @default(uuid())
+  name          String
+  type          AccountType @default(other)
+  balance       Decimal     @default(0)
+  color         String?
+  userId        String
+  user          User        @relation(fields: [userId], references: [id])
+  expenses      Expense[]
+  incomes       Income[]
+  transfersFrom Transfer[]  @relation("TransferFrom")
+  transfersTo   Transfer[]  @relation("TransferTo")
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  deletedAt     DateTime?
 
   @@index([userId])
 }
@@ -79,8 +84,12 @@ model Expense {
   description   String?
   userId        String
   user          User          @relation(fields: [userId], references: [id])
+  accountId     String?
+  account       Account?      @relation(fields: [accountId], references: [id])
   createdAt     DateTime      @default(now())
   deletedAt     DateTime?
+
+  @@index([accountId])
 }
 
 model Income {
@@ -90,7 +99,27 @@ model Income {
   description String?
   userId      String
   user        User       @relation(fields: [userId], references: [id])
+  accountId   String?
+  account     Account?   @relation(fields: [accountId], references: [id])
   createdAt   DateTime   @default(now())
+
+  @@index([accountId])
+}
+
+model Transfer {
+  id            String    @id @default(uuid())
+  amount        Decimal
+  description   String?
+  userId        String
+  user          User      @relation(fields: [userId], references: [id])
+  fromAccountId String
+  fromAccount   Account   @relation("TransferFrom", fields: [fromAccountId], references: [id])
+  toAccountId   String
+  toAccount     Account   @relation("TransferTo", fields: [toAccountId], references: [id])
+  createdAt     DateTime  @default(now())
+  deletedAt     DateTime?
+
+  @@index([userId])
 }
 
 model Budget {

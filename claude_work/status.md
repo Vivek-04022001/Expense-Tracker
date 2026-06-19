@@ -34,7 +34,7 @@ We are **not** copying the cream/yellow look. The goal is feature parity + a pol
 | # | Feature | Screens | Priority | Status |
 |---|---------|---------|----------|--------|
 | F1 | Accounts (wallets/cards/cash) | 7 | P0 | ✅ Done (merged to dev) |
-| F2 | Transfer transaction type | 4 | P0 | 📋 Planned |
+| F2 | Transfer transaction type | 4 | P0 | 🔍 In review (`feature/transfer`) |
 | F3 | Editable Categories (CRUD) | 8 | P1 | 📋 Planned |
 | F4 | Records: date-grouped list + month summary header | 1 | P1 | 📋 Planned |
 | F5 | Budget planner polish (limit-exceeded states) | 3 | P2 | 📋 Planned |
@@ -60,12 +60,20 @@ We are **not** copying the cream/yellow look. The goal is feature parity + a pol
 | Feature | Branch | Merged to dev? |
 |---------|--------|----------------|
 | F1 Accounts | `feature/accounts` | ✅ merged 2026-06-19 (--no-ff) |
-| F2 Transfer | `feature/transfer` (next) | — |
+| F2 Transfer | `feature/transfer` | ⏳ awaiting approval |
 
 ## ✅ F1 done
 
 - Migration applied to Neon (confirmed by user 2026-06-19).
 - `feature/accounts` merged into `dev`.
+
+## ⚠️ Action needed before F2 fully works
+
+- [ ] **Apply F2 DB migration to Neon.** File:
+  `server/prisma/migrations/20260619010000_add_transfer_and_account_links/migration.sql`
+  (adds `Transfer` table + `accountId` columns on Expense/Income). Apply with
+  `cd server && npx prisma migrate deploy`. The `/transfers` API and account linkage will
+  error until this is applied.
 
 ## Open questions
 

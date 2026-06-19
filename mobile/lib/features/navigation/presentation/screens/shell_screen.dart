@@ -5,6 +5,7 @@ import 'package:phosphor_flutter/phosphor_flutter.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../features/expenses/presentation/sheets/add_expense_sheet.dart';
 import '../../../../features/income/presentation/sheets/add_income_sheet.dart';
+import '../../../../features/transfers/presentation/sheets/add_transfer_sheet.dart';
 import '../../../../shared/widgets/success_overlay.dart';
 
 class ShellScreen extends StatelessWidget {
@@ -42,7 +43,7 @@ class ShellScreen extends StatelessWidget {
       if (saved == true && context.mounted) {
         await showSuccessOverlay(context, isExpense: true);
       }
-    } else {
+    } else if (type == _EntryType.income) {
       final saved = await showModalBottomSheet<bool>(
         context: context,
         useRootNavigator: true,
@@ -53,6 +54,14 @@ class ShellScreen extends StatelessWidget {
       if (saved == true && context.mounted) {
         await showSuccessOverlay(context, isExpense: false);
       }
+    } else {
+      await showModalBottomSheet<bool>(
+        context: context,
+        useRootNavigator: true,
+        isScrollControlled: true,
+        backgroundColor: Colors.transparent,
+        builder: (_) => const AddTransferSheet(),
+      );
     }
   }
 
@@ -352,7 +361,7 @@ class _RaisedFabState extends State<_RaisedFab> {
 
 // ─── Entry type picker ────────────────────────────────────────────────────────
 
-enum _EntryType { expense, income }
+enum _EntryType { expense, income, transfer }
 
 class _EntryTypePicker extends StatelessWidget {
   const _EntryTypePicker();
@@ -390,6 +399,17 @@ class _EntryTypePicker extends StatelessWidget {
                 onTap: () => Navigator.pop(context, _EntryType.income),
               )
               .animate(delay: 60.ms)
+              .fadeIn(duration: 220.ms)
+              .slideY(begin: 0.1, end: 0),
+          SizedBox(height: 10),
+          _TypeTile(
+                icon: PhosphorIcons.arrowsLeftRight(PhosphorIconsStyle.bold),
+                label: 'Transfer',
+                subtitle: 'Move money between accounts',
+                color: AppColors.info,
+                onTap: () => Navigator.pop(context, _EntryType.transfer),
+              )
+              .animate(delay: 120.ms)
               .fadeIn(duration: 220.ms)
               .slideY(begin: 0.1, end: 0),
         ],

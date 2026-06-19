@@ -35,6 +35,7 @@ class IncomeRepository {
     required double amount,
     IncomeType? incomeType,
     String? description,
+    String? accountId,
   }) async {
     final response = await _dioClient.post(
       ApiConstants.income,
@@ -43,6 +44,7 @@ class IncomeRepository {
         if (incomeType != null) 'incomeType': incomeType.toServer(),
         if (description != null && description.isNotEmpty)
           'description': description,
+        if (accountId != null) 'accountId': accountId,
       },
     );
     return IncomeModel.fromJson(

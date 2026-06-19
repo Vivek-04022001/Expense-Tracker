@@ -1,12 +1,14 @@
 import z from "zod";
 import { Category, PaymentMethod } from "../src/generated/prisma/index.js";
 import { prisma } from "../src/db.js";
+import { applyDelta, ownsAccount } from "../services/balance.service.js";
 
 const ExpenseSchema = z.object({
   amount: z.number().positive(),
   description: z.string().min(5).optional(),
   category: z.enum(Object.values(Category)).optional(),
   paymentMethod: z.enum(Object.values(PaymentMethod)).optional(),
+  accountId: z.string().uuid().optional(),
 });
 
 const UpdateExpenseSchema = z
@@ -15,6 +17,7 @@ const UpdateExpenseSchema = z
     category: z.enum(Object.values(Category)).optional(),
     paymentMethod: z.enum(Object.values(PaymentMethod)).optional(),
     description: z.string().max(255).optional(),
+    accountId: z.string().uuid().nullable().optional(),
   })
   .strict();
 
@@ -27,17 +30,21 @@ export const createExpense = async (req, res) => {
       .json({ message: "Invalid expense data", errors: result.error.errors });
   }
 
-  const { amount, description, category, paymentMethod } = result.data;
+  const { amount, description, category, paymentMethod, accountId } =
+    result.data;
   const userId = req.user.userId;
 
-  const expense = await prisma.expense.create({
-    data: {
-      amount,
-      description,
-      category,
-      paymentMethod,
-      userId,
-    },
+  if (!(await ownsAccount(prisma, userId, accountId))) {
+    return res.status(400).json({ message: "Invalid account" });
+  }
+
+  const expense = await prisma.$transaction(async (tx) => {
+    const created = await tx.expense.create({
+      data: { amount, description, category, paymentMethod, accountId, userId },
+    });
+    // Spending reduces the account balance.
+    await applyDelta(tx, accountId, -amount);
+    return created;
   });
 
   return res
@@ -100,9 +107,27 @@ export const updateExpense = async (req, res) => {
     return res.status(403).json({ message: "Forbidden" });
   }
 
-  const updated = await prisma.expense.update({
-    where: { id },
-    data: result.data,
+  const data = result.data;
+  const newAccountId =
+    "accountId" in data ? data.accountId : expense.accountId;
+
+  if (
+    "accountId" in data &&
+    data.accountId &&
+    !(await ownsAccount(prisma, userId, data.accountId))
+  ) {
+    return res.status(400).json({ message: "Invalid account" });
+  }
+
+  const oldAmount = parseFloat(expense.amount);
+  const newAmount = data.amount ?? oldAmount;
+
+  const updated = await prisma.$transaction(async (tx) => {
+    const result = await tx.expense.update({ where: { id }, data });
+    // Reverse the old effect, then apply the new one (expense reduces balance).
+    await applyDelta(tx, expense.accountId, oldAmount);
+    await applyDelta(tx, newAccountId, -newAmount);
+    return result;
   });
 
   return res
@@ -126,11 +151,10 @@ export const deleteExpense = async (req, res) => {
     return res.status(403).json({ message: "Forbidden" });
   }
 
-  await prisma.expense.update({
-    where: { id },
-    data: {
-      deletedAt: new Date(),
-    },
+  await prisma.$transaction(async (tx) => {
+    await tx.expense.update({ where: { id }, data: { deletedAt: new Date() } });
+    // Reverse the spend: add the amount back to the account.
+    await applyDelta(tx, expense.accountId, parseFloat(expense.amount));
   });
 
   return res.status(200).json({ message: "Expense deleted successfully" });
