@@ -310,6 +310,7 @@ class _ActionRow extends ConsumerWidget {
   void _showChangeType(BuildContext context, WidgetRef ref) {
     showModalBottomSheet(
       context: context,
+      useRootNavigator: true,
       backgroundColor: context.bgSurface,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(

@@ -1,6 +1,11 @@
+import 'package:flutter/foundation.dart';
+
 class ApiConstants {
-  static final String baseUrl =
+  static const String _localUrl = 'http://10.0.2.2:3000';
+  static const String _productionUrl =
       'https://expense-tracker-production-8083.up.railway.app';
+
+  static String get baseUrl => kReleaseMode ? _productionUrl : _localUrl;
 
   static const String registerEndpoint = '/auth/register';
   static const String loginEndpoint = '/auth/login';

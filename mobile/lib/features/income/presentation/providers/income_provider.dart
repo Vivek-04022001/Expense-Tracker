@@ -1,5 +1,7 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
+import '../../../expenses/presentation/providers/expense_provider.dart';
+import '../../../savings/presentation/providers/savings_provider.dart';
 import '../../data/models/income_model.dart';
 import '../../data/repositories/income_repository.dart';
 
@@ -37,6 +39,7 @@ class IncomeListNotifier extends _$IncomeListNotifier {
     );
     final current = state.valueOrNull ?? [];
     state = AsyncValue.data([income, ...current]);
+    _invalidateRelated();
   }
 
   Future<void> delete(String id) async {
@@ -44,6 +47,7 @@ class IncomeListNotifier extends _$IncomeListNotifier {
     await repo.deleteIncome(id);
     final current = state.valueOrNull ?? [];
     state = AsyncValue.data(current.where((e) => e.id != id).toList());
+    _invalidateRelated();
   }
 
   Future<void> edit(
@@ -63,6 +67,14 @@ class IncomeListNotifier extends _$IncomeListNotifier {
     state = AsyncValue.data(
       current.map((e) => e.id == id ? updated : e).toList(),
     );
+    _invalidateRelated();
+  }
+
+  void _invalidateRelated() {
+    ref.invalidate(currentMonthIncomesProvider);
+    ref.invalidate(expenseSummaryProvider);
+    ref.invalidate(currentMonthSavingsProvider);
+    ref.invalidate(allTimeSavingsProvider);
   }
 }
 

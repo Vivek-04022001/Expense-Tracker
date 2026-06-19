@@ -1,6 +1,7 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../../core/errors/app_exceptions.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
+import '../../../savings/presentation/providers/savings_provider.dart';
 import '../../data/models/expense_model.dart';
 import '../../data/models/expense_summary_model.dart';
 import '../../data/repositories/expense_repository.dart';
@@ -90,6 +91,8 @@ class ExpenseListNotifier extends _$ExpenseListNotifier {
     ref.invalidate(expenseSummaryProvider);
     ref.invalidate(currentMonthExpensesProvider);
     ref.invalidate(expensesForMonthProvider);
+    ref.invalidate(currentMonthSavingsProvider);
+    ref.invalidate(allTimeSavingsProvider);
   }
 }
 

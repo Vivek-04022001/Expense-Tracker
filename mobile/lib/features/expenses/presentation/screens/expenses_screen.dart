@@ -95,7 +95,7 @@ class _ExpensesScreenState extends ConsumerState<ExpensesScreen>
           ref
               .read(selectedExpenseMonthProvider.notifier)
               .setMonth(m.year, m.month);
-          Navigator.pop(context);
+          Navigator.of(context, rootNavigator: true).pop();
         },
       ),
     );
@@ -839,7 +839,7 @@ class _FilterSheetState extends State<_FilterSheet> {
             child: ElevatedButton(
               onPressed: () {
                 widget.onApply(_selected);
-                Navigator.pop(context);
+                Navigator.of(context, rootNavigator: true).pop();
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary500,
@@ -888,7 +888,7 @@ class _IncomeTabState extends ConsumerState<_IncomeTab> {
           ref
               .read(selectedIncomeMonthProvider.notifier)
               .setMonth(m.year, m.month);
-          Navigator.pop(context);
+          Navigator.of(context, rootNavigator: true).pop();
         },
       ),
     );
