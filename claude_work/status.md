@@ -33,7 +33,7 @@ We are **not** copying the cream/yellow look. The goal is feature parity + a pol
 
 | # | Feature | Screens | Priority | Status |
 |---|---------|---------|----------|--------|
-| F1 | Accounts (wallets/cards/cash) | 7 | P0 | 🔍 In review (`feature/accounts`) |
+| F1 | Accounts (wallets/cards/cash) | 7 | P0 | ✅ Done (merged to dev) |
 | F2 | Transfer transaction type | 4 | P0 | 📋 Planned |
 | F3 | Editable Categories (CRUD) | 8 | P1 | 📋 Planned |
 | F4 | Records: date-grouped list + month summary header | 1 | P1 | 📋 Planned |
@@ -59,14 +59,13 @@ We are **not** copying the cream/yellow look. The goal is feature parity + a pol
 
 | Feature | Branch | Merged to dev? |
 |---------|--------|----------------|
-| F1 Accounts | `feature/accounts` | ⏳ awaiting approval |
+| F1 Accounts | `feature/accounts` | ✅ merged 2026-06-19 (--no-ff) |
+| F2 Transfer | `feature/transfer` (next) | — |
 
-## ⚠️ Action needed before F1 fully works
+## ✅ F1 done
 
-- [ ] **Apply DB migration to Neon.** Migration file written at
-  `server/prisma/migrations/20260619000000_add_account/migration.sql`. It is **not yet applied**
-  (applying writes to the live Neon DB — needs your go-ahead). Apply with
-  `cd server && npx prisma migrate deploy` (or run the SQL in the Neon console).
+- Migration applied to Neon (confirmed by user 2026-06-19).
+- `feature/accounts` merged into `dev`.
 
 ## Open questions
 
