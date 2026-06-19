@@ -1,10 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:expense_tracker/core/errors/app_exceptions.dart';
-import 'package:expense_tracker/features/auth/data/models/auth_model.dart';
-import 'package:expense_tracker/features/auth/data/repositories/auth_repository.dart';
-import 'package:expense_tracker/features/auth/presentation/providers/auth_provider.dart';
+import 'package:paisa/core/errors/app_exceptions.dart';
+import 'package:paisa/features/auth/data/models/auth_model.dart';
+import 'package:paisa/features/auth/data/repositories/auth_repository.dart';
+import 'package:paisa/features/auth/presentation/providers/auth_provider.dart';
 
 class MockAuthRepository extends Mock implements AuthRepository {}
 

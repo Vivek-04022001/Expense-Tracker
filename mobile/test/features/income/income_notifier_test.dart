@@ -1,10 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:expense_tracker/core/errors/app_exceptions.dart';
-import 'package:expense_tracker/features/income/data/models/income_model.dart';
-import 'package:expense_tracker/features/income/data/repositories/income_repository.dart';
-import 'package:expense_tracker/features/income/presentation/providers/income_provider.dart';
+import 'package:paisa/core/errors/app_exceptions.dart';
+import 'package:paisa/features/income/data/models/income_model.dart';
+import 'package:paisa/features/income/data/repositories/income_repository.dart';
+import 'package:paisa/features/income/presentation/providers/income_provider.dart';
 
 class MockIncomeRepository extends Mock implements IncomeRepository {}
 

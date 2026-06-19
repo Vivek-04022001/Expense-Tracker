@@ -1,11 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:expense_tracker/core/errors/app_exceptions.dart';
-import 'package:expense_tracker/features/budgets/data/models/budget_model.dart';
-import 'package:expense_tracker/features/budgets/data/repositories/budget_repository.dart';
-import 'package:expense_tracker/features/budgets/presentation/providers/budget_provider.dart';
-import 'package:expense_tracker/features/expenses/data/models/expense_model.dart';
+import 'package:paisa/core/errors/app_exceptions.dart';
+import 'package:paisa/features/budgets/data/models/budget_model.dart';
+import 'package:paisa/features/budgets/data/repositories/budget_repository.dart';
+import 'package:paisa/features/budgets/presentation/providers/budget_provider.dart';
+import 'package:paisa/features/expenses/data/models/expense_model.dart';
 
 class MockBudgetRepository extends Mock implements BudgetRepository {}
 
