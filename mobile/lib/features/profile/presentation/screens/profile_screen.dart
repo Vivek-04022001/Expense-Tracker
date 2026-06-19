@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/theme_provider.dart';
+import '../../../accounts/presentation/screens/accounts_screen.dart';
 import '../widgets/profile_row.dart';
 import '../widgets/profile_user_card.dart';
 import 'budgets_screen.dart';
@@ -109,6 +110,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             ProfileSection(
               title: 'Finance',
               rows: [
+                ProfileRow(
+                  icon: PhosphorIcons.cardholder(PhosphorIconsStyle.fill),
+                  iconBg: AppColors.info,
+                  label: 'Accounts',
+                  onTap: () => _push(const AccountsScreen()),
+                ),
                 ProfileRow(
                   icon: PhosphorIcons.wallet(PhosphorIconsStyle.fill),
                   iconBg: AppColors.primary500,

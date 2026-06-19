@@ -33,7 +33,7 @@ We are **not** copying the cream/yellow look. The goal is feature parity + a pol
 
 | # | Feature | Screens | Priority | Status |
 |---|---------|---------|----------|--------|
-| F1 | Accounts (wallets/cards/cash) | 7 | P0 | 📋 Planned |
+| F1 | Accounts (wallets/cards/cash) | 7 | P0 | 🔍 In review (`feature/accounts`) |
 | F2 | Transfer transaction type | 4 | P0 | 📋 Planned |
 | F3 | Editable Categories (CRUD) | 8 | P1 | 📋 Planned |
 | F4 | Records: date-grouped list + month summary header | 1 | P1 | 📋 Planned |
@@ -47,9 +47,29 @@ We are **not** copying the cream/yellow look. The goal is feature parity + a pol
 
 - 2026-06-19 — Keep Paisa's modern theme; screenshots are feature refs, not visual refs.
 - 2026-06-19 — Accounts (F1) is the foundation; Transfer (F2) depends on it. Build F1 first.
+- 2026-06-19 — F1 scope = **full-stack** (Prisma model + API + Flutter), per user.
+- 2026-06-19 — Committed 3 pre-existing WIP fixes to `dev` before branching (env URL, provider
+  invalidation, root-navigator sheets). Then branched `feature/accounts`.
+- 2026-06-19 — F1 builds Accounts as a **standalone** CRUD + balances unit. Linking
+  expense/income to an `accountId` is deferred to **F2 (Transfer)**, where account linkage is
+  required anyway — keeps F1 small and reviewable.
+- 2026-06-19 — Workflow per feature: branch → build → **user approval** → merge to `dev`.
+
+## Branch / merge workflow
+
+| Feature | Branch | Merged to dev? |
+|---------|--------|----------------|
+| F1 Accounts | `feature/accounts` | ⏳ awaiting approval |
+
+## ⚠️ Action needed before F1 fully works
+
+- [ ] **Apply DB migration to Neon.** Migration file written at
+  `server/prisma/migrations/20260619000000_add_account/migration.sql`. It is **not yet applied**
+  (applying writes to the live Neon DB — needs your go-ahead). Apply with
+  `cd server && npx prisma migrate deploy` (or run the SQL in the Neon console).
 
 ## Open questions
 
-- [ ] Does the server/API already model accounts, or is this client-side only first?
-- [ ] Should category CRUD sync to server or stay local?
-- [ ] Confirm currency is ₹ (INR) everywhere (reference shows $).
+- [x] Does the server/API already model accounts? → No. Built new `Account` model + `/accounts` API.
+- [ ] Should category CRUD sync to server or stay local? (decide at F3)
+- [ ] Confirm currency is ₹ (INR) everywhere (reference shows $). Added shared `formatRupee` util.

@@ -25,6 +25,9 @@ class ApiConstants {
 
   static const String savingsSummary = '/savings/summary';
 
+  static const String accounts = '/accounts';
+  static String accountById(String id) => '/accounts/$id';
+
   static const String accessTokenKey = 'access_token';
   static const String refreshTokenKey = 'refresh_token';
 }
