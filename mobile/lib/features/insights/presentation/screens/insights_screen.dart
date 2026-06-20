@@ -12,6 +12,7 @@ import '../widgets/ai_insight_card.dart';
 import '../widgets/budget_list_card.dart';
 import '../widgets/category_donut_card.dart';
 import '../widgets/daily_spend_chart.dart';
+import '../widgets/expense_flow_card.dart';
 import '../widgets/income_analysis_card.dart';
 import '../widgets/insights_header.dart';
 import '../widgets/top_merchants_card.dart';
@@ -236,6 +237,8 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen> {
         CategoryDonutCard(data: data),
         SizedBox(height: 14),
         DailySpendChart(data: data, month: currentInsightsMonth),
+        SizedBox(height: 14),
+        ExpenseFlowCard(data: data, month: currentInsightsMonth),
         SizedBox(height: 14),
         BudgetListCard(data: data),
         SizedBox(height: 14),
