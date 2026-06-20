@@ -5,6 +5,7 @@ import {
   IncomeQuerySchema,
 } from "../src/validators/incomeValidator.js";
 import { applyDelta, ownsAccount } from "../services/balance.service.js";
+import { ownsCategory } from "../services/category.service.js";
 
 export const createIncome = async (req, res) => {
   const result = CreateIncomeSchema.safeParse(req.body);
@@ -15,16 +16,21 @@ export const createIncome = async (req, res) => {
       .json({ message: "Invalid income data", errors: result.error.errors });
   }
 
-  const { amount, incomeType, description, accountId } = result.data;
+  const { amount, incomeType, description, accountId, categoryId } =
+    result.data;
   const userId = req.user.userId;
 
   if (!(await ownsAccount(prisma, userId, accountId))) {
     return res.status(400).json({ message: "Invalid account" });
   }
 
+  if (!(await ownsCategory(prisma, userId, categoryId, "income"))) {
+    return res.status(400).json({ message: "Invalid category" });
+  }
+
   const income = await prisma.$transaction(async (tx) => {
     const created = await tx.income.create({
-      data: { amount, incomeType, description, accountId, userId },
+      data: { amount, incomeType, description, accountId, categoryId, userId },
     });
     // Income increases the account balance.
     await applyDelta(tx, accountId, amount);
@@ -90,6 +96,14 @@ export const updateIncome = async (req, res) => {
     !(await ownsAccount(prisma, userId, data.accountId))
   ) {
     return res.status(400).json({ message: "Invalid account" });
+  }
+
+  if (
+    "categoryId" in data &&
+    data.categoryId &&
+    !(await ownsCategory(prisma, userId, data.categoryId, "income"))
+  ) {
+    return res.status(400).json({ message: "Invalid category" });
   }
 
   const oldAmount = parseFloat(income.amount);

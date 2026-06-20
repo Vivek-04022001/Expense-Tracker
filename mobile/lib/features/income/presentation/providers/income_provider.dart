@@ -32,6 +32,7 @@ class IncomeListNotifier extends _$IncomeListNotifier {
     IncomeType? incomeType,
     String? description,
     String? accountId,
+    String? categoryId,
   }) async {
     final repo = ref.read(incomeRepositoryProvider);
     final income = await repo.createIncome(
@@ -39,6 +40,7 @@ class IncomeListNotifier extends _$IncomeListNotifier {
       incomeType: incomeType,
       description: description,
       accountId: accountId,
+      categoryId: categoryId,
     );
     final current = state.valueOrNull ?? [];
     state = AsyncValue.data([income, ...current]);

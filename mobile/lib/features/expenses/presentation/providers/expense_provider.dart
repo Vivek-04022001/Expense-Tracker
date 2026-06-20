@@ -42,6 +42,7 @@ class ExpenseListNotifier extends _$ExpenseListNotifier {
     ExpenseCategory? category,
     ExpensePaymentMethod? paymentMethod,
     String? accountId,
+    String? categoryId,
   }) async {
     try {
       final repo = ref.read(expenseRepositoryProvider);
@@ -51,6 +52,7 @@ class ExpenseListNotifier extends _$ExpenseListNotifier {
         category: category,
         paymentMethod: paymentMethod,
         accountId: accountId,
+        categoryId: categoryId,
       );
       final current = state.valueOrNull ?? [];
       state = AsyncValue.data([expense, ...current]);

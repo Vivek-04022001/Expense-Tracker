@@ -115,9 +115,45 @@ hardcoded list** — not editable.
 or expand the existing profile screen + add a categories provider.
 
 **Acceptance:**
-- [ ] Separate income/expense lists.
-- [ ] Full CRUD with icon + color picker.
-- [ ] New categories appear in the add-transaction selectors.
+- [x] Separate income/expense lists.
+- [x] Full CRUD with icon + color picker.
+- [x] New categories appear in the add-transaction selectors.
+
+### ✅ Implemented (`feature/categories`, 2026-06-20) — in review
+
+**Approach:** Full table migration, additive & non-destructive. Built-ins seeded as system rows
+with stable keys; custom CRUD layered on top; legacy enum columns kept so SMS/charts/budgets
+keep working. Expense + Income both.
+
+**Server**
+- `prisma/schema.prisma`: `CategoryKind` enum + `TransactionCategory` model (named to avoid the
+  existing `Category` enum collision); optional `categoryId`/`categoryRef` + index on
+  Expense / Income / Budget; `User.categories` relation.
+- Migration `migrations/20260620000000_add_category_table/migration.sql` — enum + table +
+  columns + indexes + FKs, seeds 8 expense + 5 income built-ins per existing user, backfills
+  `categoryId` from the legacy enum columns. **Not yet applied to Neon (user applies).**
+- `src/constants/categorySeed.js` — single source of truth for built-ins + idempotent
+  `seedBuiltinCategories()` (mirrors the migration seed list).
+- `controllers/category.controller.js` + `routes/category.route.js` + `validators/categoryValidator.js`
+  → `GET/POST/PATCH/DELETE /categories` (lazy-seeds on GET; system rows editable, not deletable;
+  `kind`/`key` immutable). Registered in `app.js`.
+- `services/category.service.js` `ownsCategory()`; expense/income controllers + validators accept
+  `categoryId` (validated against owner + kind) on create/update; new users seeded on register.
+
+**Mobile** — new `features/categories/` module:
+- `data/category_icons.dart` (string-key → Phosphor registry + picker palette/colors),
+  `data/models/category_model.dart`, `data/repositories/category_repository.dart`,
+  `presentation/providers/category_provider.dart` (list notifier + `categoriesByKind`).
+- `presentation/screens/categories_screen.dart` — sectioned Expense/Income CRUD list with FAB,
+  edit/delete menu, "Built-in" badge. Replaces the old static profile screen (now deleted;
+  `profile_screen.dart` points at the new one).
+- `presentation/sheets/add_category_sheet.dart` — name + kind toggle (create-only) + icon grid +
+  color palette, live preview.
+- `presentation/widgets/category_selector.dart` — dynamic chip row; wired into
+  `add_expense_sheet.dart` + `add_income_sheet.dart`, which now send the legacy enum (from the
+  selected category's `key`, custom → `other`) **and** `categoryId`.
+
+`flutter analyze`: 0 errors (only pre-existing deprecation infos). `build_runner` regenerated.
 
 ---
 

@@ -2,6 +2,7 @@ import z from "zod";
 import { Category, PaymentMethod } from "../src/generated/prisma/index.js";
 import { prisma } from "../src/db.js";
 import { applyDelta, ownsAccount } from "../services/balance.service.js";
+import { ownsCategory } from "../services/category.service.js";
 
 const ExpenseSchema = z.object({
   amount: z.number().positive(),
@@ -9,6 +10,7 @@ const ExpenseSchema = z.object({
   category: z.enum(Object.values(Category)).optional(),
   paymentMethod: z.enum(Object.values(PaymentMethod)).optional(),
   accountId: z.string().uuid().optional(),
+  categoryId: z.string().uuid().optional(),
 });
 
 const UpdateExpenseSchema = z
@@ -18,6 +20,7 @@ const UpdateExpenseSchema = z
     paymentMethod: z.enum(Object.values(PaymentMethod)).optional(),
     description: z.string().max(255).optional(),
     accountId: z.string().uuid().nullable().optional(),
+    categoryId: z.string().uuid().nullable().optional(),
   })
   .strict();
 
@@ -30,7 +33,7 @@ export const createExpense = async (req, res) => {
       .json({ message: "Invalid expense data", errors: result.error.errors });
   }
 
-  const { amount, description, category, paymentMethod, accountId } =
+  const { amount, description, category, paymentMethod, accountId, categoryId } =
     result.data;
   const userId = req.user.userId;
 
@@ -38,9 +41,21 @@ export const createExpense = async (req, res) => {
     return res.status(400).json({ message: "Invalid account" });
   }
 
+  if (!(await ownsCategory(prisma, userId, categoryId, "expense"))) {
+    return res.status(400).json({ message: "Invalid category" });
+  }
+
   const expense = await prisma.$transaction(async (tx) => {
     const created = await tx.expense.create({
-      data: { amount, description, category, paymentMethod, accountId, userId },
+      data: {
+        amount,
+        description,
+        category,
+        paymentMethod,
+        accountId,
+        categoryId,
+        userId,
+      },
     });
     // Spending reduces the account balance.
     await applyDelta(tx, accountId, -amount);
@@ -117,6 +132,14 @@ export const updateExpense = async (req, res) => {
     !(await ownsAccount(prisma, userId, data.accountId))
   ) {
     return res.status(400).json({ message: "Invalid account" });
+  }
+
+  if (
+    "categoryId" in data &&
+    data.categoryId &&
+    !(await ownsCategory(prisma, userId, data.categoryId, "expense"))
+  ) {
+    return res.status(400).json({ message: "Invalid category" });
   }
 
   const oldAmount = parseFloat(expense.amount);

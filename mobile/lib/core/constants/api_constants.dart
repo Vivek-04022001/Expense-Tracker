@@ -31,6 +31,9 @@ class ApiConstants {
   static const String transfers = '/transfers';
   static String transferById(String id) => '/transfers/$id';
 
+  static const String categories = '/categories';
+  static String categoryById(String id) => '/categories/$id';
+
   static const String accessTokenKey = 'access_token';
   static const String refreshTokenKey = 'refresh_token';
 }

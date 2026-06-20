@@ -128,6 +128,21 @@ exports.Prisma.UserScalarFieldEnum = {
   createdAt: 'createdAt'
 };
 
+exports.Prisma.TransactionCategoryScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  name: 'name',
+  kind: 'kind',
+  icon: 'icon',
+  color: 'color',
+  key: 'key',
+  isSystem: 'isSystem',
+  sortOrder: 'sortOrder',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  deletedAt: 'deletedAt'
+};
+
 exports.Prisma.AccountScalarFieldEnum = {
   id: 'id',
   name: 'name',
@@ -148,6 +163,7 @@ exports.Prisma.ExpenseScalarFieldEnum = {
   description: 'description',
   userId: 'userId',
   accountId: 'accountId',
+  categoryId: 'categoryId',
   createdAt: 'createdAt',
   deletedAt: 'deletedAt'
 };
@@ -159,6 +175,7 @@ exports.Prisma.IncomeScalarFieldEnum = {
   description: 'description',
   userId: 'userId',
   accountId: 'accountId',
+  categoryId: 'categoryId',
   createdAt: 'createdAt'
 };
 
@@ -177,6 +194,7 @@ exports.Prisma.BudgetScalarFieldEnum = {
   id: 'id',
   limitAmount: 'limitAmount',
   category: 'category',
+  categoryId: 'categoryId',
   month: 'month',
   year: 'year',
   userId: 'userId',
@@ -207,6 +225,11 @@ exports.Prisma.NullsOrder = {
   first: 'first',
   last: 'last'
 };
+exports.CategoryKind = exports.$Enums.CategoryKind = {
+  expense: 'expense',
+  income: 'income'
+};
+
 exports.AccountType = exports.$Enums.AccountType = {
   card: 'card',
   cash: 'cash',
@@ -245,6 +268,7 @@ exports.IncomeType = exports.$Enums.IncomeType = {
 
 exports.Prisma.ModelName = {
   User: 'User',
+  TransactionCategory: 'TransactionCategory',
   Account: 'Account',
   Expense: 'Expense',
   Income: 'Income',

@@ -35,6 +35,7 @@ class ExpenseRepository {
     ExpenseCategory? category,
     ExpensePaymentMethod? paymentMethod,
     String? accountId,
+    String? categoryId,
   }) async {
     final response = await _dioClient.post(
       ApiConstants.expenses,
@@ -45,6 +46,7 @@ class ExpenseRepository {
         if (category != null) 'category': category.toServer(),
         if (paymentMethod != null) 'paymentMethod': paymentMethod.toServer(),
         if (accountId != null) 'accountId': accountId,
+        if (categoryId != null) 'categoryId': categoryId,
       },
     );
     return ExpenseModel.fromJson(

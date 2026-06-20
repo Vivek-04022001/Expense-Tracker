@@ -4,6 +4,8 @@ import '../../../../core/errors/app_exceptions.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../shared/widgets/calculator_numpad.dart';
 import '../../../accounts/presentation/widgets/account_selector.dart';
+import '../../../categories/data/models/category_model.dart';
+import '../../../categories/presentation/widgets/category_selector.dart';
 import '../../data/models/income_model.dart';
 import '../providers/income_provider.dart';
 
@@ -16,7 +18,7 @@ class AddIncomeSheet extends ConsumerStatefulWidget {
 
 class _AddIncomeSheetState extends ConsumerState<AddIncomeSheet> {
   String _expr = '';
-  IncomeType _incomeType = IncomeType.salary;
+  CategoryModel? _category;
   final _descCtrl = TextEditingController();
   String? _accountId;
   bool _saving = false;
@@ -110,11 +112,17 @@ class _AddIncomeSheetState extends ConsumerState<AddIncomeSheet> {
     setState(() => _saving = true);
     try {
       final desc = _descCtrl.text.trim();
+      final cat = _category;
+      // Keep the legacy enum populated; custom categories fall back to other.
+      final legacyType = cat?.key != null
+          ? IncomeType.fromServer(cat!.key!)
+          : IncomeType.other;
       await ref.read(incomeListNotifierProvider.notifier).create(
             amount: value,
-            incomeType: _incomeType,
+            incomeType: legacyType,
             description: desc.isNotEmpty ? desc : null,
             accountId: _accountId,
+            categoryId: cat?.id,
           );
       if (!mounted) return;
       setState(() {
@@ -260,66 +268,11 @@ class _AddIncomeSheetState extends ConsumerState<AddIncomeSheet> {
                   ],
                 ),
                 SizedBox(height: 16),
-                // Income type chips
-                SizedBox(
-                  height: 36,
-                  child: ListView.separated(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    scrollDirection: Axis.horizontal,
-                    itemCount: IncomeType.values.length,
-                    separatorBuilder: (_, __) => SizedBox(width: 8),
-                    itemBuilder: (_, i) {
-                      final type = IncomeType.values[i];
-                      final selected = _incomeType == type;
-                      return GestureDetector(
-                        onTap: () => setState(() => _incomeType = type),
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 150),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 6,
-                          ),
-                          decoration: BoxDecoration(
-                            color: selected
-                                ? AppColors.success.withValues(alpha: 0.15)
-                                : Colors.white,
-                            borderRadius: BorderRadius.circular(20),
-                            border: Border.all(
-                              color: selected
-                                  ? AppColors.success
-                                  : context.borderSubtle,
-                            ),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Container(
-                                width: 7,
-                                height: 7,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: selected
-                                      ? AppColors.success
-                                      : context.textTertiary,
-                                ),
-                              ),
-                              SizedBox(width: 6),
-                              Text(
-                                type.displayLabel,
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w500,
-                                  color: selected
-                                      ? AppColors.success
-                                      : context.textPrimary,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
-                  ),
+                // Category chips (dynamic, user-managed)
+                CategorySelector(
+                  kind: CategoryKind.income,
+                  selectedId: _category?.id,
+                  onChanged: (c) => setState(() => _category = c),
                 ),
                 SizedBox(height: 10),
                 // Account selector

@@ -44,7 +44,7 @@ final currentMonthIncomesProvider =
 typedef CurrentMonthIncomesRef =
     AutoDisposeFutureProviderRef<List<IncomeModel>>;
 String _$incomeListNotifierHash() =>
-    r'865120882ecd457d92394ae38441774eeecee953';
+    r'ff8f86daef0766e404df0b1297bc500af9d17537';
 
 /// See also [IncomeListNotifier].
 @ProviderFor(IncomeListNotifier)
