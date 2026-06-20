@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/category_mapper.dart';
+import '../../../../shared/widgets/category_avatar.dart';
 import '../../data/models/expense_model.dart';
 import '../providers/expense_provider.dart';
 import '../../../../features/income/presentation/screens/income_detail_screen.dart';
@@ -538,20 +539,11 @@ class _EntryTile extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         child: Row(
           children: [
-            Container(
-              width: 38,
-              height: 38,
-              decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.12),
-                shape: BoxShape.circle,
-              ),
-              child: Center(
-                child: PhosphorIcon(
-                  CategoryMapper.icon(expense.category),
-                  size: 18,
-                  color: color,
-                ),
-              ),
+            CategoryAvatar(
+              icon: CategoryMapper.icon(expense.category),
+              color: color,
+              size: 38,
+              iconSize: 18,
             ),
             SizedBox(width: 12),
             Expanded(
@@ -1110,20 +1102,11 @@ class _IncomeTile extends StatelessWidget {
         ),
         child: Row(
           children: [
-            Container(
-              width: 38,
-              height: 38,
-              decoration: BoxDecoration(
-                color: AppColors.success.withValues(alpha: 0.12),
-                shape: BoxShape.circle,
-              ),
-              child: Center(
-                child: PhosphorIcon(
-                  _icon(income.incomeType),
-                  size: 18,
-                  color: AppColors.success,
-                ),
-              ),
+            CategoryAvatar(
+              icon: _icon(income.incomeType),
+              color: AppColors.success,
+              size: 38,
+              iconSize: 18,
             ),
             SizedBox(width: 12),
             Expanded(

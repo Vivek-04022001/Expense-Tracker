@@ -9,6 +9,7 @@ import '../../../expenses/data/models/expense_model.dart';
 import '../../../expenses/presentation/providers/expense_provider.dart';
 import '../../../income/data/models/income_model.dart';
 import '../../../income/presentation/providers/income_provider.dart';
+import '../../../../shared/widgets/category_avatar.dart';
 
 // ── Unified transaction entry ─────────────────────────────────────────────────
 
@@ -197,16 +198,11 @@ class _TransactionTile extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       child: Row(
         children: [
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: tx.iconColor.withValues(alpha: 0.12),
-              shape: BoxShape.circle,
-            ),
-            child: Center(
-              child: PhosphorIcon(tx.icon, size: 18, color: tx.iconColor),
-            ),
+          CategoryAvatar(
+            icon: tx.icon,
+            color: tx.iconColor,
+            size: 40,
+            iconSize: 18,
           ),
           SizedBox(width: 12),
           Expanded(

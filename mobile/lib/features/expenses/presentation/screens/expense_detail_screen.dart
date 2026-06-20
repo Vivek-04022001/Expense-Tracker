@@ -6,6 +6,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/category_mapper.dart';
 import '../../data/models/expense_model.dart';
 import '../providers/expense_provider.dart';
+import '../../../../shared/widgets/category_avatar.dart';
 
 class ExpenseDetailScreen extends ConsumerWidget {
   const ExpenseDetailScreen({super.key, required this.expense});
@@ -132,20 +133,10 @@ class _HeroSection extends StatelessWidget {
 
     return Column(
       children: [
-        Container(
-          width: 72,
-          height: 72,
-          decoration: BoxDecoration(
-            color: color.withValues(alpha: 0.12),
-            shape: BoxShape.circle,
-          ),
-          child: Center(
-            child: PhosphorIcon(
-              CategoryMapper.icon(expense.category),
-              size: 32,
-              color: color,
-            ),
-          ),
+        CategoryAvatar.expense(
+          expense.category,
+          size: 72,
+          iconSize: 32,
         ),
         SizedBox(height: 14),
         Container(

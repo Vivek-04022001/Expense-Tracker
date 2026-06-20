@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/category_mapper.dart';
+import '../../../../shared/widgets/category_avatar.dart';
 import '../../data/models/budget_model.dart';
 import '../providers/budget_provider.dart';
 import '../sheets/add_budget_sheet.dart';
@@ -470,20 +471,12 @@ class _BudgetCard extends StatelessWidget {
             Row(
               children: [
                 // Category icon
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: color.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Center(
-                    child: PhosphorIcon(
-                      CategoryMapper.icon(budget.category),
-                      size: 18,
-                      color: color,
-                    ),
-                  ),
+                CategoryAvatar(
+                  icon: CategoryMapper.icon(budget.category),
+                  color: color,
+                  size: 40,
+                  iconSize: 18,
+                  radius: 12,
                 ),
                 SizedBox(width: 12),
                 Expanded(
