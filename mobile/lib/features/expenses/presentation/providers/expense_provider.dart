@@ -3,7 +3,6 @@ import '../../../../core/db/app_database.dart';
 import '../../../../core/errors/app_exceptions.dart';
 import '../../../../core/sync/sync_engine.dart';
 import '../../../accounts/presentation/providers/account_provider.dart';
-import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../savings/presentation/providers/savings_provider.dart';
 import '../../data/models/expense_model.dart';
 import '../../data/models/expense_summary_model.dart';
@@ -14,7 +13,6 @@ part 'expense_provider.g.dart';
 @riverpod
 ExpenseRepository expenseRepository(ExpenseRepositoryRef ref) =>
     ExpenseRepository(
-      ref.watch(dioClientProvider),
       ref.watch(appDatabaseProvider),
       ref.watch(syncEngineProvider),
     );

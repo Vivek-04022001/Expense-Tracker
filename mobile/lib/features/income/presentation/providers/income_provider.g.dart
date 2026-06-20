@@ -6,7 +6,7 @@ part of 'income_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$incomeRepositoryHash() => r'd40f0cfc24ad1607c8c0e67cbb4fd4279a59a42d';
+String _$incomeRepositoryHash() => r'9e2eeae45c07ac3720c59120b52f66a5384f18c2';
 
 /// See also [incomeRepository].
 @ProviderFor(incomeRepository)

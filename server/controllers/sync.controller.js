@@ -168,6 +168,31 @@ export const push = async (req, res) => {
 
         // upsert
         const fields = pickFields(data, config.fields);
+
+        // Budgets are unique per (userId, category, month, year); upsert by that
+        // composite key so a client-generated id never collides with an
+        // existing slot created elsewhere.
+        if (entity === "budget") {
+          await tx.budget.upsert({
+            where: {
+              userId_category_month_year: {
+                userId,
+                category: fields.category,
+                month: fields.month,
+                year: fields.year,
+              },
+            },
+            create: { ...fields, id, userId },
+            update: {
+              limitAmount: fields.limitAmount,
+              categoryId: fields.categoryId ?? null,
+              deletedAt: null,
+            },
+          });
+          results.push({ index: i, id, status: "applied" });
+          continue;
+        }
+
         if (existing) {
           await model.update({ where: { id }, data: { ...fields, deletedAt: null } });
         } else {

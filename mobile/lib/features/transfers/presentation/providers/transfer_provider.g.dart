@@ -7,7 +7,7 @@ part of 'transfer_provider.dart';
 // **************************************************************************
 
 String _$transferRepositoryHash() =>
-    r'2a86aaf00b1f8e53cad2a7d805109b0c2951e1c4';
+    r'28372bf357f5b1da1e0b1afb9451e33f71873eb1';
 
 /// See also [transferRepository].
 @ProviderFor(transferRepository)

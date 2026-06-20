@@ -1,19 +1,25 @@
-import '../../../../core/constants/api_constants.dart';
+import 'package:drift/drift.dart';
+
 import '../../../../core/db/app_database.dart';
-import '../../../../core/network/dio_client.dart';
+import '../../../../core/db/tables.dart';
+import '../../../../core/sync/outbox_service.dart';
 import '../../../../core/sync/sync_engine.dart';
 import '../../../expenses/data/models/expense_model.dart';
 import '../datasources/budget_local_datasource.dart';
 import '../models/budget_model.dart';
 
-/// Offline-first budget repository. Reads and status come from Drift; writes hit
-/// the network then trigger a delta sync.
+/// Offline-first budget repository. Local-first writes via outbox. Budgets are
+/// keyed by (category, month, year); an existing local row for a slot is reused
+/// so there's at most one budget per slot, matching the server's unique key.
 class BudgetRepository {
-  BudgetRepository(this._dioClient, AppDatabase db, this._sync)
-      : _local = BudgetLocalDataSource(db);
+  BudgetRepository(AppDatabase db, this._sync)
+      : _db = db,
+        _local = BudgetLocalDataSource(db),
+        _outbox = OutboxService(db);
 
-  final DioClient _dioClient;
+  final AppDatabase _db;
   final BudgetLocalDataSource _local;
+  final OutboxService _outbox;
   final SyncEngine _sync;
 
   Future<List<BudgetModel>> getBudgets({
@@ -29,22 +35,67 @@ class BudgetRepository {
     required int month,
     required int year,
   }) async {
-    final response = await _dioClient.put(
-      ApiConstants.budgets,
-      data: {
-        'category': category.toServer(),
-        'limitAmount': limitAmount,
-        'month': month,
-        'year': year,
-      },
+    final now = DateTime.now();
+    final cat = category.toServer();
+
+    // Reuse the existing row for this slot (it may carry a server-assigned id);
+    // otherwise mint a deterministic id so two devices agree on new slots.
+    final existing = await (_db.select(_db.budgets)
+          ..where((t) =>
+              t.category.equals(cat) &
+              t.month.equals(month) &
+              t.year.equals(year)))
+        .getSingleOrNull();
+    final id = existing?.id ?? 'bgt-$year-$month-$cat';
+
+    await _db.transaction(() async {
+      await _local.upsert(BudgetsCompanion.insert(
+        id: id,
+        limitAmount: limitAmount,
+        category: cat,
+        month: month,
+        year: year,
+        createdAt: Value(existing?.createdAt ?? now),
+        updatedAt: Value(now),
+        deletedAt: const Value(null),
+        syncStatus: const Value(SyncStatus.pending),
+      ));
+      await _outbox.enqueue(
+        entity: 'budget',
+        op: 'upsert',
+        entityId: id,
+        updatedAt: now,
+        payload: {
+          'limitAmount': limitAmount,
+          'category': cat,
+          'month': month,
+          'year': year,
+        },
+      );
+    });
+
+    _sync.syncQuietly();
+    return BudgetModel(
+      id: id,
+      category: category,
+      limitAmount: limitAmount,
+      month: month,
+      year: year,
     );
-    await _sync.pullQuietly();
-    return BudgetModel.fromJson(response.data['budget'] as Map<String, dynamic>);
   }
 
   Future<void> deleteBudget(String id) async {
-    await _dioClient.delete(ApiConstants.budgetById(id));
-    await _sync.pullQuietly();
+    final now = DateTime.now();
+    await _db.transaction(() async {
+      await _local.softDelete(id, now, syncStatus: SyncStatus.pending);
+      await _outbox.enqueue(
+        entity: 'budget',
+        op: 'delete',
+        entityId: id,
+        updatedAt: now,
+      );
+    });
+    _sync.syncQuietly();
   }
 
   Future<BudgetStatusModel> getBudgetStatus(String id) async {
