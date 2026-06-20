@@ -38,7 +38,7 @@ We are **not** copying the cream/yellow look. The goal is feature parity + a pol
 | F3 | Editable Categories (CRUD) | 8 | P1 | ✅ Done (merged to dev) |
 | F4 | Records: date-grouped list + month summary header | 1 | P1 | ✅ Done (merged to dev) |
 | F5 | Budget planner polish (limit-exceeded states) | 3 | P2 | ✅ Done (merged to dev) |
-| F6 | Analysis: income/expense overview toggle + breakdown bars | 2 | P2 | 📋 Planned |
+| F6 | Analysis: income/expense overview toggle + breakdown bars | 2 | P2 | ✅ Done (merged to dev) |
 | F7 | Expense Flow chart + weekly table | 6 | P2 | 📋 Planned |
 | A1 | Icon system upgrade (see assets_plan.md) | all | P1 | 📋 Planned |
 | A2 | Human-feel illustrations/images (see assets_plan.md) | all | P2 | ✅ Done (12 illustrations integrated on dev) |
@@ -75,6 +75,10 @@ We are **not** copying the cream/yellow look. The goal is feature parity + a pol
   spent vs budgeted, aggregate progress bar, over-budget count), fixed the hardcoded progress
   track color (`0xFFECEDF0`) to `context.bgSubtle` so bars render in dark mode, added a "Near
   limit" badge at ≥75% (shared `_StatusBadge`), and a "% used" label per card.
+- 2026-06-20 — F6 Analysis toggle (frontend-only): added an Expenses/Income segmented toggle
+  to the insights screen. Income mode derives data client-side from `incomesForMonth` (current
+  + previous month): total income with vs-prev-month delta, "By source type" breakdown bars,
+  and a top-sources list. Shared `_EmptyAnalysis` state across both modes.
 
 ## Branch / merge workflow
 
@@ -85,6 +89,7 @@ We are **not** copying the cream/yellow look. The goal is feature parity + a pol
 | F3 Categories CRUD | `feature/categories` | ✅ merged 2026-06-20 (--no-ff) |
 | F4 Records | `feature/records` | ✅ merged 2026-06-20 (--no-ff) |
 | F5 Budget polish | `feature/budget-polish` | ✅ merged 2026-06-20 (--no-ff) |
+| F6 Analysis toggle | `feature/analysis-toggle` | ✅ merged 2026-06-20 (--no-ff) |
 
 ## ✅ F1 done
 
