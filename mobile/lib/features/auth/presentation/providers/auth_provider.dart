@@ -1,4 +1,5 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import '../../../../core/db/app_database.dart';
 import '../../../../core/errors/app_exceptions.dart';
 import '../../../../core/network/dio_client.dart';
 import '../../data/models/auth_model.dart';
@@ -90,6 +91,9 @@ class AuthNotifier extends _$AuthNotifier {
   Future<void> logout() async {
     final repo = ref.read(authRepositoryProvider);
     await repo.logout();
+    // The local database holds this user's data (and any unsynced outbox
+    // entries). Wipe it so the next user never sees stale rows.
+    await ref.read(appDatabaseProvider).wipe();
     state = AsyncValue.data(AuthUnauthenticated());
   }
 

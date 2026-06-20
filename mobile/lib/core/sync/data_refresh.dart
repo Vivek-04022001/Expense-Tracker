@@ -10,8 +10,9 @@ import '../../features/transfers/presentation/providers/transfer_provider.dart';
 
 /// Invalidates every read provider that sources from the local database, forcing
 /// a re-read after a sync has changed Drift's contents. Called after a bootstrap
-/// or background pull so the UI reflects freshly downloaded data.
-void refreshAllData(WidgetRef ref) {
+/// or background pull so the UI reflects freshly downloaded data. Accepts either
+/// a [Ref] or a [WidgetRef] (both expose `invalidate`).
+void refreshAllData(Ref ref) {
   // Expenses
   ref.invalidate(expenseListNotifierProvider);
   ref.invalidate(expenseSummaryProvider);

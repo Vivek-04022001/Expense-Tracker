@@ -3,8 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'core/notifications/notification_service.dart';
 import 'core/router/app_router.dart';
-import 'core/sync/data_refresh.dart';
-import 'core/sync/sync_engine.dart';
+import 'core/sync/connectivity_provider.dart';
+import 'core/sync/sync_controller.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/theme_provider.dart';
 import 'features/auth/presentation/providers/auth_provider.dart';
@@ -35,27 +35,45 @@ class PaisaApp extends ConsumerStatefulWidget {
   ConsumerState<PaisaApp> createState() => _PaisaAppState();
 }
 
-class _PaisaAppState extends ConsumerState<PaisaApp> {
+class _PaisaAppState extends ConsumerState<PaisaApp>
+    with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
-    // Whenever the user is authenticated (restored session on launch, or a
-    // fresh login), sync with the server and refresh the UI from the now
-    // up-to-date local database.
+    WidgetsBinding.instance.addObserver(this);
+
+    // Sync whenever the user becomes authenticated (restored session or login).
     ref.listenManual(
       authNotifierProvider,
       (previous, next) {
-        if (next.valueOrNull is AuthAuthenticated) {
-          _syncAndRefresh();
-        }
+        if (next.valueOrNull is AuthAuthenticated) _syncIfAuthed();
       },
       fireImmediately: true,
     );
+
+    // Sync the moment connectivity is restored.
+    ref.listenManual(connectivityProvider, (previous, next) {
+      final wasOffline = previous?.valueOrNull == false;
+      if (wasOffline && next.valueOrNull == true) _syncIfAuthed();
+    });
   }
 
-  Future<void> _syncAndRefresh() async {
-    await ref.read(syncEngineProvider).syncQuietly();
-    if (mounted) refreshAllData(ref);
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // Sync when the app returns to the foreground.
+    if (state == AppLifecycleState.resumed) _syncIfAuthed();
+  }
+
+  void _syncIfAuthed() {
+    if (ref.read(authNotifierProvider).valueOrNull is AuthAuthenticated) {
+      ref.read(syncControllerProvider.notifier).syncNow();
+    }
   }
 
   @override
