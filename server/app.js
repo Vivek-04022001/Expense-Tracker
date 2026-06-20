@@ -9,6 +9,7 @@ import incomeRouter from "./routes/income.route.js";
 import accountRouter from "./routes/account.route.js";
 import transferRouter from "./routes/transfer.route.js";
 import categoryRouter from "./routes/category.route.js";
+import syncRouter from "./routes/sync.routes.js";
 
 const app = express();
 app.use(cors());
@@ -23,5 +24,6 @@ app.use("/income", incomeRouter);
 app.use("/accounts", accountRouter);
 app.use("/transfers", transferRouter);
 app.use("/categories", categoryRouter);
+app.use("/sync", syncRouter);
 
 export default app;
