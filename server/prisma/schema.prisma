@@ -43,6 +43,11 @@ enum AccountType {
   other
 }
 
+enum CategoryKind {
+  expense
+  income
+}
+
 model User {
   id           String         @id @default(uuid())
   name         String
@@ -53,8 +58,31 @@ model User {
   budgets      Budget[]
   accounts     Account[]
   transfers    Transfer[]
+  categories   TransactionCategory[]
   refreshToken RefreshToken[]
   createdAt    DateTime       @default(now())
+}
+
+model TransactionCategory {
+  id        String       @id @default(uuid())
+  userId    String
+  user      User         @relation(fields: [userId], references: [id])
+  name      String
+  kind      CategoryKind
+  icon      String
+  color     String
+  // Stable identifier for seeded built-ins (e.g. "food_and_drink"); null for custom.
+  key       String?
+  isSystem  Boolean      @default(false)
+  sortOrder Int          @default(0)
+  expenses  Expense[]
+  incomes   Income[]
+  budgets   Budget[]
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+  deletedAt DateTime?
+
+  @@index([userId])
 }
 
 model Account {
@@ -86,10 +114,13 @@ model Expense {
   user          User          @relation(fields: [userId], references: [id])
   accountId     String?
   account       Account?      @relation(fields: [accountId], references: [id])
+  categoryId    String?
+  categoryRef   TransactionCategory?     @relation(fields: [categoryId], references: [id])
   createdAt     DateTime      @default(now())
   deletedAt     DateTime?
 
   @@index([accountId])
+  @@index([categoryId])
 }
 
 model Income {
@@ -101,9 +132,12 @@ model Income {
   user        User       @relation(fields: [userId], references: [id])
   accountId   String?
   account     Account?   @relation(fields: [accountId], references: [id])
+  categoryId  String?
+  categoryRef TransactionCategory?  @relation(fields: [categoryId], references: [id])
   createdAt   DateTime   @default(now())
 
   @@index([accountId])
+  @@index([categoryId])
 }
 
 model Transfer {
@@ -123,17 +157,20 @@ model Transfer {
 }
 
 model Budget {
-  id          String   @id @default(uuid())
+  id          String    @id @default(uuid())
   limitAmount Decimal
   category    Category
+  categoryId  String?
+  categoryRef TransactionCategory? @relation(fields: [categoryId], references: [id])
   month       Int
   year        Int
   userId      String
-  user        User     @relation(fields: [userId], references: [id])
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  user        User      @relation(fields: [userId], references: [id])
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
   @@unique([userId, category, month, year])
+  @@index([categoryId])
 }
 
 model RefreshToken {

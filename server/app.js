@@ -8,6 +8,7 @@ import savingsRouter from "./routes/savings.route.js";
 import incomeRouter from "./routes/income.route.js";
 import accountRouter from "./routes/account.route.js";
 import transferRouter from "./routes/transfer.route.js";
+import categoryRouter from "./routes/category.route.js";
 
 const app = express();
 app.use(cors());
@@ -21,5 +22,6 @@ app.use("/savings", savingsRouter);
 app.use("/income", incomeRouter);
 app.use("/accounts", accountRouter);
 app.use("/transfers", transferRouter);
+app.use("/categories", categoryRouter);
 
 export default app;

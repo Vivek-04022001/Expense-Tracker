@@ -1,6 +1,7 @@
 import bcrypt from "bcrypt";
 import { prisma } from "../src/db.js";
 import jwt from "jsonwebtoken";
+import { seedBuiltinCategories } from "../src/constants/categorySeed.js";
 
 export const registerUser = async (req, res) => {
   try {
@@ -14,6 +15,9 @@ export const registerUser = async (req, res) => {
         passwordHash,
       },
     });
+
+    // Give the new user the built-in expense + income categories.
+    await seedBuiltinCategories(prisma, user.id);
 
     return res
       .status(201)

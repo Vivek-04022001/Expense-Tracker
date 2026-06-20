@@ -35,7 +35,7 @@ We are **not** copying the cream/yellow look. The goal is feature parity + a pol
 |---|---------|---------|----------|--------|
 | F1 | Accounts (wallets/cards/cash) | 7 | P0 | ✅ Done (merged to dev) |
 | F2 | Transfer transaction type | 4 | P0 | ✅ Done (merged to dev) |
-| F3 | Editable Categories (CRUD) | 8 | P1 | 📋 Planned |
+| F3 | Editable Categories (CRUD) | 8 | P1 | 🔍 In review (`feature/categories`) |
 | F4 | Records: date-grouped list + month summary header | 1 | P1 | 📋 Planned |
 | F5 | Budget planner polish (limit-exceeded states) | 3 | P2 | 📋 Planned |
 | F6 | Analysis: income/expense overview toggle + breakdown bars | 2 | P2 | 📋 Planned |
@@ -54,6 +54,18 @@ We are **not** copying the cream/yellow look. The goal is feature parity + a pol
   expense/income to an `accountId` is deferred to **F2 (Transfer)**, where account linkage is
   required anyway — keeps F1 small and reviewable.
 - 2026-06-19 — Workflow per feature: branch → build → **user approval** → merge to `dev`.
+- 2026-06-20 — F3 Categories = **full table migration**. New `TransactionCategory` table
+  (renamed from `Category` to avoid colliding with the existing `Category` enum). Additive &
+  non-destructive: legacy `Category`/`IncomeType` enum columns are **kept** so the SMS
+  classifier, insights charts, and budget aggregation keep working unchanged.
+- 2026-06-20 — Built-ins seeded as **system rows** (`isSystem=true`) with stable `key` values
+  matching the legacy enum values (8 expense + 5 income). Custom categories layer on top
+  (`key=null`). System rows are editable (name/icon/color) but **not deletable**; `kind`/`key`
+  are immutable. New users seeded on register; existing users seeded by the migration backfill
+  and lazily on first `GET /categories`.
+- 2026-06-20 — Transaction sheets now send BOTH the legacy enum (derived from the selected
+  category's `key`, custom → `other`) AND the new `categoryId`. Keeps charts/SMS intact while
+  linking the richer category.
 
 ## Branch / merge workflow
 
@@ -61,7 +73,7 @@ We are **not** copying the cream/yellow look. The goal is feature parity + a pol
 |---------|--------|----------------|
 | F1 Accounts | `feature/accounts` | ✅ merged 2026-06-19 (--no-ff) |
 | F2 Transfer | `feature/transfer` | ✅ merged 2026-06-19 (--no-ff) |
-| F3 Categories CRUD | `feature/categories` (next) | — |
+| F3 Categories CRUD | `feature/categories` | 🔍 awaiting approval |
 
 ## ✅ F1 done
 
@@ -75,6 +87,16 @@ We are **not** copying the cream/yellow look. The goal is feature parity + a pol
   (adds `Transfer` table + `accountId` columns on Expense/Income). Apply with
   `cd server && npx prisma migrate deploy`. The `/transfers` API and account linkage will
   error until this is applied.
+
+## ⚠️ Action needed before F3 fully works
+
+- [ ] **Apply F3 DB migration to Neon.** File:
+  `server/prisma/migrations/20260620000000_add_category_table/migration.sql`
+  (creates `CategoryKind` enum + `TransactionCategory` table, adds `categoryId` to
+  Expense/Income/Budget, seeds built-ins per existing user, backfills `categoryId` from the
+  legacy enum columns). Apply with `cd server && npx prisma migrate deploy`. The `/categories`
+  API and category linkage will error until this is applied. Uses `gen_random_uuid()`
+  (available natively on Neon/Postgres 13+).
 
 ## Open questions
 

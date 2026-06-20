@@ -11,10 +11,12 @@ export const CreateIncomeSchema = z.object({
   incomeType: z.enum(incomeTypeValues).default("other"),
   description: z.string().max(255).optional(),
   accountId: z.string().uuid().optional(),
+  categoryId: z.string().uuid().optional(),
 });
 
 export const UpdateIncomeSchema = CreateIncomeSchema.partial().extend({
   accountId: z.string().uuid().nullable().optional(),
+  categoryId: z.string().uuid().nullable().optional(),
 });
 
 const dateRegex = /^\d{4}-\d{2}-\d{2}$/;

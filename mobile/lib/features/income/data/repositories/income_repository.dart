@@ -36,6 +36,7 @@ class IncomeRepository {
     IncomeType? incomeType,
     String? description,
     String? accountId,
+    String? categoryId,
   }) async {
     final response = await _dioClient.post(
       ApiConstants.income,
@@ -45,6 +46,7 @@ class IncomeRepository {
         if (description != null && description.isNotEmpty)
           'description': description,
         if (accountId != null) 'accountId': accountId,
+        if (categoryId != null) 'categoryId': categoryId,
       },
     );
     return IncomeModel.fromJson(

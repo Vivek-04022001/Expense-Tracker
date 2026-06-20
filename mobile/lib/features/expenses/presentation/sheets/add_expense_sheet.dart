@@ -4,9 +4,10 @@ import 'package:intl/intl.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import '../../../../core/errors/app_exceptions.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../../../../core/utils/category_mapper.dart';
 import '../../../../shared/widgets/calculator_numpad.dart';
 import '../../../accounts/presentation/widgets/account_selector.dart';
+import '../../../categories/data/models/category_model.dart';
+import '../../../categories/presentation/widgets/category_selector.dart';
 import '../../data/models/expense_model.dart';
 import '../providers/expense_provider.dart';
 
@@ -19,7 +20,7 @@ class AddExpenseSheet extends ConsumerStatefulWidget {
 
 class _AddExpenseSheetState extends ConsumerState<AddExpenseSheet> {
   String _expr = '';
-  ExpenseCategory _category = ExpenseCategory.foodAndDrink;
+  CategoryModel? _category;
   final _merchantCtrl = TextEditingController();
   ExpensePaymentMethod _payment = ExpensePaymentMethod.upi;
   DateTime _date = DateTime.now();
@@ -122,12 +123,19 @@ class _AddExpenseSheetState extends ConsumerState<AddExpenseSheet> {
     setState(() => _saving = true);
     try {
       final desc = _merchantCtrl.text.trim();
+      final cat = _category;
+      // Keep the legacy enum populated (SMS classifier + charts rely on it):
+      // built-ins map by their stable key, custom categories fall back to other.
+      final legacyCategory = cat?.key != null
+          ? ExpenseCategory.fromServer(cat!.key!)
+          : ExpenseCategory.other;
       await ref.read(expenseListNotifierProvider.notifier).create(
             amount: value,
             description: desc.length >= 5 ? desc : null,
-            category: _category,
+            category: legacyCategory,
             paymentMethod: _payment,
             accountId: _accountId,
+            categoryId: cat?.id,
           );
       if (!mounted) return;
       setState(() {
@@ -243,65 +251,11 @@ class _AddExpenseSheetState extends ConsumerState<AddExpenseSheet> {
                   fmtNum: _fmtNum,
                 ),
                 SizedBox(height: 16),
-                // Category chips
-                SizedBox(
-                  height: 36,
-                  child: ListView.separated(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    scrollDirection: Axis.horizontal,
-                    itemCount: ExpenseCategory.values.length,
-                    separatorBuilder: (_, __) => SizedBox(width: 8),
-                    itemBuilder: (_, i) {
-                      final cat = ExpenseCategory.values[i];
-                      final color = CategoryMapper.color(cat);
-                      final selected = _category == cat;
-                      return GestureDetector(
-                        onTap: () => setState(() => _category = cat),
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 150),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 6,
-                          ),
-                          decoration: BoxDecoration(
-                            color: selected
-                                ? color.withValues(alpha: 0.15)
-                                : Colors.white,
-                            borderRadius: BorderRadius.circular(20),
-                            border: Border.all(
-                              color: selected
-                                  ? color
-                                  : context.borderSubtle,
-                            ),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Container(
-                                width: 7,
-                                height: 7,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: color,
-                                ),
-                              ),
-                              SizedBox(width: 6),
-                              Text(
-                                CategoryMapper.label(cat),
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w500,
-                                  color: selected
-                                      ? color
-                                      : context.textPrimary,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
-                  ),
+                // Category chips (dynamic, user-managed)
+                CategorySelector(
+                  kind: CategoryKind.expense,
+                  selectedId: _category?.id,
+                  onChanged: (c) => setState(() => _category = c),
                 ),
                 SizedBox(height: 10),
                 // Account selector
