@@ -63,16 +63,25 @@ class BudgetsScreen extends ConsumerWidget {
                     );
                   }
                   final spent = spentAsync.valueOrNull ?? {};
-                  return ListView.separated(
+                  return ListView(
                     padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
-                    itemCount: budgets.length,
-                    separatorBuilder: (_, __) => SizedBox(height: 12),
-                    itemBuilder: (_, i) => _BudgetCard(
-                      budget: budgets[i],
-                      spent: spent[budgets[i].category] ?? 0,
-                      onDelete: () => _confirmDelete(context, ref, budgets[i]),
-                      onEdit: () => _openEditSheet(context, budgets[i]),
-                    ),
+                    children: [
+                      _OverviewCard(budgets: budgets, spent: spent),
+                      const SizedBox(height: 16),
+                      for (var i = 0; i < budgets.length; i++)
+                        Padding(
+                          padding: EdgeInsets.only(
+                            bottom: i == budgets.length - 1 ? 0 : 12,
+                          ),
+                          child: _BudgetCard(
+                            budget: budgets[i],
+                            spent: spent[budgets[i].category] ?? 0,
+                            onDelete: () =>
+                                _confirmDelete(context, ref, budgets[i]),
+                            onEdit: () => _openEditSheet(context, budgets[i]),
+                          ),
+                        ),
+                    ],
                   );
                 },
               ),
@@ -252,6 +261,161 @@ class _MonthNavBtn extends StatelessWidget {
   }
 }
 
+// ── Overview card ─────────────────────────────────────────────────────────────
+
+class _OverviewCard extends StatelessWidget {
+  const _OverviewCard({required this.budgets, required this.spent});
+
+  final List<BudgetModel> budgets;
+  final Map<dynamic, double> spent;
+
+  @override
+  Widget build(BuildContext context) {
+    final totalLimit =
+        budgets.fold<double>(0, (sum, b) => sum + b.limitAmount);
+    final totalSpent = budgets.fold<double>(
+      0,
+      (sum, b) => sum + (spent[b.category] ?? 0),
+    );
+    final pct = totalLimit > 0 ? totalSpent / totalLimit : 0.0;
+    final isOver = totalSpent > totalLimit;
+    final remaining = (totalLimit - totalSpent).clamp(0.0, double.infinity);
+    final overCount = budgets
+        .where((b) => (spent[b.category] ?? 0) > b.limitAmount)
+        .length;
+
+    final barColor = isOver
+        ? AppColors.danger
+        : pct >= 0.75
+            ? AppColors.warning
+            : AppColors.success;
+
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: context.bgSurface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: context.borderSubtle),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Total spent',
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: context.textSecondary,
+                      ),
+                    ),
+                    SizedBox(height: 4),
+                    Text(
+                      '₹${_fmtNum(totalSpent.round())}',
+                      style: TextStyle(
+                        fontSize: 26,
+                        fontWeight: FontWeight.w700,
+                        color: context.textPrimary,
+                      ),
+                    ),
+                    Text(
+                      'of ₹${_fmtNum(totalLimit.round())} budgeted',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: context.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (overCount > 0)
+                _StatusBadge(
+                  label: '$overCount over',
+                  color: AppColors.danger,
+                ),
+            ],
+          ),
+          SizedBox(height: 16),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(4),
+            child: SizedBox(
+              height: 8,
+              child: LinearProgressIndicator(
+                value: pct.clamp(0.0, 1.0),
+                backgroundColor: context.bgSubtle,
+                valueColor: AlwaysStoppedAnimation<Color>(barColor),
+              ),
+            ),
+          ),
+          SizedBox(height: 10),
+          Row(
+            children: [
+              Text(
+                '${(pct * 100).round()}% used',
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                  color: context.textPrimary,
+                ),
+              ),
+              const Spacer(),
+              Text(
+                isOver
+                    ? '₹${_fmtNum((totalSpent - totalLimit).round())} over'
+                    : '₹${_fmtNum(remaining.round())} left',
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: isOver ? AppColors.danger : AppColors.success,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Status badge ──────────────────────────────────────────────────────────────
+
+class _StatusBadge extends StatelessWidget {
+  const _StatusBadge({required this.label, required this.color});
+  final String label;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          fontSize: 11,
+          fontWeight: FontWeight.w600,
+          color: color,
+        ),
+      ),
+    );
+  }
+}
+
 // ── Budget card ───────────────────────────────────────────────────────────────
 
 class _BudgetCard extends StatelessWidget {
@@ -345,21 +509,14 @@ class _BudgetCard extends StatelessWidget {
                   ),
                 ),
                 if (isOver)
-                  Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                    decoration: BoxDecoration(
-                      color: AppColors.danger.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(
-                      'Over budget',
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.danger,
-                      ),
-                    ),
+                  _StatusBadge(
+                    label: 'Over budget',
+                    color: AppColors.danger,
+                  )
+                else if (isWarning)
+                  _StatusBadge(
+                    label: 'Near limit',
+                    color: AppColors.warning,
                   ),
                 SizedBox(width: 8),
                 GestureDetector(
@@ -383,7 +540,7 @@ class _BudgetCard extends StatelessWidget {
                 height: 6,
                 child: LinearProgressIndicator(
                   value: pct.clamp(0.0, 1.0),
-                  backgroundColor: const Color(0xFFECEDF0),
+                  backgroundColor: context.bgSubtle,
                   valueColor: AlwaysStoppedAnimation<Color>(barColor),
                 ),
               ),
@@ -392,7 +549,7 @@ class _BudgetCard extends StatelessWidget {
             Row(
               children: [
                 Text(
-                  '₹${_fmtNum(spent.round())} spent',
+                  '₹${_fmtNum(spent.round())} spent · ${(pct * 100).round()}%',
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w500,
