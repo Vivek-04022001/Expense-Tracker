@@ -41,7 +41,7 @@ We are **not** copying the cream/yellow look. The goal is feature parity + a pol
 | F6 | Analysis: income/expense overview toggle + breakdown bars | 2 | P2 | 📋 Planned |
 | F7 | Expense Flow chart + weekly table | 6 | P2 | 📋 Planned |
 | A1 | Icon system upgrade (see assets_plan.md) | all | P1 | 📋 Planned |
-| A2 | Human-feel illustrations/images (see assets_plan.md) | all | P2 | 📋 Planned |
+| A2 | Human-feel illustrations/images (see assets_plan.md) | all | P2 | ✅ Done (12 illustrations integrated on dev) |
 
 ## Decisions log
 
@@ -66,6 +66,11 @@ We are **not** copying the cream/yellow look. The goal is feature parity + a pol
 - 2026-06-20 — Transaction sheets now send BOTH the legacy enum (derived from the selected
   category's `key`, custom → `other`) AND the new `categoryId`. Keeps charts/SMS intact while
   linking the richer category.
+- 2026-06-20 — A2 illustrations generated (Nano Banana, per assets_plan.md style guide) and
+  wired into 12 placements: onboarding ×3, no_accounts, no_budget, no_transaction (×2),
+  insight_empty_state, profile_header_banner, sms_import_explainer, saving_goal_art, success,
+  account_type_icon. Registered `assets/illustrations/` in pubspec; removed macOS `._*`
+  AppleDouble files so they don't bloat the asset bundle. `flutter analyze` clean (no new issues).
 
 ## Branch / merge workflow
 

@@ -163,29 +163,62 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen> {
             ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Column(
-                children: [
-                  SizedBox(height: 16),
-                  TotalSpendCard(data: data),
-                  SizedBox(height: 14),
-                  CategoryDonutCard(data: data),
-                  SizedBox(height: 14),
-                  DailySpendChart(data: data, month: currentInsightsMonth),
-                  SizedBox(height: 14),
-                  BudgetListCard(data: data),
-                  SizedBox(height: 14),
-                  TopMerchantsCard(data: data),
-                  if (data.aiInsights.isNotEmpty) ...[
-                    SizedBox(height: 14),
-                    ...data.aiInsights.map(
-                      (i) => Padding(
-                        padding: const EdgeInsets.only(bottom: 10),
-                        child: AiInsightCard(insight: i),
+              child: data.totalSpend == 0 && data.categories.isEmpty
+                  ? Padding(
+                      padding: const EdgeInsets.only(top: 48),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Image.asset(
+                            'assets/illustrations/insight_empty_state.png',
+                            width: 220,
+                            fit: BoxFit.contain,
+                          ),
+                          const SizedBox(height: 20),
+                          Text(
+                            'No data yet',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w700,
+                              color: context.textPrimary,
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            'Add some expenses to see your spending insights.',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: context.textSecondary,
+                              height: 1.4,
+                            ),
+                          ),
+                        ],
                       ),
+                    )
+                  : Column(
+                      children: [
+                        SizedBox(height: 16),
+                        TotalSpendCard(data: data),
+                        SizedBox(height: 14),
+                        CategoryDonutCard(data: data),
+                        SizedBox(height: 14),
+                        DailySpendChart(data: data, month: currentInsightsMonth),
+                        SizedBox(height: 14),
+                        BudgetListCard(data: data),
+                        SizedBox(height: 14),
+                        TopMerchantsCard(data: data),
+                        if (data.aiInsights.isNotEmpty) ...[
+                          SizedBox(height: 14),
+                          ...data.aiInsights.map(
+                            (i) => Padding(
+                              padding: const EdgeInsets.only(bottom: 10),
+                              child: AiInsightCard(insight: i),
+                            ),
+                          ),
+                        ],
+                      ],
                     ),
-                  ],
-                ],
-              ),
             ),
           ],
         ),

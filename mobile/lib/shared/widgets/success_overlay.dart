@@ -41,8 +41,6 @@ class _SuccessOverlayState extends State<_SuccessOverlay> {
   String get _label => widget.isExpense ? 'Expense Added' : 'Income Added';
   String get _subtitle =>
       widget.isExpense ? 'Tracked & saved' : 'Recorded successfully';
-  IconData get _icon =>
-      widget.isExpense ? Icons.arrow_downward_rounded : Icons.arrow_upward_rounded;
 
   @override
   void initState() {
@@ -98,8 +96,22 @@ class _SuccessOverlayState extends State<_SuccessOverlay> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    _MainCircle(color: _color, icon: _icon),
-                    const SizedBox(height: 28),
+                    Image.asset(
+                      'assets/illustrations/success.png',
+                      width: 220,
+                      height: 180,
+                      fit: BoxFit.contain,
+                    )
+                        .animate()
+                        .scale(
+                          begin: const Offset(0.0, 0.0),
+                          end: const Offset(1.0, 1.0),
+                          duration: 600.ms,
+                          delay: 60.ms,
+                          curve: Curves.easeOutBack,
+                        )
+                        .fadeIn(duration: 250.ms, delay: 60.ms),
+                    const SizedBox(height: 20),
                     Text(
                       _label,
                       style: const TextStyle(
@@ -155,123 +167,6 @@ class _SuccessOverlayState extends State<_SuccessOverlay> {
             ],
           ),
         ),
-      ),
-    );
-  }
-}
-
-// ── Main animated circle ──────────────────────────────────────────────────────
-
-class _MainCircle extends StatelessWidget {
-  const _MainCircle({required this.color, required this.icon});
-  final Color color;
-  final IconData icon;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: 220,
-      height: 220,
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          // Outermost diffuse glow ring — expands and fades
-          Container(
-            width: 220,
-            height: 220,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: color.withValues(alpha: 0.10),
-            ),
-          )
-              .animate()
-              .scale(
-                begin: const Offset(0.4, 0.4),
-                end: const Offset(1.0, 1.0),
-                duration: 700.ms,
-                delay: 100.ms,
-                curve: Curves.easeOut,
-              )
-              .then()
-              .scaleXY(
-                begin: 1.0,
-                end: 1.25,
-                duration: 600.ms,
-                curve: Curves.easeInOut,
-              )
-              .fadeOut(duration: 600.ms),
-
-          // Middle halo ring
-          Container(
-            width: 170,
-            height: 170,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: color.withValues(alpha: 0.18),
-            ),
-          )
-              .animate()
-              .scale(
-                begin: const Offset(0.3, 0.3),
-                end: const Offset(1.0, 1.0),
-                duration: 550.ms,
-                delay: 60.ms,
-                curve: Curves.easeOutBack,
-              )
-              .then()
-              .fadeOut(duration: 500.ms, delay: 200.ms),
-
-          // Core circle with icon — the main "pop"
-          Container(
-            width: 118,
-            height: 118,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: color,
-              boxShadow: [
-                BoxShadow(
-                  color: color.withValues(alpha: 0.55),
-                  blurRadius: 48,
-                  spreadRadius: 8,
-                ),
-                BoxShadow(
-                  color: color.withValues(alpha: 0.25),
-                  blurRadius: 16,
-                  spreadRadius: 2,
-                ),
-              ],
-            ),
-            child: Icon(icon, color: Colors.white, size: 52),
-          )
-              .animate()
-              .scale(
-                begin: const Offset(0.0, 0.0),
-                end: const Offset(1.0, 1.0),
-                duration: 480.ms,
-                delay: 80.ms,
-                curve: Curves.easeOutBack,
-              )
-              .fadeIn(duration: 200.ms, delay: 80.ms),
-
-          // White ring flash on pop — a quick white outline that fades
-          Container(
-            width: 130,
-            height: 130,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(color: Colors.white, width: 3),
-            ),
-          )
-              .animate()
-              .scale(
-                begin: const Offset(0.85, 0.85),
-                end: const Offset(1.15, 1.15),
-                duration: 450.ms,
-                delay: 200.ms,
-                curve: Curves.easeOut,
-              )
-              .fadeOut(duration: 450.ms, delay: 200.ms),
-        ],
       ),
     );
   }

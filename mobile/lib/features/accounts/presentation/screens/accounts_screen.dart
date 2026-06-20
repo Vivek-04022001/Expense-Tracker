@@ -293,8 +293,12 @@ class _EmptyState extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            PhosphorIcon(PhosphorIcons.wallet(PhosphorIconsStyle.duotone),
-                size: 64, color: context.textTertiary),
+            Image.asset(
+              'assets/illustrations/no_accounts.png',
+              width: 200,
+              height: 160,
+              fit: BoxFit.contain,
+            ),
             const SizedBox(height: 16),
             Text(
               'No accounts yet',

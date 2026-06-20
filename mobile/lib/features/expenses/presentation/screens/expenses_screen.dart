@@ -417,12 +417,13 @@ class _ExpensesScreenState extends ConsumerState<ExpensesScreen>
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          PhosphorIcon(
-            PhosphorIcons.receipt(PhosphorIconsStyle.light),
-            size: 56,
-            color: context.textTertiary,
+          Image.asset(
+            'assets/illustrations/no_transaction.png',
+            width: 180,
+            height: 160,
+            fit: BoxFit.contain,
           ),
-          SizedBox(height: 12),
+          SizedBox(height: 16),
           Text(
             label,
             style: TextStyle(
@@ -967,13 +968,13 @@ class _IncomeTabState extends ConsumerState<_IncomeTab> {
                             child: Column(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                PhosphorIcon(
-                                  PhosphorIcons.trendUp(
-                                      PhosphorIconsStyle.light),
-                                  size: 56,
-                                  color: context.textTertiary,
+                                Image.asset(
+                                  'assets/illustrations/no_transaction.png',
+                                  width: 180,
+                                  height: 160,
+                                  fit: BoxFit.contain,
                                 ),
-                                SizedBox(height: 12),
+                                SizedBox(height: 16),
                                 Text(
                                   'No income this month',
                                   style: TextStyle(

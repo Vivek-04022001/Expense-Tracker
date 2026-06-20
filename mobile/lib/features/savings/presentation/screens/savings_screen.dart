@@ -54,7 +54,16 @@ class SavingsScreen extends ConsumerWidget {
                   ),
                 ],
               ),
-              SizedBox(height: 24),
+              SizedBox(height: 20),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(16),
+                child: Image.asset(
+                  'assets/illustrations/saving_goal_art.png',
+                  width: double.infinity,
+                  fit: BoxFit.fitWidth,
+                ),
+              ),
+              SizedBox(height: 20),
               _SectionLabel(label: DateFormat('MMMM yyyy').format(now)),
               SizedBox(height: 10),
               monthAsync.when(

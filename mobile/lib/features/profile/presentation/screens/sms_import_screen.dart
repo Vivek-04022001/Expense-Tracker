@@ -44,6 +44,16 @@ class _SmsImportScreenState extends ConsumerState<SmsImportScreen> {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
+          // ── Explainer illustration ─────────────────────────────────────
+          ClipRRect(
+            borderRadius: BorderRadius.circular(16),
+            child: Image.asset(
+              'assets/illustrations/sms_import_explainer.png',
+              width: double.infinity,
+              fit: BoxFit.fitWidth,
+            ),
+          ),
+          const SizedBox(height: 16),
           // ── Paste SMS card ─────────────────────────────────────────────
           Container(
             padding: const EdgeInsets.all(16),

@@ -170,6 +170,17 @@ class _AddAccountSheetState extends ConsumerState<AddAccountSheet> {
                 ),
               ),
               const SizedBox(height: 16),
+              // Account type visual guide
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Image.asset(
+                  'assets/illustrations/account_type_icon.png',
+                  width: double.infinity,
+                  height: 56,
+                  fit: BoxFit.contain,
+                ),
+              ),
+              const SizedBox(height: 10),
               // Type chips
               SizedBox(
                 height: 38,

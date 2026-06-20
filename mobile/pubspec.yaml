@@ -44,7 +44,6 @@ dependencies:
   # For generating app icons from a single image
   flutter_launcher_icons: ^0.14.4
 
-
 flutter_launcher_icons:
   android: true
   image_path: "assets/images/app_logo.png" # Path to your logo file
@@ -65,3 +64,4 @@ flutter:
 
   assets:
     - assets/images/
+    - assets/illustrations/

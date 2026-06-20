@@ -104,7 +104,17 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 color: context.textPrimary,
               ),
             ),
-            SizedBox(height: 16),
+            SizedBox(height: 12),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(16),
+              child: Image.asset(
+                'assets/illustrations/profile_header_banner.png',
+                width: double.infinity,
+                height: 110,
+                fit: BoxFit.cover,
+              ),
+            ),
+            SizedBox(height: 12),
             ProfileUserCard(name: _name, phone: _phone, onEdit: _openEdit),
             SizedBox(height: 24),
             ProfileSection(

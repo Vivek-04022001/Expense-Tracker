@@ -433,20 +433,11 @@ class _EmptyState extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Container(
-              width: 72,
-              height: 72,
-              decoration: BoxDecoration(
-                color: AppColors.primary100,
-                shape: BoxShape.circle,
-              ),
-              child: Center(
-                child: PhosphorIcon(
-                  PhosphorIconsRegular.piggyBank,
-                  size: 32,
-                  color: AppColors.primary500,
-                ),
-              ),
+            Image.asset(
+              'assets/illustrations/no_budget.png',
+              width: 180,
+              height: 160,
+              fit: BoxFit.contain,
             ),
             SizedBox(height: 16),
             Text(
