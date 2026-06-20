@@ -43,13 +43,9 @@ class _PaisaAppState extends ConsumerState<PaisaApp>
     WidgetsBinding.instance.addObserver(this);
 
     // Sync whenever the user becomes authenticated (restored session or login).
-    ref.listenManual(
-      authNotifierProvider,
-      (previous, next) {
-        if (next.valueOrNull is AuthAuthenticated) _syncIfAuthed();
-      },
-      fireImmediately: true,
-    );
+    ref.listenManual(authNotifierProvider, (previous, next) {
+      if (next.valueOrNull is AuthAuthenticated) _syncIfAuthed();
+    }, fireImmediately: true);
 
     // Sync the moment connectivity is restored.
     ref.listenManual(connectivityProvider, (previous, next) {
