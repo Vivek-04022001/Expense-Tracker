@@ -103,3 +103,14 @@ Future<List<IncomeModel>> currentMonthIncomes(
   final to = DateTime(now.year, now.month + 1, 0, 23, 59, 59);
   return repo.getIncomes(from: from, to: to);
 }
+
+@riverpod
+Future<List<IncomeModel>> incomesForMonth(
+  IncomesForMonthRef ref,
+  DateTime month,
+) async {
+  final repo = ref.watch(incomeRepositoryProvider);
+  final from = DateTime(month.year, month.month);
+  final to = DateTime(month.year, month.month + 1, 0, 23, 59, 59);
+  return repo.getIncomes(from: from, to: to);
+}

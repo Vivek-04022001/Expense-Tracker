@@ -173,9 +173,31 @@ keep working. Expense + Income both.
 per git status) + a reusable `transaction_tile` widget.
 
 **Acceptance:**
-- [ ] Month switching updates list + summary.
-- [ ] Transactions grouped by day with weekday labels.
-- [ ] Expense/Income/Total computed for the visible month.
+- [x] Month switching updates list + summary.
+- [x] Transactions grouped by day with weekday labels.
+- [x] Expense/Income/Total computed for the visible month.
+
+### ✅ Implemented (`feature/records`, 2026-06-20) — in review
+
+**Approach:** Extended the existing `expenses_screen.dart` (Transactions screen, Expenses + Income
+tabs) rather than a rewrite — it already had month-scoped data, search, and category filters.
+
+- New `presentation/widgets/month_summary_header.dart`:
+  - `MonthNavigator` — `‹ Month YYYY ›` with prev/next arrows + tappable label (opens the existing
+    month picker). "Next" disabled at the current month (no future months).
+  - `MonthSummaryHeader` — 3-column **Expense / Income / Total** strip for the visible month
+    (red / green / signed), `FittedBox` so large amounts don't overflow.
+- Both tabs now render `MonthNavigator` + `MonthSummaryHeader`. The summary needs the *other*
+  side's total for the same month, so added `incomesForMonth(month)` provider (mirrors the
+  existing `expensesForMonth`); each tab watches the opposite month-scoped provider.
+- Day grouping now uses weekday labels: `Today · Sunday` / `Yesterday · …` / `MMM d, EEEE`.
+  Income tab gained day grouping too (`_IncomeDaySection`) for parity with expenses.
+- No server changes (all data already month-scoped via existing endpoints). build_runner
+  regenerated for the new provider; `flutter analyze`: 0 errors.
+
+> Note: transaction tiles still use `CategoryMapper` (legacy enum) for icon/color. Wiring tiles
+> to the richer F3 `categoryId` is a follow-up (needs the expense/income models to expose the
+> linked category) — tracked in fixes/backlog, out of F4 scope.
 
 ---
 
