@@ -37,7 +37,7 @@ We are **not** copying the cream/yellow look. The goal is feature parity + a pol
 | F2 | Transfer transaction type | 4 | P0 | ✅ Done (merged to dev) |
 | F3 | Editable Categories (CRUD) | 8 | P1 | ✅ Done (merged to dev) |
 | F4 | Records: date-grouped list + month summary header | 1 | P1 | ✅ Done (merged to dev) |
-| F5 | Budget planner polish (limit-exceeded states) | 3 | P2 | 📋 Planned |
+| F5 | Budget planner polish (limit-exceeded states) | 3 | P2 | ✅ Done (merged to dev) |
 | F6 | Analysis: income/expense overview toggle + breakdown bars | 2 | P2 | 📋 Planned |
 | F7 | Expense Flow chart + weekly table | 6 | P2 | 📋 Planned |
 | A1 | Icon system upgrade (see assets_plan.md) | all | P1 | 📋 Planned |
@@ -71,6 +71,10 @@ We are **not** copying the cream/yellow look. The goal is feature parity + a pol
   insight_empty_state, profile_header_banner, sms_import_explainer, saving_goal_art, success,
   account_type_icon. Registered `assets/illustrations/` in pubspec; removed macOS `._*`
   AppleDouble files so they don't bloat the asset bundle. `flutter analyze` clean (no new issues).
+- 2026-06-20 — F5 Budget polish (frontend-only): added a month-level overview card (total
+  spent vs budgeted, aggregate progress bar, over-budget count), fixed the hardcoded progress
+  track color (`0xFFECEDF0`) to `context.bgSubtle` so bars render in dark mode, added a "Near
+  limit" badge at ≥75% (shared `_StatusBadge`), and a "% used" label per card.
 
 ## Branch / merge workflow
 
@@ -80,6 +84,7 @@ We are **not** copying the cream/yellow look. The goal is feature parity + a pol
 | F2 Transfer | `feature/transfer` | ✅ merged 2026-06-19 (--no-ff) |
 | F3 Categories CRUD | `feature/categories` | ✅ merged 2026-06-20 (--no-ff) |
 | F4 Records | `feature/records` | ✅ merged 2026-06-20 (--no-ff) |
+| F5 Budget polish | `feature/budget-polish` | ✅ merged 2026-06-20 (--no-ff) |
 
 ## ✅ F1 done
 
