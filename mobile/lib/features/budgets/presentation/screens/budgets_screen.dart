@@ -29,15 +29,19 @@ class BudgetsScreen extends ConsumerWidget {
                 final m = selectedMonth;
                 ref
                     .read(selectedBudgetMonthProvider.notifier)
-                    .setMonth(m.month == 1 ? m.year - 1 : m.year,
-                        m.month == 1 ? 12 : m.month - 1);
+                    .setMonth(
+                      m.month == 1 ? m.year - 1 : m.year,
+                      m.month == 1 ? 12 : m.month - 1,
+                    );
               },
               onNext: () {
                 final m = selectedMonth;
                 ref
                     .read(selectedBudgetMonthProvider.notifier)
-                    .setMonth(m.month == 12 ? m.year + 1 : m.year,
-                        m.month == 12 ? 1 : m.month + 1);
+                    .setMonth(
+                      m.month == 12 ? m.year + 1 : m.year,
+                      m.month == 12 ? 1 : m.month + 1,
+                    );
               },
               onReset: () {
                 final now = DateTime.now();
@@ -49,8 +53,7 @@ class BudgetsScreen extends ConsumerWidget {
             ),
             Expanded(
               child: budgetsAsync.when(
-                loading: () =>
-                    Center(child: CircularProgressIndicator()),
+                loading: () => Center(child: CircularProgressIndicator()),
                 error: (e, _) => Center(
                   child: Text(
                     'Could not load budgets',
@@ -59,9 +62,7 @@ class BudgetsScreen extends ConsumerWidget {
                 ),
                 data: (budgets) {
                   if (budgets.isEmpty) {
-                    return _EmptyState(
-                      onAdd: () => _openAddSheet(context),
-                    );
+                    return _EmptyState(onAdd: () => _openAddSheet(context));
                   }
                   final spent = spentAsync.valueOrNull ?? {};
                   return ListView(
@@ -96,6 +97,7 @@ class BudgetsScreen extends ConsumerWidget {
   Future<void> _openAddSheet(BuildContext context) async {
     await showModalBottomSheet<bool>(
       context: context,
+      useRootNavigator: true,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (_) => const AddBudgetSheet(),
@@ -105,6 +107,7 @@ class BudgetsScreen extends ConsumerWidget {
   Future<void> _openEditSheet(BuildContext context, BudgetModel budget) async {
     await showModalBottomSheet<bool>(
       context: context,
+      useRootNavigator: true,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (_) => AddBudgetSheet(prefillCategory: budget.category),
@@ -122,10 +125,7 @@ class BudgetsScreen extends ConsumerWidget {
         ),
         content: Text(
           'Remove the ${CategoryMapper.label(budget.category)} budget of ₹${_fmtNum(budget.limitAmount.round())}?',
-          style: TextStyle(
-            color: context.textSecondary,
-            fontSize: 14,
-          ),
+          style: TextStyle(color: context.textSecondary, fontSize: 14),
         ),
         actions: [
           TextButton(
@@ -184,6 +184,20 @@ class _Header extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
       child: Row(
         children: [
+          if (Navigator.of(context).canPop()) ...[
+            GestureDetector(
+              onTap: () => Navigator.of(context).maybePop(),
+              behavior: HitTestBehavior.opaque,
+              child: Padding(
+                padding: const EdgeInsets.only(right: 10),
+                child: PhosphorIcon(
+                  PhosphorIcons.caretLeft(PhosphorIconsStyle.bold),
+                  size: 20,
+                  color: context.textPrimary,
+                ),
+              ),
+            ),
+          ],
           Text(
             'Budgets',
             style: TextStyle(
@@ -272,8 +286,7 @@ class _OverviewCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final totalLimit =
-        budgets.fold<double>(0, (sum, b) => sum + b.limitAmount);
+    final totalLimit = budgets.fold<double>(0, (sum, b) => sum + b.limitAmount);
     final totalSpent = budgets.fold<double>(
       0,
       (sum, b) => sum + (spent[b.category] ?? 0),
@@ -288,8 +301,8 @@ class _OverviewCard extends StatelessWidget {
     final barColor = isOver
         ? AppColors.danger
         : pct >= 0.75
-            ? AppColors.warning
-            : AppColors.success;
+        ? AppColors.warning
+        : AppColors.success;
 
     return Container(
       padding: const EdgeInsets.all(18),
@@ -342,10 +355,7 @@ class _OverviewCard extends StatelessWidget {
                 ),
               ),
               if (overCount > 0)
-                _StatusBadge(
-                  label: '$overCount over',
-                  color: AppColors.danger,
-                ),
+                _StatusBadge(label: '$overCount over', color: AppColors.danger),
             ],
           ),
           SizedBox(height: 16),
@@ -444,8 +454,8 @@ class _BudgetCard extends StatelessWidget {
     final barColor = isOver
         ? AppColors.danger
         : isWarning
-            ? AppColors.warning
-            : AppColors.success;
+        ? AppColors.warning
+        : AppColors.success;
 
     return GestureDetector(
       onTap: onEdit,
@@ -502,15 +512,9 @@ class _BudgetCard extends StatelessWidget {
                   ),
                 ),
                 if (isOver)
-                  _StatusBadge(
-                    label: 'Over budget',
-                    color: AppColors.danger,
-                  )
+                  _StatusBadge(label: 'Over budget', color: AppColors.danger)
                 else if (isWarning)
-                  _StatusBadge(
-                    label: 'Near limit',
-                    color: AppColors.warning,
-                  ),
+                  _StatusBadge(label: 'Near limit', color: AppColors.warning),
                 SizedBox(width: 8),
                 GestureDetector(
                   onTap: onDelete,
@@ -614,8 +618,10 @@ class _EmptyState extends StatelessWidget {
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary500,
                 foregroundColor: Colors.white,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 28,
+                  vertical: 14,
+                ),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),

@@ -176,7 +176,7 @@ class _AddAccountSheetState extends ConsumerState<AddAccountSheet> {
                 child: Image.asset(
                   'assets/illustrations/account_type_icon.png',
                   width: double.infinity,
-                  height: 56,
+                  height: 120,
                   fit: BoxFit.contain,
                 ),
               ),

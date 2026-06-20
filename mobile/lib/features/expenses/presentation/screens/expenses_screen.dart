@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
+import '../../../../core/router/transitions.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/category_mapper.dart';
 import '../../../../shared/widgets/category_avatar.dart';
@@ -216,9 +217,7 @@ class _ExpensesScreenState extends ConsumerState<ExpensesScreen>
                           child: Center(
                             child: Text(
                               'Failed to load expenses',
-                              style: TextStyle(
-                                color: context.textSecondary,
-                              ),
+                              style: TextStyle(color: context.textSecondary),
                             ),
                           ),
                         ),
@@ -234,8 +233,10 @@ class _ExpensesScreenState extends ConsumerState<ExpensesScreen>
                           final monthIncome = ref
                               .watch(incomesForMonthProvider(selectedMonth))
                               .valueOrNull;
-                          final totalIncome = (monthIncome ?? [])
-                              .fold(0.0, (s, e) => s + e.amount);
+                          final totalIncome = (monthIncome ?? []).fold(
+                            0.0,
+                            (s, e) => s + e.amount,
+                          );
                           return Expanded(
                             child: Column(
                               children: [
@@ -359,10 +360,7 @@ class _ExpensesScreenState extends ConsumerState<ExpensesScreen>
               child: TextField(
                 controller: _searchCtrl,
                 autofocus: true,
-                style: TextStyle(
-                  fontSize: 14,
-                  color: context.textPrimary,
-                ),
+                style: TextStyle(fontSize: 14, color: context.textPrimary),
                 decoration: InputDecoration(
                   hintText: 'Search expenses…',
                   hintStyle: TextStyle(
@@ -403,10 +401,7 @@ class _ExpensesScreenState extends ConsumerState<ExpensesScreen>
         children: [
           Text(
             '${_fmtRupee(total)} across $count expenses',
-            style: TextStyle(
-              fontSize: 13,
-              color: context.textSecondary,
-            ),
+            style: TextStyle(fontSize: 13, color: context.textSecondary),
           ),
         ],
       ),
@@ -420,17 +415,14 @@ class _ExpensesScreenState extends ConsumerState<ExpensesScreen>
         children: [
           Image.asset(
             'assets/illustrations/no_transaction.png',
-            width: 180,
+            width: 380,
             height: 160,
             fit: BoxFit.contain,
           ),
           SizedBox(height: 16),
           Text(
             label,
-            style: TextStyle(
-              fontSize: 15,
-              color: context.textSecondary,
-            ),
+            style: TextStyle(fontSize: 15, color: context.textSecondary),
           ),
         ],
       ),
@@ -499,11 +491,8 @@ class _DaySection extends StatelessWidget {
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             itemCount: entries.length,
-            separatorBuilder: (_, __) => Divider(
-              height: 1,
-              indent: 62,
-              color: context.borderSubtle,
-            ),
+            separatorBuilder: (_, __) =>
+                Divider(height: 1, indent: 62, color: context.borderSubtle),
             itemBuilder: (_, i) => _EntryTile(expense: entries[i]),
           ),
         ),
@@ -519,8 +508,8 @@ class _EntryTile extends StatelessWidget {
   final ExpenseModel expense;
 
   void _openDetail(BuildContext context) {
-    Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => ExpenseDetailScreen(expense: expense)),
+    Navigator.of(context, rootNavigator: true).push(
+      slideFadeRoute(ExpenseDetailScreen(expense: expense)),
     );
   }
 
@@ -799,9 +788,7 @@ class _FilterSheetState extends State<_FilterSheet> {
                     style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
-                      color: isActive
-                          ? Colors.white
-                          : context.textSecondary,
+                      color: isActive ? Colors.white : context.textSecondary,
                     ),
                   ),
                 ),
@@ -827,10 +814,7 @@ class _FilterSheetState extends State<_FilterSheet> {
               ),
               child: Text(
                 _selected.isEmpty ? 'Show All' : 'Apply Filter',
-                style: TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w600,
-                ),
+                style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
               ),
             ),
           ),
@@ -927,10 +911,13 @@ class _IncomeTabState extends ConsumerState<_IncomeTab> {
           data: (incomes) {
             final totalIncome = incomes.fold(0.0, (s, e) => s + e.amount);
             // Expense for the same month, for the summary strip.
-            final monthExpense =
-                ref.watch(expensesForMonthProvider(selectedMonth)).valueOrNull;
-            final totalExpense =
-                (monthExpense ?? []).fold(0.0, (s, e) => s + e.amount);
+            final monthExpense = ref
+                .watch(expensesForMonthProvider(selectedMonth))
+                .valueOrNull;
+            final totalExpense = (monthExpense ?? []).fold(
+              0.0,
+              (s, e) => s + e.amount,
+            );
             final grouped = _group(incomes);
             final dateKeys = grouped.keys.toList();
             return Expanded(
@@ -1050,9 +1037,7 @@ class _IncomeDaySection extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Column(
-            children: [
-              for (final e in entries) _IncomeTile(income: e),
-            ],
+            children: [for (final e in entries) _IncomeTile(income: e)],
           ),
         ),
       ],
@@ -1073,8 +1058,8 @@ class _IncomeTile extends StatelessWidget {
   };
 
   void _openDetail(BuildContext context) {
-    Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => IncomeDetailScreen(income: income)),
+    Navigator.of(context, rootNavigator: true).push(
+      slideFadeRoute(IncomeDetailScreen(income: income)),
     );
   }
 

@@ -242,7 +242,7 @@ class _CategoryRow extends StatelessWidget {
             onSelected: (v) => v == 'edit' ? onEdit() : onDelete(),
             itemBuilder: (_) => [
               const PopupMenuItem(value: 'edit', child: Text('Edit')),
-              // Built-in categories back the SMS classifier and reports, so they
+              // Built-in categories back the reports, so they
               // can be edited but not deleted.
               if (!category.isSystem)
                 const PopupMenuItem(value: 'delete', child: Text('Delete')),

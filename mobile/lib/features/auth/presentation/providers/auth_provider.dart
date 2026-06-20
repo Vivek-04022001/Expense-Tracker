@@ -93,6 +93,23 @@ class AuthNotifier extends _$AuthNotifier {
     state = AsyncValue.data(AuthUnauthenticated());
   }
 
+  /// Updates the locally stored profile name. Persists to secure storage only —
+  /// there is no backend profile-update endpoint yet, and phone is the login
+  /// identifier so it stays immutable here.
+  Future<void> updateProfile({required String name}) async {
+    final current = state.valueOrNull;
+    if (current is! AuthAuthenticated) return;
+    final trimmed = name.trim();
+    if (trimmed.isEmpty || trimmed == current.user.name) return;
+    final updated = UserModel(
+      id: current.user.id,
+      name: trimmed,
+      phone: current.user.phone,
+    );
+    await ref.read(authRepositoryProvider).saveUser(updated);
+    state = AsyncValue.data(AuthAuthenticated(updated));
+  }
+
   String _errorMessage(AppException e) {
     if (e.isUnauthorized) return 'Invalid phone number or password';
     if (e.isNetwork) return 'No internet connection';

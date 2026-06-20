@@ -1,10 +1,10 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../expenses/data/models/expense_model.dart';
 import '../../../expenses/presentation/providers/expense_provider.dart';
+import '../../../../shared/widgets/shimmer.dart';
 
 class TodayThisWeekRow extends ConsumerWidget {
   const TodayThisWeekRow({super.key});
@@ -43,10 +43,22 @@ class _SkeletonCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const _Card(
+    return _Card(
       child: SizedBox(
         height: 100,
-        child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
+        child: Shimmer(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: const [
+              ShimmerBox(height: 12, width: 60),
+              SizedBox(height: 12),
+              ShimmerBox(height: 22, width: 90),
+              SizedBox(height: 10),
+              ShimmerBox(height: 10, width: 70),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -68,23 +80,16 @@ class _TodayCard extends StatelessWidget {
     final todayExpenses =
         expenses.where((e) => _sameDay(e.createdAt, now)).toList();
     final todayTotal = todayExpenses.fold(0.0, (s, e) => s + e.amount);
-    final txCount = todayExpenses.length;
 
     // Last 7 days daily totals: index 0 = 6 days ago, index 6 = today
     final spots = <FlSpot>[];
-    double priorSum = 0;
     for (var i = 0; i < 7; i++) {
       final day = now.subtract(Duration(days: 6 - i));
       final dayTotal = expenses
           .where((e) => _sameDay(e.createdAt, day))
           .fold(0.0, (s, e) => s + e.amount);
-      if (i < 6) priorSum += dayTotal;
       spots.add(FlSpot(i.toDouble(), dayTotal));
     }
-
-    final avg6 = priorSum / 6;
-    final diffVsAvg = todayTotal - avg6;
-    final showBadge = avg6 > 0 || todayTotal > 0;
 
     final maxY = spots.fold(0.0, (m, s) => s.y > m ? s.y : m);
     final chartMaxY = maxY > 0 ? maxY * 1.3 : 1.0;
@@ -93,53 +98,13 @@ class _TodayCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Text(
-                'Today',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: context.textSecondary,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              SizedBox(width: 6),
-              if (showBadge)
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                  decoration: BoxDecoration(
-                    color: (diffVsAvg >= 0 ? AppColors.warning : AppColors.success)
-                        .withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      PhosphorIcon(
-                        diffVsAvg >= 0
-                            ? PhosphorIcons.arrowUp(PhosphorIconsStyle.bold)
-                            : PhosphorIcons.arrowDown(PhosphorIconsStyle.bold),
-                        size: 9,
-                        color: diffVsAvg >= 0
-                            ? AppColors.warning
-                            : AppColors.success,
-                      ),
-                      SizedBox(width: 2),
-                      Text(
-                        '₹${_fmt(diffVsAvg.abs().round())} vs avg',
-                        style: TextStyle(
-                          fontSize: 9,
-                          fontWeight: FontWeight.w600,
-                          color: diffVsAvg >= 0
-                              ? AppColors.warning
-                              : AppColors.success,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-            ],
+          Text(
+            'Today',
+            style: TextStyle(
+              fontSize: 12,
+              color: context.textSecondary,
+              fontWeight: FontWeight.w500,
+            ),
           ),
           SizedBox(height: 6),
           Text(
@@ -151,17 +116,9 @@ class _TodayCard extends StatelessWidget {
               height: 1,
             ),
           ),
-          SizedBox(height: 8),
-          Text(
-            '$txCount txn${txCount == 1 ? '' : 's'} · last 7d',
-            style: TextStyle(
-              fontSize: 10,
-              color: context.textTertiary,
-            ),
-          ),
-          SizedBox(height: 6),
+          SizedBox(height: 14),
           SizedBox(
-            height: 36,
+            height: 40,
             child: LineChart(
               LineChartData(
                 gridData: const FlGridData(show: false),
@@ -176,6 +133,7 @@ class _TodayCard extends StatelessWidget {
                       AxisTitles(sideTitles: SideTitles(showTitles: false)),
                 ),
                 borderData: FlBorderData(show: false),
+                lineTouchData: const LineTouchData(enabled: false),
                 minX: 0,
                 maxX: 6,
                 minY: 0,
@@ -184,10 +142,31 @@ class _TodayCard extends StatelessWidget {
                   LineChartBarData(
                     spots: spots,
                     isCurved: true,
-                    color: AppColors.warning,
-                    barWidth: 1.8,
-                    dotData: const FlDotData(show: false),
-                    belowBarData: BarAreaData(show: false),
+                    curveSmoothness: 0.35,
+                    preventCurveOverShooting: true,
+                    color: AppColors.primary500,
+                    barWidth: 2.5,
+                    dotData: FlDotData(
+                      show: true,
+                      checkToShowDot: (spot, _) => spot.x == 6,
+                      getDotPainter: (spot, _, __, ___) => FlDotCirclePainter(
+                        radius: 3.5,
+                        color: AppColors.primary500,
+                        strokeWidth: 2,
+                        strokeColor: context.bgSurface,
+                      ),
+                    ),
+                    belowBarData: BarAreaData(
+                      show: true,
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          AppColors.primary500.withValues(alpha: 0.25),
+                          AppColors.primary500.withValues(alpha: 0.0),
+                        ],
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -226,19 +205,6 @@ class _ThisWeekCard extends StatelessWidget {
       }
     }
 
-    // Prior week total for % comparison
-    final priorMonday = mondayDate.subtract(const Duration(days: 7));
-    double priorSum = 0;
-    for (final e in expenses) {
-      final d = DateTime(
-          e.createdAt.year, e.createdAt.month, e.createdAt.day);
-      final diff = d.difference(priorMonday).inDays;
-      if (diff >= 0 && diff < 7) priorSum += e.amount;
-    }
-
-    final pctChange =
-        priorSum > 0 ? ((weekSum - priorSum) / priorSum * 100).round() : null;
-
     final maxVal = weekTotals.fold(0.0, (m, v) => v > m ? v : m);
     final chartMax = maxVal > 0 ? maxVal * 1.3 : 1.0;
 
@@ -264,35 +230,7 @@ class _ThisWeekCard extends StatelessWidget {
               height: 1,
             ),
           ),
-          SizedBox(height: 6),
-          if (pctChange != null)
-            Row(
-              children: [
-                PhosphorIcon(
-                  pctChange <= 0
-                      ? PhosphorIcons.arrowDown(PhosphorIconsStyle.bold)
-                      : PhosphorIcons.arrowUp(PhosphorIconsStyle.bold),
-                  size: 11,
-                  color: pctChange <= 0
-                      ? AppColors.accent500
-                      : AppColors.warning,
-                ),
-                SizedBox(width: 2),
-                Text(
-                  '${pctChange.abs()}% vs last wk',
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w600,
-                    color: pctChange <= 0
-                        ? AppColors.accent500
-                        : AppColors.warning,
-                  ),
-                ),
-              ],
-            )
-          else
-            SizedBox(height: 14),
-          SizedBox(height: 8),
+          SizedBox(height: 14),
           SizedBox(
             height: 48,
             child: BarChart(
@@ -309,11 +247,23 @@ class _ThisWeekCard extends StatelessWidget {
                     barRods: [
                       BarChartRodData(
                         toY: weekTotals[i],
+                        gradient: i == todayIndex
+                            ? const LinearGradient(
+                                begin: Alignment.bottomCenter,
+                                end: Alignment.topCenter,
+                                colors: [
+                                  AppColors.primary500,
+                                  Color(0xFF5B8DEF),
+                                ],
+                              )
+                            : null,
                         color: i == todayIndex
-                            ? AppColors.primary500
-                            : const Color(0xFFE5E7EB),
-                        width: 7,
-                        borderRadius: BorderRadius.circular(4),
+                            ? null
+                            : AppColors.primary500.withValues(alpha: 0.14),
+                        width: 8,
+                        borderRadius: const BorderRadius.vertical(
+                          top: Radius.circular(4),
+                        ),
                       ),
                     ],
                   ),

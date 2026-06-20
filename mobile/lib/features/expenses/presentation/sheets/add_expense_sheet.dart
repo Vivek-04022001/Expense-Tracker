@@ -124,7 +124,7 @@ class _AddExpenseSheetState extends ConsumerState<AddExpenseSheet> {
     try {
       final desc = _merchantCtrl.text.trim();
       final cat = _category;
-      // Keep the legacy enum populated (SMS classifier + charts rely on it):
+      // Keep the legacy enum populated (charts and reports rely on it):
       // built-ins map by their stable key, custom categories fall back to other.
       final legacyCategory = cat?.key != null
           ? ExpenseCategory.fromServer(cat!.key!)
@@ -251,19 +251,23 @@ class _AddExpenseSheetState extends ConsumerState<AddExpenseSheet> {
                   fmtNum: _fmtNum,
                 ),
                 SizedBox(height: 16),
+                const _FieldLabel('Category'),
+                SizedBox(height: 8),
                 // Category chips (dynamic, user-managed)
                 CategorySelector(
                   kind: CategoryKind.expense,
                   selectedId: _category?.id,
                   onChanged: (c) => setState(() => _category = c),
                 ),
-                SizedBox(height: 10),
+                SizedBox(height: 16),
+                const _FieldLabel('Account'),
+                SizedBox(height: 8),
                 // Account selector
                 AccountSelector(
                   selectedId: _accountId,
                   onChanged: (id) => setState(() => _accountId = id),
                 ),
-                SizedBox(height: 12),
+                SizedBox(height: 16),
                 // Merchant + Date
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -332,7 +336,9 @@ class _AddExpenseSheetState extends ConsumerState<AddExpenseSheet> {
                     ),
                   ),
                 ),
-                SizedBox(height: 10),
+                SizedBox(height: 16),
+                const _FieldLabel('Payment method'),
+                SizedBox(height: 8),
                 // Payment method
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -412,6 +418,30 @@ class _AddExpenseSheetState extends ConsumerState<AddExpenseSheet> {
               label: 'Expense saved',
             ),
         ],
+      ),
+    );
+  }
+}
+
+// ─── Section label ────────────────────────────────────────────────────────────
+
+class _FieldLabel extends StatelessWidget {
+  const _FieldLabel(this.text);
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Text(
+        text.toUpperCase(),
+        style: TextStyle(
+          fontSize: 11,
+          fontWeight: FontWeight.w600,
+          letterSpacing: 0.6,
+          color: context.textSecondary,
+        ),
       ),
     );
   }

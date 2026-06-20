@@ -8,15 +8,11 @@ class PrivacyPolicyScreen extends StatelessWidget {
   static const _sections = [
     _PolicySection(
       title: 'Data Collection',
-      body: 'We collect only the information necessary to provide the expense tracking service. This includes transaction data you enter manually or that is auto-imported from SMS messages on your device.',
+      body: 'We collect only the information necessary to provide the expense tracking service. This includes the transaction data you enter in the app.',
     ),
     _PolicySection(
-      title: 'Local Storage',
-      body: 'All your financial data is stored locally on your device. We do not upload your transaction history, bank details, or SMS content to any external server.',
-    ),
-    _PolicySection(
-      title: 'SMS Access',
-      body: 'When you enable SMS auto-import, the app reads your SMS inbox on-device to detect bank transaction messages. This data is processed locally and never transmitted externally.',
+      title: 'Data Storage',
+      body: 'Your transaction data is stored in your private account on our secure backend so it stays in sync across sessions. It is protected by your login credentials and is only accessible after you sign in.',
     ),
     _PolicySection(
       title: 'Third-Party Services',
@@ -24,7 +20,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
     ),
     _PolicySection(
       title: 'Data Deletion',
-      body: 'You can delete all your data at any time from Profile → Data → Clear all data. Uninstalling the app will also remove all locally stored information.',
+      body: 'You can sign out at any time to remove your data from this device. To permanently delete your account and its data, contact us via Help & Support.',
     ),
     _PolicySection(
       title: 'Changes to This Policy',

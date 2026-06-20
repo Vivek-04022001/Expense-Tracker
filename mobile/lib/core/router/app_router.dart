@@ -10,12 +10,12 @@ import '../../features/budgets/presentation/screens/budgets_screen.dart';
 import '../../features/savings/presentation/screens/savings_screen.dart';
 import '../../features/home/presentation/screens/home_screen.dart';
 import '../../features/expenses/presentation/screens/expenses_screen.dart';
-import '../../features/insights/presentation/screens/insights_screen.dart';
+import '../../features/statistics/presentation/screens/statistics_screen.dart';
 import '../../features/navigation/presentation/screens/shell_screen.dart';
 import '../../features/onboarding/presentation/providers/onboarding_provider.dart';
 import '../../features/onboarding/presentation/screens/onboarding_screen.dart';
-import '../../features/history/presentation/screens/history_screen.dart';
 import '../../features/profile/presentation/screens/profile_screen.dart';
+import 'transitions.dart';
 
 part 'app_router.g.dart';
 
@@ -58,6 +58,13 @@ GoRouter appRouter(AppRouterRef ref) {
         return location == '/splash' ? null : '/splash';
       }
       if (authState is AuthAuthenticated) {
+        // Once a user has authenticated, onboarding is considered seen for
+        // good, so it never reappears (e.g. after a future logout).
+        if (!onboardingSeen) {
+          Future.microtask(
+            () => ref.read(onboardingNotifierProvider.notifier).markSeen(),
+          );
+        }
         if (publicRoutes.contains(location)) return '/home';
         return null;
       }
@@ -109,7 +116,7 @@ GoRouter appRouter(AppRouterRef ref) {
             routes: [
               GoRoute(
                 path: '/statistics',
-                builder: (context, state) => const HistoryScreen(),
+                builder: (context, state) => const StatisticsScreen(),
               ),
             ],
           ),
@@ -124,16 +131,14 @@ GoRouter appRouter(AppRouterRef ref) {
         ],
       ),
       GoRoute(
-        path: '/insights',
-        builder: (context, state) => const InsightsScreen(),
-      ),
-      GoRoute(
         path: '/budgets',
-        builder: (context, state) => const BudgetsScreen(),
+        pageBuilder: (context, state) =>
+            slideFadePage(state: state, child: const BudgetsScreen()),
       ),
       GoRoute(
         path: '/savings',
-        builder: (context, state) => const SavingsScreen(),
+        pageBuilder: (context, state) =>
+            slideFadePage(state: state, child: const SavingsScreen()),
       ),
     ],
   );

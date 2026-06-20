@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import '../../../../core/theme/app_colors.dart';
 
@@ -15,33 +14,23 @@ class HomeGreetingHeader extends StatelessWidget {
     return 'Good evening';
   }
 
+  /// Only show the name when it's an actual name — never a phone number.
+  bool get _hasRealName =>
+      name.trim().isNotEmpty && !RegExp(r'^[\d\s+()-]+$').hasMatch(name);
+
   @override
   Widget build(BuildContext context) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                DateFormat('EEEE, d MMM').format(DateTime.now()),
-                style: TextStyle(
-                  fontSize: 13,
-                  color: context.textSecondary,
-                  fontWeight: FontWeight.w400,
-                ),
-              ),
-              SizedBox(height: 2),
-              Text(
-                '$_greeting, $name',
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.w700,
-                  color: context.textPrimary,
-                ),
-              ),
-            ],
+          child: Text(
+            _hasRealName ? '$_greeting, $name' : _greeting,
+            style: TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.w700,
+              color: context.textPrimary,
+            ),
           ),
         ),
         GestureDetector(

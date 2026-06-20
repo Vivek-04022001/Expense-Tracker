@@ -3,10 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../widgets/home_greeting_header.dart';
-import '../widgets/insight_banner.dart';
 import '../widgets/monthly_spend_card.dart';
 import '../widgets/recent_transactions_list.dart';
-import '../widgets/savings_rate_card.dart';
 import '../widgets/today_this_week_row.dart';
 
 class HomeScreen extends ConsumerWidget {
@@ -31,13 +29,9 @@ class HomeScreen extends ConsumerWidget {
               SizedBox(height: 18),
               const MonthlySpendCard(),
               SizedBox(height: 12),
-              const SavingsRateCard(),
-              SizedBox(height: 12),
               const TodayThisWeekRow(),
               SizedBox(height: 24),
               const RecentTransactionsList(),
-              SizedBox(height: 14),
-              const InsightBanner(),
               SizedBox(height: 102),
             ],
           ),

@@ -131,14 +131,14 @@ class _PageContent extends StatelessWidget {
   final Widget illustration;
 
   static const _titles = [
-    'Your SMS already\nknows.',
-    'Auto-import.\nZero typing.',
+    'Track every\nrupee.',
+    'Organized\nautomatically.',
     'Know where money\ngoes.',
   ];
 
   static const _subtitles = [
-    'We read your bank and UPI alerts to auto-import every expense. No typing, no tagging.',
-    'Transactions appear in seconds, categorized for you. Correct one and we learn forever.',
+    'Log expenses and income in seconds with a fast, calculator-style entry screen.',
+    'Categorize spending, set budgets, and keep all your accounts tidy in one place.',
     'Weekly reality checks, budget nudges, and the one insight that matters most — right now.',
   ];
 

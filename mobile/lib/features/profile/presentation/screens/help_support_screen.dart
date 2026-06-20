@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import '../../../../core/theme/app_colors.dart';
 import '_inner_app_bar.dart';
+
+const _supportEmail = 'support@expensetracker.app';
 
 class HelpSupportScreen extends StatefulWidget {
   const HelpSupportScreen({super.key});
@@ -13,12 +16,23 @@ class HelpSupportScreen extends StatefulWidget {
 class _HelpSupportScreenState extends State<HelpSupportScreen> {
   final Set<int> _expanded = {};
 
+  Future<void> _contactSupport() async {
+    await Clipboard.setData(const ClipboardData(text: _supportEmail));
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Support email copied to clipboard'),
+        backgroundColor: AppColors.success,
+      ),
+    );
+  }
+
   static const _faqs = [
-    _Faq('How does SMS auto-import work?', 'The app reads your bank SMS messages to automatically detect and import transactions. It supports all major Indian banks. No SMS is sent to any server — parsing happens fully on-device.'),
-    _Faq('Is my data stored securely?', 'All your financial data is stored locally on your device. We do not upload your transaction history to any cloud server.'),
+    _Faq('How do I add an expense?', 'Tap the + button on the home or expenses screen, enter the amount on the calculator-style keypad, pick a category and account, then save.'),
+    _Faq('Is my data stored securely?', 'Your data is stored in your private account on our backend and is only accessible after you sign in. We never share it with third parties.'),
     _Faq('How do I add a custom category?', 'Go to Profile → Categories, then tap the + button to create a new category with a custom name, icon, and color.'),
-    _Faq('Can I edit an auto-imported transaction?', 'Yes. Tap any transaction to open its detail screen, then use the Recategorize or Edit options to update the details.'),
-    _Faq('Why is a transaction not being imported?', 'Some SMS formats may not be recognised. You can report unrecognised SMS from Profile → SMS Auto-Import → Show unrecognised SMS.'),
+    _Faq('Can I edit a transaction?', 'Yes. Tap any transaction to open its detail screen, then use the Recategorize or Edit options to update the details.'),
+    _Faq('How do budgets work?', 'Go to Profile → Budgets to set a monthly limit per category. The app tracks your spending against each budget and nudges you as you approach the limit.'),
   ];
 
   @override
@@ -29,7 +43,10 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          Container(
+          GestureDetector(
+            onTap: _contactSupport,
+            behavior: HitTestBehavior.opaque,
+            child: Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               color: AppColors.primary100,
@@ -50,13 +67,14 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
                     children: [
                       Text('Contact support', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.primary500)),
                       SizedBox(height: 2),
-                      Text('We typically reply within 24 hours', style: TextStyle(fontSize: 12, color: context.textSecondary)),
+                      Text(_supportEmail, style: TextStyle(fontSize: 12, color: context.textSecondary)),
                     ],
                   ),
                 ),
-                PhosphorIcon(PhosphorIcons.caretRight(PhosphorIconsStyle.bold), size: 14, color: AppColors.primary500),
+                PhosphorIcon(PhosphorIcons.copy(PhosphorIconsStyle.bold), size: 16, color: AppColors.primary500),
               ],
             ),
+          ),
           ),
           SizedBox(height: 24),
           Text('FREQUENTLY ASKED', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: context.textTertiary, letterSpacing: 0.8)),

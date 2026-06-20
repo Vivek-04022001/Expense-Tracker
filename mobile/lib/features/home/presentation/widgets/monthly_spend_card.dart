@@ -1,149 +1,238 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
+import '../../../../core/router/transitions.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../../../expenses/presentation/providers/expense_provider.dart';
-import '../../../income/data/models/income_model.dart';
-import '../../../income/presentation/providers/income_provider.dart';
+import '../../../savings/presentation/providers/savings_provider.dart';
+import '../../../savings/presentation/screens/savings_screen.dart';
+import '../../../../shared/widgets/shimmer.dart';
 
+/// Hero overview: this month's income split into spent / saved on a single
+/// progress bar, with a forward-looking projection. Rendered on a brand-blue
+/// gradient so it anchors the home screen.
 class MonthlySpendCard extends ConsumerWidget {
   const MonthlySpendCard({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final summaryAsync = ref.watch(expenseSummaryProvider);
-    final incomesAsync = ref.watch(currentMonthIncomesProvider);
+    final savingsAsync = ref.watch(currentMonthSavingsProvider);
 
-    final isLoading =
-        summaryAsync.isLoading || incomesAsync.isLoading;
-    final hasError =
-        summaryAsync.hasError || incomesAsync.hasError;
-
-    if (isLoading) {
-      return _Card(
-        child: SizedBox(
-          height: 110,
-          child: Center(child: CircularProgressIndicator()),
-        ),
-      );
+    if (savingsAsync.isLoading) {
+      return const _Shell(child: _LoadingShimmer());
+    }
+    if (savingsAsync.hasError) {
+      return const _Shell(child: _ErrorState());
     }
 
-    if (hasError) {
-      return _Card(
-        child: SizedBox(
-          height: 110,
-          child: Center(
-            child: Text(
-              'Could not load financial data',
-              style: TextStyle(color: context.textSecondary),
-            ),
-          ),
-        ),
-      );
-    }
-
-    final summary = summaryAsync.value!;
-    final incomes = incomesAsync.value ?? <IncomeModel>[];
-
+    final s = savingsAsync.value!;
     final now = DateTime.now();
-    final currentKey =
-        '${now.year}-${now.month.toString().padLeft(2, '0')}';
 
-    final spent = summary.byMonth
-        .where((m) => m.month == currentKey)
-        .fold<double>(0, (s, m) => s + m.total);
+    final income = s.totalIncome;
+    final spent = s.totalExpenses;
+    final saved = s.netSavings;
+    final rate = s.savingsRate;
 
-    final income = incomes.fold<double>(0, (s, e) => s + e.amount);
-    final saved = (income - spent).clamp(0.0, double.infinity);
-    final savedPct = income > 0 ? (saved / income).clamp(0.0, 1.0) : 0.0;
-    final spentPct = income > 0 ? (spent / income).clamp(0.0, 1.0) : 0.0;
+    // Pace → end-of-month projection.
+    final daysInMonth = DateTime(now.year, now.month + 1, 0).day;
+    final dayOfMonth = now.day;
+    final daysLeft = daysInMonth - dayOfMonth;
+    final dailyAvg = dayOfMonth > 0 ? spent / dayOfMonth : 0.0;
+    final projectedSaved = saved - dailyAvg * daysLeft;
 
-    // Latest income entry for sub-label
-    final latestIncome = incomes.isNotEmpty ? incomes.first : null;
-    final subLabel = latestIncome != null
-        ? '${latestIncome.incomeType.displayLabel} · ${DateFormat('MMM d').format(latestIncome.createdAt)}'
-        : null;
+    // Bar split (income = spent + saved).
+    final segSpent = spent < 0 ? 0.0 : spent;
+    final segSaved = saved < 0 ? 0.0 : saved;
+    final segTotal = segSpent + segSaved;
 
-    final monthLabel = DateFormat('MMMM').format(now);
-
-    return _Card(
+    return _Shell(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header row
+          // ── Month + days left ──
           Row(
             children: [
-              Text(
-                '$monthLabel so far',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: context.textPrimary,
+              _Pill(
+                child: Text(
+                  '${_monthNames[now.month - 1].toUpperCase()} ${now.year}',
+                  style: const TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white70,
+                    letterSpacing: 1,
+                  ),
                 ),
               ),
               const Spacer(),
-              if (subLabel != null)
-                Text(
-                  subLabel,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: context.textSecondary,
-                    fontWeight: FontWeight.w500,
+              _Pill(
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 6,
+                      height: 6,
+                      decoration: const BoxDecoration(
+                        color: AppColors.warning,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      daysLeft <= 0
+                          ? 'Last day'
+                          : '$daysLeft day${daysLeft == 1 ? '' : 's'} left',
+                      style: const TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 18),
+
+          // ── Hero figure ──
+          Text(
+            '₹${_fmt(income.round())}',
+            style: const TextStyle(
+              fontSize: 36,
+              fontWeight: FontWeight.w800,
+              color: Colors.white,
+              letterSpacing: -1,
+              height: 1,
+            ),
+          ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              const Text(
+                'Total income',
+                style: TextStyle(fontSize: 13, color: Colors.white60),
+              ),
+              const SizedBox(width: 10),
+              if (income > 0)
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: AppColors.success.withValues(alpha: 0.20),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      PhosphorIcon(
+                        PhosphorIcons.trendUp(PhosphorIconsStyle.bold),
+                        size: 12,
+                        color: const Color(0xFF6BF0C4),
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        '${rate.toStringAsFixed(1)}% saved',
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          color: Color(0xFF6BF0C4),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
             ],
           ),
-          SizedBox(height: 12),
-          // Progress bar: red spent | green saved
+          const SizedBox(height: 20),
+
+          // ── Spent / saved bar ──
           ClipRRect(
             borderRadius: BorderRadius.circular(6),
             child: SizedBox(
-              height: 8,
-              child: Row(
-                children: [
-                  if (income == 0) ...[
-                    Expanded(child: Container(color: const Color(0xFFE5E7EB))),
-                  ] else ...[
-                    if (spentPct > 0)
-                      Expanded(
-                        flex: (spentPct * 1000).round(),
-                        child: Container(color: AppColors.danger),
-                      ),
-                    if (savedPct > 0)
-                      Expanded(
-                        flex: (savedPct * 1000).round(),
-                        child: Container(color: AppColors.success),
-                      ),
-                  ],
-                ],
-              ),
+              height: 10,
+              child: segTotal <= 0
+                  ? Container(color: Colors.white.withValues(alpha: 0.18))
+                  : Row(
+                      children: [
+                        if (segSpent > 0)
+                          Expanded(
+                            flex: (segSpent / segTotal * 1000).round(),
+                            child: Container(color: AppColors.danger),
+                          ),
+                        if (segSaved > 0)
+                          Expanded(
+                            flex: (segSaved / segTotal * 1000).round(),
+                            child: Container(color: const Color(0xFF2BE0A6)),
+                          ),
+                      ],
+                    ),
             ),
           ),
-          SizedBox(height: 16),
-          // Three-stat row
+          const SizedBox(height: 14),
+
+          // ── Legend ──
           Row(
             children: [
-              _StatCol(
-                dot: const Color(0xFF1A1A2E),
-                label: 'INCOME',
-                value: '₹${_fmtNum(income.round())}',
-                valueColor: context.textPrimary,
+              _Legend(
+                color: AppColors.danger,
+                label: '₹${_fmt(spent.round())} spent',
               ),
-              SizedBox(width: 20),
-              _StatCol(
-                dot: AppColors.danger,
-                label: 'SPENT',
-                value: '₹${_fmtNum(spent.round())}',
-                valueColor: context.textPrimary,
+              const SizedBox(width: 20),
+              _Legend(
+                color: const Color(0xFF2BE0A6),
+                label: '₹${_fmt(saved.round())} saved',
               ),
-              SizedBox(width: 20),
-              _StatCol(
-                dot: AppColors.success,
-                label: 'SAVED',
-                value: '₹${_fmtNum(saved.round())}',
-                valueColor: AppColors.success,
-                subtitle:
-                    income > 0 ? '${(savedPct * 100).toStringAsFixed(0)}% of income' : null,
+            ],
+          ),
+          const SizedBox(height: 18),
+          Divider(color: Colors.white.withValues(alpha: 0.10), height: 1),
+          const SizedBox(height: 14),
+
+          // ── Footer: projection + drill-in ──
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  projectedSaved >= 0
+                      ? "On track to save ₹${_fmt(projectedSaved.round())} this month"
+                      : "On track to overspend ₹${_fmt(projectedSaved.abs().round())} this month",
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: Colors.white60,
+                    height: 1.3,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              GestureDetector(
+                onTap: () => Navigator.of(context, rootNavigator: true)
+                    .push(slideFadeRoute(const SavingsScreen())),
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.16),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Text(
+                        'Details',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                        ),
+                      ),
+                      const SizedBox(width: 2),
+                      PhosphorIcon(
+                        PhosphorIcons.caretRight(PhosphorIconsStyle.bold),
+                        size: 12,
+                        color: Colors.white,
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ],
           ),
@@ -153,90 +242,29 @@ class MonthlySpendCard extends ConsumerWidget {
   }
 }
 
-// ── Stat column ───────────────────────────────────────────────────────────────
+// ── Gradient shell ──────────────────────────────────────────────────────────
 
-class _StatCol extends StatelessWidget {
-  const _StatCol({
-    required this.dot,
-    required this.label,
-    required this.value,
-    required this.valueColor,
-    this.subtitle,
-  });
-
-  final Color dot;
-  final String label;
-  final String value;
-  final Color valueColor;
-  final String? subtitle;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Container(
-              width: 7,
-              height: 7,
-              decoration: BoxDecoration(color: dot, shape: BoxShape.circle),
-            ),
-            SizedBox(width: 5),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 10,
-                fontWeight: FontWeight.w600,
-                color: context.textSecondary,
-                letterSpacing: 0.5,
-              ),
-            ),
-          ],
-        ),
-        SizedBox(height: 4),
-        Text(
-          value,
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w700,
-            color: valueColor,
-          ),
-        ),
-        if (subtitle != null) ...[
-          SizedBox(height: 2),
-          Text(
-            subtitle!,
-            style: TextStyle(
-              fontSize: 11,
-              color: context.textSecondary,
-            ),
-          ),
-        ],
-      ],
-    );
-  }
-}
-
-// ── Card wrapper ──────────────────────────────────────────────────────────────
-
-class _Card extends StatelessWidget {
-  const _Card({required this.child});
+class _Shell extends StatelessWidget {
+  const _Shell({required this.child});
   final Widget child;
 
   @override
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: context.bgSurface,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(24),
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFF1E60FF), Color(0xFF0B3CC9)],
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 12,
-            offset: const Offset(0, 2),
+            color: AppColors.primary500.withValues(alpha: 0.30),
+            blurRadius: 24,
+            offset: const Offset(0, 10),
           ),
         ],
       ),
@@ -245,15 +273,119 @@ class _Card extends StatelessWidget {
   }
 }
 
-String _fmtNum(int v) {
-  if (v < 1000) return v.toString();
-  final s = v.toString();
-  final last3 = s.substring(s.length - 3);
-  final rest = s.substring(0, s.length - 3);
-  final buf = StringBuffer();
-  for (var i = 0; i < rest.length; i++) {
-    if (i > 0 && (rest.length - i) % 2 == 0) buf.write(',');
-    buf.write(rest[i]);
+// ── Small parts ───────────────────────────────────────────────────────────────
+
+class _Pill extends StatelessWidget {
+  const _Pill({required this.child});
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: child,
+    );
   }
-  return '$buf,$last3';
+}
+
+class _Legend extends StatelessWidget {
+  const _Legend({required this.color, required this.label});
+  final Color color;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 8,
+          height: 8,
+          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+        ),
+        const SizedBox(width: 7),
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 12.5,
+            color: Colors.white,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// ── Loading / error ─────────────────────────────────────────────────────────
+
+class _LoadingShimmer extends StatelessWidget {
+  const _LoadingShimmer();
+
+  @override
+  Widget build(BuildContext context) {
+    return Shimmer(
+      baseColor: Colors.white.withValues(alpha: 0.12),
+      highlightColor: Colors.white.withValues(alpha: 0.26),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: const [
+          ShimmerBox(height: 14, width: 110, borderRadius: 8),
+          SizedBox(height: 18),
+          ShimmerBox(height: 34, width: 200, borderRadius: 8),
+          SizedBox(height: 18),
+          ShimmerBox(height: 10, width: double.infinity, borderRadius: 6),
+          SizedBox(height: 16),
+          ShimmerBox(height: 12, width: 220, borderRadius: 6),
+        ],
+      ),
+    );
+  }
+}
+
+class _ErrorState extends StatelessWidget {
+  const _ErrorState();
+
+  @override
+  Widget build(BuildContext context) {
+    return const SizedBox(
+      height: 110,
+      child: Center(
+        child: Text(
+          'Could not load this month',
+          style: TextStyle(color: Colors.white60),
+        ),
+      ),
+    );
+  }
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
+const _monthNames = [
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December',
+];
+
+String _fmt(int v) {
+  final neg = v < 0;
+  final s = v.abs().toString();
+  String out;
+  if (s.length <= 3) {
+    out = s;
+  } else {
+    final last3 = s.substring(s.length - 3);
+    final rest = s.substring(0, s.length - 3);
+    final buf = StringBuffer();
+    for (var i = 0; i < rest.length; i++) {
+      if (i > 0 && (rest.length - i) % 2 == 0) buf.write(',');
+      buf.write(rest[i]);
+    }
+    out = '$buf,$last3';
+  }
+  return neg ? '-$out' : out;
 }

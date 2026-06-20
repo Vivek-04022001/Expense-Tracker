@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
+import '../../../../core/router/transitions.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../savings/presentation/providers/savings_provider.dart';
 import '../../../savings/presentation/screens/savings_screen.dart';
+import '../../../../shared/widgets/shimmer.dart';
 
 class SavingsRateCard extends ConsumerWidget {
   const SavingsRateCard({super.key});
@@ -13,8 +15,8 @@ class SavingsRateCard extends ConsumerWidget {
     final savingsAsync = ref.watch(currentMonthSavingsProvider);
 
     return GestureDetector(
-      onTap: () => Navigator.of(context).push(
-        MaterialPageRoute(builder: (_) => const SavingsScreen()),
+      onTap: () => Navigator.of(context, rootNavigator: true).push(
+        slideFadeRoute(const SavingsScreen()),
       ),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
@@ -130,42 +132,23 @@ class _CardShimmer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Container(
-          width: 42,
-          height: 42,
-          decoration: BoxDecoration(
-            color: context.borderSubtle,
-            shape: BoxShape.circle,
+    return Shimmer(
+      child: Row(
+        children: const [
+          ShimmerBox(width: 42, height: 42, shape: BoxShape.circle),
+          SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ShimmerBox(height: 12, width: 130),
+                SizedBox(height: 8),
+                ShimmerBox(height: 18, width: 90),
+              ],
+            ),
           ),
-        ),
-        SizedBox(width: 14),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                height: 12,
-                width: 130,
-                decoration: BoxDecoration(
-                  color: context.borderSubtle,
-                  borderRadius: BorderRadius.circular(6),
-                ),
-              ),
-              SizedBox(height: 8),
-              Container(
-                height: 18,
-                width: 90,
-                decoration: BoxDecoration(
-                  color: context.borderSubtle,
-                  borderRadius: BorderRadius.circular(6),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

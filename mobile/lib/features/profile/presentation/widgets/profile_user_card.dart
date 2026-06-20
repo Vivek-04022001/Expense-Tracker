@@ -12,7 +12,7 @@ class ProfileUserCard extends StatelessWidget {
 
   final String name;
   final String phone;
-  final VoidCallback onEdit;
+  final VoidCallback? onEdit;
 
   @override
   Widget build(BuildContext context) {

@@ -1,5 +1,5 @@
 name: paisa
-description: India-first expense tracker with SMS auto-import.
+description: India-first expense tracker.
 publish_to: "none"
 version: 1.0.0+1
 
@@ -43,6 +43,12 @@ dependencies:
 
   # For generating app icons from a single image
   flutter_launcher_icons: ^0.14.4
+  animated_text_kit: ^4.3.0
+
+  # Local notifications (daily expense/savings reminder)
+  flutter_local_notifications: ^18.0.1
+  timezone: ^0.10.0
+  flutter_timezone: ^4.1.0
 
 flutter_launcher_icons:
   android: true

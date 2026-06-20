@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
@@ -10,6 +11,7 @@ import '../../../expenses/presentation/providers/expense_provider.dart';
 import '../../../income/data/models/income_model.dart';
 import '../../../income/presentation/providers/income_provider.dart';
 import '../../../../shared/widgets/category_avatar.dart';
+import '../../../../shared/widgets/shimmer.dart';
 
 // ── Unified transaction entry ─────────────────────────────────────────────────
 
@@ -114,10 +116,7 @@ class RecentTransactionsList extends ConsumerWidget {
         ),
         SizedBox(height: 12),
         if (isLoading)
-          SizedBox(
-            height: 120,
-            child: Center(child: CircularProgressIndicator()),
-          )
+          const _LoadingShimmer()
         else if (hasError)
           SizedBox(
             height: 80,
@@ -176,10 +175,14 @@ class RecentTransactionsList extends ConsumerWidget {
         itemCount: recent.length,
         separatorBuilder: (context, __) => Divider(
           height: 1,
-          indent: 60,
-          color: context.borderSubtle,
+          indent: 68,
+          endIndent: 14,
+          color: context.borderSubtle.withValues(alpha: 0.6),
         ),
-        itemBuilder: (_, i) => _TransactionTile(tx: recent[i]),
+        itemBuilder: (_, i) => _TransactionTile(tx: recent[i])
+            .animate()
+            .fadeIn(duration: 300.ms, delay: (50 * i).ms)
+            .slideX(begin: 0.06, end: 0, curve: Curves.easeOut),
       ),
     );
   }
@@ -195,14 +198,14 @@ class _TransactionTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
       child: Row(
         children: [
           CategoryAvatar(
             icon: tx.icon,
             color: tx.iconColor,
-            size: 40,
-            iconSize: 18,
+            size: 42,
+            iconSize: 19,
           ),
           SizedBox(width: 12),
           Expanded(
@@ -214,31 +217,81 @@ class _TransactionTile extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
                     color: context.textPrimary,
                   ),
                 ),
-                SizedBox(height: 2),
+                SizedBox(height: 3),
                 Text(
                   tx.subtitle,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     fontSize: 12,
-                    color: context.textSecondary,
+                    color: context.textTertiary,
                   ),
                 ),
               ],
             ),
           ),
-          Text(
-            tx.amountLabel,
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              color: tx.amountColor,
+          SizedBox(width: 10),
+          // Tinted amount pill — green earns, red spends.
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            decoration: BoxDecoration(
+              color: tx.amountColor.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Text(
+              tx.amountLabel,
+              style: TextStyle(
+                fontSize: 13.5,
+                fontWeight: FontWeight.w700,
+                color: tx.amountColor,
+                fontFeatures: const [FontFeature.tabularFigures()],
+              ),
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+// ── Loading shimmer ───────────────────────────────────────────────────────────
+
+class _LoadingShimmer extends StatelessWidget {
+  const _LoadingShimmer();
+
+  @override
+  Widget build(BuildContext context) {
+    return Shimmer(
+      child: Column(
+        children: List.generate(
+          4,
+          (_) => Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: Row(
+              children: const [
+                ShimmerBox(width: 40, height: 40, shape: BoxShape.circle),
+                SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      ShimmerBox(height: 13, width: 120),
+                      SizedBox(height: 6),
+                      ShimmerBox(height: 11, width: 80),
+                    ],
+                  ),
+                ),
+                SizedBox(width: 12),
+                ShimmerBox(height: 14, width: 56),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

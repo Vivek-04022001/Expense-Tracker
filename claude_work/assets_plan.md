@@ -1,6 +1,7 @@
 # Paisa — Icons & Images Plan
 
 Two goals from the brief:
+
 1. **Great-looking, consistent icons** (not generic Material defaults).
 2. **Human-feel imagery** — where to place illustrations/photos so the app doesn't read as
    "AI-made". Every image below includes a suggested **Nano Banana prompt** + exact placement.
@@ -17,13 +18,14 @@ You already depend on `phosphor_flutter` — that's a strong, modern choice (con
 both `regular` and `fill` weights, huge set). **Keep it as the primary family.** Don't mix three
 icon styles; that's the #1 tell of an "AI-made" app.
 
-| Library | Package | Use for | Why |
-|---------|---------|---------|-----|
-| **Phosphor** (primary) | `phosphor_flutter` ✅ installed | Nav, actions, category glyphs | Already in use; 1,200+ icons; fill+regular weights |
-| **Lucide** (optional) | `lucide_icons` | Thin-line accents, empty-state line art | Cleaner hairline look if Phosphor feels heavy in spots |
-| **Category brand glyphs** | local SVG via `flutter_svg` | Account types (Visa/UPI/cash) | Brand marks Phosphor can't provide |
+| Library                   | Package                         | Use for                                 | Why                                                    |
+| ------------------------- | ------------------------------- | --------------------------------------- | ------------------------------------------------------ |
+| **Phosphor** (primary)    | `phosphor_flutter` ✅ installed | Nav, actions, category glyphs           | Already in use; 1,200+ icons; fill+regular weights     |
+| **Lucide** (optional)     | `lucide_icons`                  | Thin-line accents, empty-state line art | Cleaner hairline look if Phosphor feels heavy in spots |
+| **Category brand glyphs** | local SVG via `flutter_svg`     | Account types (Visa/UPI/cash)           | Brand marks Phosphor can't provide                     |
 
 **Rules to keep it looking hand-crafted:**
+
 - One weight per context: `fill` for active nav + category circles, `regular` for inline/secondary.
 - Category icons live on a **colored circle** (reuse `AppColors.forCategory`) — matches the
   reference's colored-circle look but in our palette.
@@ -31,6 +33,7 @@ icon styles; that's the #1 tell of an "AI-made" app.
 - Consistent corner radius + circle size across Records, Analysis, Budgets, Categories, Accounts.
 
 **Action items:**
+
 - [ ] Build a `CategoryAvatar` shared widget (circle + Phosphor icon + category color) and use it
       everywhere a category is shown.
 - [ ] Curate Phosphor icons for the income categories (Salary→`wallet`, Business→`briefcase`,
@@ -56,25 +59,27 @@ declared asset folder in `pubspec.yaml`) and add an `assets/illustrations/` subf
 
 ### Where each image goes
 
-| # | Image | Placement | Why it adds "human" feel | Nano Banana prompt seed |
-|---|-------|-----------|--------------------------|-------------------------|
-| I1 | **Onboarding hero (×3)** | `onboarding_screen.dart` — one per slide | First impression; sets tone | "A young Indian person happily tracking money on a phone, coins and ₹ notes floating, flat vector" / "Person planning a monthly budget with charts" / "Person reaching a savings goal, piggy bank, confetti" |
-| I2 | **Empty: no transactions** | Expenses/Records empty state | Turns a dead screen into a friendly nudge | "Friendly empty wallet with a small plant growing out of it, hinting at fresh start, flat vector" |
-| I3 | **Empty: no accounts** | Accounts screen (F1) empty state | Guides first action | "A neat row of cards, a coin jar and a wallet floating, inviting to add, flat vector" |
-| I4 | **Empty: no budget set** | Budgets screen empty state | Encourages setup | "A calm person setting a target on a dial, balanced scale of ₹ coins, flat vector" |
-| I5 | **Savings goal art** | Savings screen header / goal cards | Emotional, motivating | "A small rocket / piggy bank climbing stairs toward a flag labelled with a goal, flat vector" |
-| I6 | **Success / celebration** | Reuse with `success_overlay.dart` after save/transfer | Delight on completion | "Minimal confetti burst with a checkmark coin, flat vector, transparent bg" |
-| I7 | **Profile header banner** | Top of `profile_screen.dart` | Warmth, personality | "Soft abstract gradient with floating ₹ coins and tiny financial icons, wide banner, flat vector" |
-| I8 | **SMS import explainer** | `sms_import_screen.dart` / `sms_preview` intro | Explains a novel feature visually | "A phone receiving a bank SMS that turns into a neat expense card, arrow flow, flat vector" |
-| I9 | **Insights/Analysis empty** | Analysis tab before data | Avoids blank charts | "A magnifying glass over a friendly donut chart, flat vector" |
-| I10 | **Account-type icons (set)** | Account cards (card/cash/wallet/savings/investment) | Cohesive, branded | "A matching set of 5 flat icons: credit card, cash notes, wallet, piggy-bank savings, growth-chart investment, same style and palette" |
-| I11 | **App store / dark-theme hero** (optional) | Marketing + splash | Polish | "App dashboard mockup on a phone at night, glowing charts, cozy, flat vector" |
+| #   | Image                                      | Placement                                             | Why it adds "human" feel                  | Nano Banana prompt seed                                                                                                                                                                                      |
+| --- | ------------------------------------------ | ----------------------------------------------------- | ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| I1  | **Onboarding hero (×3)**                   | `onboarding_screen.dart` — one per slide              | First impression; sets tone               | "A young Indian person happily tracking money on a phone, coins and ₹ notes floating, flat vector" / "Person planning a monthly budget with charts" / "Person reaching a savings goal, piggy bank, confetti" |
+| I2  | **Empty: no transactions**                 | Expenses/Records empty state                          | Turns a dead screen into a friendly nudge | "Friendly empty wallet with a small plant growing out of it, hinting at fresh start, flat vector"                                                                                                            |
+| I3  | **Empty: no accounts**                     | Accounts screen (F1) empty state                      | Guides first action                       | "A neat row of cards, a coin jar and a wallet floating, inviting to add, flat vector"                                                                                                                        |
+| I4  | **Empty: no budget set**                   | Budgets screen empty state                            | Encourages setup                          | "A calm person setting a target on a dial, balanced scale of ₹ coins, flat vector"                                                                                                                           |
+| I5  | **Savings goal art**                       | Savings screen header / goal cards                    | Emotional, motivating                     | "A small rocket / piggy bank climbing stairs toward a flag labelled with a goal, flat vector"                                                                                                                |
+| I6  | **Success / celebration**                  | Reuse with `success_overlay.dart` after save/transfer | Delight on completion                     | "Minimal confetti burst with a checkmark coin, flat vector, transparent bg"                                                                                                                                  |
+| I7  | **Profile header banner**                  | Top of `profile_screen.dart`                          | Warmth, personality                       | "Soft abstract gradient with floating ₹ coins and tiny financial icons, wide banner, flat vector"                                                                                                            |
+| I8  | **SMS import explainer**                   | `sms_import_screen.dart` / `sms_preview` intro        | Explains a novel feature visually         | "A phone receiving a bank SMS that turns into a neat expense card, arrow flow, flat vector"                                                                                                                  |
+| I9  | **Insights/Analysis empty**                | Analysis tab before data                              | Avoids blank charts                       | "A magnifying glass over a friendly donut chart, flat vector"                                                                                                                                                |
+| I10 | **Account-type icons (set)**               | Account cards (card/cash/wallet/savings/investment)   | Cohesive, branded                         | "A matching set of 5 flat icons: credit card, cash notes, wallet, piggy-bank savings, growth-chart investment, same style and palette"                                                                       |
+| I11 | **App store / dark-theme hero** (optional) | Marketing + splash                                    | Polish                                    | "App dashboard mockup on a phone at night, glowing charts, cozy, flat vector"                                                                                                                                |
 
 ### Where NOT to add images
+
 - Dense data screens (Records list, budget cards): keep them clean — icons only. Images there
   create clutter and slow scrolling.
 
 ### Implementation notes
+
 - Add `assets/illustrations/` to `pubspec.yaml` `flutter.assets`.
 - Build a reusable `EmptyState` widget: illustration + title + subtitle + optional CTA. Use it for
   I2–I4, I9 so empty states are consistent.
