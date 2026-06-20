@@ -6,10 +6,13 @@ import '../../../../core/utils/category_mapper.dart';
 import '../../../budgets/presentation/providers/budget_provider.dart';
 import '../../../expenses/data/models/expense_model.dart';
 import '../../../expenses/presentation/providers/expense_provider.dart';
+import '../../../income/data/models/income_model.dart';
+import '../../../income/presentation/providers/income_provider.dart';
 import '../widgets/ai_insight_card.dart';
 import '../widgets/budget_list_card.dart';
 import '../widgets/category_donut_card.dart';
 import '../widgets/daily_spend_chart.dart';
+import '../widgets/income_analysis_card.dart';
 import '../widgets/insights_header.dart';
 import '../widgets/top_merchants_card.dart';
 import '../widgets/total_spend_card.dart';
@@ -43,6 +46,22 @@ class InsightsData {
   final List<BudgetItem> budgets;
   final List<MerchantItem> merchants;
   final List<AiInsight> aiInsights;
+}
+
+class IncomeData {
+  const IncomeData({
+    required this.totalIncome,
+    required this.prevIncome,
+    required this.prevLabel,
+    required this.byType,
+    required this.sources,
+  });
+
+  final int totalIncome;
+  final int prevIncome;
+  final String prevLabel;
+  final List<CategorySlice> byType;
+  final List<MerchantItem> sources;
 }
 
 class CategorySlice {
@@ -95,8 +114,11 @@ class InsightsScreen extends ConsumerStatefulWidget {
   ConsumerState<InsightsScreen> createState() => _InsightsScreenState();
 }
 
+enum AnalysisMode { expense, income }
+
 class _InsightsScreenState extends ConsumerState<InsightsScreen> {
   late DateTime _selectedMonth;
+  AnalysisMode _mode = AnalysisMode.expense;
 
   @override
   void initState() {
@@ -139,15 +161,6 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen> {
         DateTime(_selectedMonth.year, _selectedMonth.month - 1);
     final prevKey = DateFormat('yyyy-MM').format(prevMonthDt);
 
-    InsightsData data = _buildData(
-      summaryAsync: summaryAsync,
-      expensesAsync: expensesAsync,
-      budgetsAsync: budgetsAsync,
-      monthKey: monthKey,
-      prevKey: prevKey,
-      prevMonthDt: prevMonthDt,
-    );
-
     return Scaffold(
       backgroundColor: context.bgBase,
       body: SafeArea(
@@ -163,68 +176,173 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen> {
             ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: data.totalSpend == 0 && data.categories.isEmpty
-                  ? Padding(
-                      padding: const EdgeInsets.only(top: 48),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Image.asset(
-                            'assets/illustrations/insight_empty_state.png',
-                            width: 220,
-                            fit: BoxFit.contain,
-                          ),
-                          const SizedBox(height: 20),
-                          Text(
-                            'No data yet',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w700,
-                              color: context.textPrimary,
-                            ),
-                          ),
-                          const SizedBox(height: 6),
-                          Text(
-                            'Add some expenses to see your spending insights.',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: context.textSecondary,
-                              height: 1.4,
-                            ),
-                          ),
-                        ],
-                      ),
+              child: Column(
+                children: [
+                  const SizedBox(height: 16),
+                  _ModeToggle(
+                    mode: _mode,
+                    onChanged: (m) => setState(() => _mode = m),
+                  ),
+                  const SizedBox(height: 16),
+                  if (_mode == AnalysisMode.expense)
+                    _buildExpenseContent(
+                      summaryAsync: summaryAsync,
+                      expensesAsync: expensesAsync,
+                      budgetsAsync: budgetsAsync,
+                      monthKey: monthKey,
+                      prevKey: prevKey,
+                      prevMonthDt: prevMonthDt,
+                      currentInsightsMonth: currentInsightsMonth,
                     )
-                  : Column(
-                      children: [
-                        SizedBox(height: 16),
-                        TotalSpendCard(data: data),
-                        SizedBox(height: 14),
-                        CategoryDonutCard(data: data),
-                        SizedBox(height: 14),
-                        DailySpendChart(data: data, month: currentInsightsMonth),
-                        SizedBox(height: 14),
-                        BudgetListCard(data: data),
-                        SizedBox(height: 14),
-                        TopMerchantsCard(data: data),
-                        if (data.aiInsights.isNotEmpty) ...[
-                          SizedBox(height: 14),
-                          ...data.aiInsights.map(
-                            (i) => Padding(
-                              padding: const EdgeInsets.only(bottom: 10),
-                              child: AiInsightCard(insight: i),
-                            ),
-                          ),
-                        ],
-                      ],
-                    ),
+                  else
+                    _buildIncomeContent(prevMonthDt: prevMonthDt),
+                ],
+              ),
             ),
           ],
         ),
       ),
     );
   }
+
+  Widget _buildExpenseContent({
+    required AsyncValue summaryAsync,
+    required AsyncValue<List<ExpenseModel>> expensesAsync,
+    required AsyncValue budgetsAsync,
+    required String monthKey,
+    required String prevKey,
+    required DateTime prevMonthDt,
+    required InsightsMonth currentInsightsMonth,
+  }) {
+    final data = _buildData(
+      summaryAsync: summaryAsync,
+      expensesAsync: expensesAsync,
+      budgetsAsync: budgetsAsync,
+      monthKey: monthKey,
+      prevKey: prevKey,
+      prevMonthDt: prevMonthDt,
+    );
+
+    if (data.totalSpend == 0 && data.categories.isEmpty) {
+      return _EmptyAnalysis(
+        message: 'Add some expenses to see your spending insights.',
+      );
+    }
+
+    return Column(
+      children: [
+        TotalSpendCard(data: data),
+        SizedBox(height: 14),
+        CategoryDonutCard(data: data),
+        SizedBox(height: 14),
+        DailySpendChart(data: data, month: currentInsightsMonth),
+        SizedBox(height: 14),
+        BudgetListCard(data: data),
+        SizedBox(height: 14),
+        TopMerchantsCard(data: data),
+        if (data.aiInsights.isNotEmpty) ...[
+          SizedBox(height: 14),
+          ...data.aiInsights.map(
+            (i) => Padding(
+              padding: const EdgeInsets.only(bottom: 10),
+              child: AiInsightCard(insight: i),
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildIncomeContent({required DateTime prevMonthDt}) {
+    final incomesAsync = ref.watch(incomesForMonthProvider(_selectedMonth));
+    final prevIncomesAsync = ref.watch(incomesForMonthProvider(prevMonthDt));
+
+    final data = _buildIncomeData(
+      incomes: incomesAsync.valueOrNull ?? const [],
+      prevIncomes: prevIncomesAsync.valueOrNull ?? const [],
+      prevMonthDt: prevMonthDt,
+    );
+
+    if (data.totalIncome == 0 && data.byType.isEmpty) {
+      return _EmptyAnalysis(
+        message: 'Add some income to see where your money comes from.',
+      );
+    }
+
+    return Column(
+      children: [
+        IncomeTotalCard(data: data),
+        SizedBox(height: 14),
+        IncomeBreakdownCard(data: data),
+        SizedBox(height: 14),
+        IncomeSourcesCard(data: data),
+      ],
+    );
+  }
+
+  IncomeData _buildIncomeData({
+    required List<IncomeModel> incomes,
+    required List<IncomeModel> prevIncomes,
+    required DateTime prevMonthDt,
+  }) {
+    final totalIncome =
+        incomes.fold<double>(0, (s, e) => s + e.amount).round();
+    final prevIncome =
+        prevIncomes.fold<double>(0, (s, e) => s + e.amount).round();
+
+    // Group by income type for the breakdown bars.
+    final byTypeMap = <IncomeType, double>{};
+    for (final e in incomes) {
+      byTypeMap[e.incomeType] = (byTypeMap[e.incomeType] ?? 0) + e.amount;
+    }
+    final byType = byTypeMap.entries
+        .map(
+          (e) => CategorySlice(
+            label: e.key.displayLabel,
+            amount: e.value.round(),
+            color: _incomeTypeColor(e.key),
+          ),
+        )
+        .where((s) => s.amount > 0)
+        .toList()
+      ..sort((a, b) => b.amount.compareTo(a.amount));
+
+    // Top sources — group by description (fallback to the type label).
+    final sourceMap = <String, (int, double)>{};
+    for (final e in incomes) {
+      final name = (e.description?.trim().isEmpty ?? true)
+          ? e.incomeType.displayLabel
+          : e.description!.trim();
+      final (count, total) = sourceMap[name] ?? (0, 0.0);
+      sourceMap[name] = (count + 1, total + e.amount);
+    }
+    final sources = sourceMap.entries
+        .map(
+          (e) => MerchantItem(
+            name: e.key,
+            txCount: e.value.$1,
+            amount: e.value.$2.round(),
+          ),
+        )
+        .toList()
+      ..sort((a, b) => b.amount.compareTo(a.amount));
+
+    return IncomeData(
+      totalIncome: totalIncome,
+      prevIncome: prevIncome,
+      prevLabel: DateFormat('MMMM').format(prevMonthDt),
+      byType: byType,
+      sources: sources.take(5).toList(),
+    );
+  }
+
+  Color _incomeTypeColor(IncomeType type) => switch (type) {
+        IncomeType.salary => AppColors.success,
+        IncomeType.freelance => AppColors.info,
+        IncomeType.investment => AppColors.categoryShopping,
+        IncomeType.reward => AppColors.warning,
+        IncomeType.other => AppColors.categoryOther,
+      };
 
   InsightsData _buildData({
     required AsyncValue summaryAsync,
@@ -339,6 +457,104 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen> {
       budgets: budgets,
       merchants: merchants.take(5).toList(),
       aiInsights: const [],
+    );
+  }
+}
+
+// ── Mode toggle ───────────────────────────────────────────────────────────────
+
+class _ModeToggle extends StatelessWidget {
+  const _ModeToggle({required this.mode, required this.onChanged});
+  final AnalysisMode mode;
+  final ValueChanged<AnalysisMode> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        color: context.bgSurface,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: context.borderSubtle),
+      ),
+      child: Row(
+        children: [
+          _segment(context, 'Expenses', AnalysisMode.expense),
+          _segment(context, 'Income', AnalysisMode.income),
+        ],
+      ),
+    );
+  }
+
+  Widget _segment(BuildContext context, String label, AnalysisMode value) {
+    final selected = mode == value;
+    final activeColor =
+        value == AnalysisMode.income ? AppColors.success : AppColors.primary500;
+    return Expanded(
+      child: GestureDetector(
+        onTap: () => onChanged(value),
+        behavior: HitTestBehavior.opaque,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          padding: const EdgeInsets.symmetric(vertical: 10),
+          decoration: BoxDecoration(
+            color: selected ? activeColor : Colors.transparent,
+            borderRadius: BorderRadius.circular(9),
+          ),
+          alignment: Alignment.center,
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: selected ? Colors.white : context.textSecondary,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ── Empty analysis state ──────────────────────────────────────────────────────
+
+class _EmptyAnalysis extends StatelessWidget {
+  const _EmptyAnalysis({required this.message});
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 48),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Image.asset(
+            'assets/illustrations/insight_empty_state.png',
+            width: 220,
+            fit: BoxFit.contain,
+          ),
+          const SizedBox(height: 20),
+          Text(
+            'No data yet',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w700,
+              color: context.textPrimary,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            message,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 14,
+              color: context.textSecondary,
+              height: 1.4,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
