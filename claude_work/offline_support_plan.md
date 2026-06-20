@@ -6,6 +6,56 @@
 
 ---
 
+## ✅ Implementation status — SHIPPED
+
+All five phases are implemented, tested, and verified working end-to-end on device.
+Built on branch `feature/offline-support`.
+
+| Phase | Status | Commit |
+|-------|--------|--------|
+| 1 — Server sync foundation (schema, `recomputeBalance`, `/sync/pull` + `/sync/push`) | ✅ Done | `a63937a`, `c540a87` |
+| 2 — Drift DB layer + local data sources | ✅ Done | `e90b611` |
+| 3 — Offline reads + pull pipeline + local aggregates | ✅ Done | `9100862` |
+| 4 — Offline writes (outbox + push, local balance recompute) | ✅ Done | `d6f43a9` |
+| 5 — UX polish (offline banner, sync status, logout wipe, triggers) | ✅ Done | `b991d02` |
+| Sign-out dialog fix (found during verification) | ✅ Done | `810b583` |
+
+Coverage: 70 mobile unit tests pass (in-memory SQLite), analyzer clean, server endpoints
+syntax-checked. Verified manually on device: add/edit/delete offline, balances correct,
+reconnect drains the outbox, logout wipes local data.
+
+### Deviations from the original plan (and why)
+
+- **Schema applied via `prisma db push`, not `migrate dev`.** The repo's existing migration
+  history was already drifted (an old `add_category_table` migration assumes a `Budget.category`
+  column that no migration creates), so a shadow-DB replay fails. `db push` sidesteps the
+  shadow DB and matches how the schema had been evolved before. New `updatedAt` columns were
+  given `@default(now())` so they could be added to existing rows safely. A one-time
+  `server/scripts/backfill_opening_balance.js` seeds `openingBalance` for existing accounts.
+- **`/sync/push` does not run the Zod validators.** It picks an allowlist of fields per entity
+  and passes them to Prisma directly, so the `ExpenseSchema` `description.min(5)` rule (Section
+  12) never applies to offline-created rows — the validation-mismatch risk is moot.
+- **Budgets use a deterministic per-slot id** (`bgt-<year>-<month>-<category>`) on the client,
+  and `/sync/push` upserts budgets by the composite key `(userId, category, month, year)`.
+  The client also de-dupes a slot on ingest. This keeps the unique constraint collision-free
+  across devices (more robust than the generic by-id upsert the plan implied).
+- **Pending changes are surfaced as a global banner + count, not per-row badges.** A live
+  `pendingCountProvider` (a Drift stream over the outbox) drives an offline banner and a
+  "Data & sync" row in Profile (last-synced / N pending / tap to sync). Per-row `syncStatus`
+  badges (Section 8) were not added — the domain models don't carry `syncStatus`; easy to add
+  later if wanted.
+- **Sync triggers:** launch, app foreground (lifecycle observer), and **on reconnect**
+  (`connectivity_plus`) — the reconnect trigger from Section 6's "future addition" note was
+  included. There is no separate "Setting things up…" bootstrap screen (Section 7); the first
+  authenticated sync runs in the background and the UI refreshes when it completes.
+- **Logout wipe lives in `AuthNotifier.logout()`** (which has `ref` access to the database),
+  not in `auth_repository.dart` as Section 8 suggested. The "warn if outbox non-empty" prompt
+  was not added.
+- Existing REST write endpoints remain but are **no longer used by the app** — all writes now
+  flow through the outbox/push path.
+
+---
+
 ## 1. The problem (why we're doing this)
 
 Right now the app is **online-only**:
