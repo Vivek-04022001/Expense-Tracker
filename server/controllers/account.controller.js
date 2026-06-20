@@ -1,4 +1,5 @@
 import { prisma } from "../src/db.js";
+import { recomputeBalance } from "../services/balance.service.js";
 
 const serialize = (account) => ({
   id: account.id,
@@ -14,11 +15,15 @@ export const createAccount = async (req, res) => {
   const userId = req.user.userId;
   const { name, type, balance, color } = req.body;
 
+  // The entered amount is the account's starting point. `balance` is derived
+  // from openingBalance + activity, so a brand-new account's balance equals it.
+  const opening = balance ?? 0;
   const account = await prisma.account.create({
     data: {
       name,
       type,
-      balance: balance ?? 0,
+      openingBalance: opening,
+      balance: opening,
       color,
       userId,
     },
@@ -53,9 +58,25 @@ export const updateAccount = async (req, res) => {
 
   if (!account) return res.status(404).json({ message: "Account not found" });
 
-  const updated = await prisma.account.update({
-    where: { id },
-    data: req.body,
+  const { name, type, color, balance } = req.body;
+  const data = {};
+  if (name !== undefined) data.name = name;
+  if (type !== undefined) data.type = type;
+  if (color !== undefined) data.color = color;
+
+  // Editing the displayed balance shifts openingBalance so the recomputed
+  // balance lands on the entered value while preserving existing activity.
+  let recompute = false;
+  if (balance !== undefined) {
+    const activity = parseFloat(account.balance) - parseFloat(account.openingBalance);
+    data.openingBalance = parseFloat(balance) - activity;
+    recompute = true;
+  }
+
+  const updated = await prisma.$transaction(async (tx) => {
+    const row = await tx.account.update({ where: { id }, data });
+    if (recompute) await recomputeBalance(tx, id);
+    return tx.account.findUnique({ where: { id } });
   });
 
   return res

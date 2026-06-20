@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import '../../../../core/router/transitions.dart';
+import '../../../../core/sync/sync_controller.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/theme_provider.dart';
 import '../../../accounts/presentation/screens/accounts_screen.dart';
@@ -20,6 +21,15 @@ import '../widgets/profile_user_card.dart';
 import 'help_support_screen.dart';
 import 'privacy_policy_screen.dart';
 import 'theme_screen.dart';
+
+String _lastSyncedLabel(DateTime? at) {
+  if (at == null) return 'Tap to sync';
+  final diff = DateTime.now().difference(at);
+  if (diff.inMinutes < 1) return 'Synced just now';
+  if (diff.inMinutes < 60) return 'Synced ${diff.inMinutes}m ago';
+  if (diff.inHours < 24) return 'Synced ${diff.inHours}h ago';
+  return 'Synced ${diff.inDays}d ago';
+}
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -50,7 +60,7 @@ class ProfileScreen extends ConsumerWidget {
   Future<void> _confirmSignOut(BuildContext context, WidgetRef ref) async {
     final shouldLogout = await showDialog<bool>(
       context: context,
-      builder: (_) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Text(
           'Sign out?',
@@ -62,11 +72,11 @@ class ProfileScreen extends ConsumerWidget {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context, false),
+            onPressed: () => Navigator.pop(dialogContext, false),
             child: Text('Cancel', style: TextStyle(color: context.textSecondary)),
           ),
           TextButton(
-            onPressed: () => Navigator.pop(context, true),
+            onPressed: () => Navigator.pop(dialogContext, true),
             child: Text(
               'Sign out',
               style: TextStyle(
@@ -190,6 +200,27 @@ class ProfileScreen extends ConsumerWidget {
                           .setMode(labelToThemeMode(result));
                     }
                   },
+                ),
+              ],
+            ),
+            SizedBox(height: 24),
+            ProfileSection(
+              title: 'Data & sync',
+              rows: [
+                ProfileRow(
+                  icon: PhosphorIcons.arrowsClockwise(PhosphorIconsStyle.bold),
+                  iconBg: AppColors.info,
+                  label: 'Sync now',
+                  trailing: () {
+                    final s = ref.watch(syncControllerProvider);
+                    final pending =
+                        ref.watch(pendingCountProvider).valueOrNull ?? 0;
+                    if (s.syncing) return 'Syncing…';
+                    if (pending > 0) return '$pending pending';
+                    return _lastSyncedLabel(s.lastSyncedAt);
+                  }(),
+                  onTap: () =>
+                      ref.read(syncControllerProvider.notifier).syncNow(),
                 ),
               ],
             ),

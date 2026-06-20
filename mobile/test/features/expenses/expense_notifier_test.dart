@@ -1,6 +1,8 @@
+import 'package:drift/native.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:paisa/core/db/app_database.dart';
 import 'package:paisa/core/errors/app_exceptions.dart';
 import 'package:paisa/features/expenses/data/models/expense_model.dart';
 import 'package:paisa/features/expenses/data/repositories/expense_repository.dart';
@@ -26,9 +28,14 @@ ExpenseModel _fakeExpense({
     );
 
 ProviderContainer _makeContainer(MockExpenseRepository mockRepo) {
+  // An in-memory DB backs the related providers (savings, accounts) that get
+  // invalidated after writes, so they don't reach for a real on-disk database.
+  final db = AppDatabase(NativeDatabase.memory());
+  addTearDown(db.close);
   return ProviderContainer(
     overrides: [
       expenseRepositoryProvider.overrideWithValue(mockRepo),
+      appDatabaseProvider.overrideWithValue(db),
     ],
   );
 }

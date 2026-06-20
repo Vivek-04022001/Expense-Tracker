@@ -147,6 +147,7 @@ exports.Prisma.AccountScalarFieldEnum = {
   id: 'id',
   name: 'name',
   type: 'type',
+  openingBalance: 'openingBalance',
   balance: 'balance',
   color: 'color',
   userId: 'userId',
@@ -165,6 +166,7 @@ exports.Prisma.ExpenseScalarFieldEnum = {
   accountId: 'accountId',
   categoryId: 'categoryId',
   createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
   deletedAt: 'deletedAt'
 };
 
@@ -176,7 +178,9 @@ exports.Prisma.IncomeScalarFieldEnum = {
   userId: 'userId',
   accountId: 'accountId',
   categoryId: 'categoryId',
-  createdAt: 'createdAt'
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  deletedAt: 'deletedAt'
 };
 
 exports.Prisma.TransferScalarFieldEnum = {
@@ -187,6 +191,7 @@ exports.Prisma.TransferScalarFieldEnum = {
   fromAccountId: 'fromAccountId',
   toAccountId: 'toAccountId',
   createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
   deletedAt: 'deletedAt'
 };
 
@@ -199,7 +204,8 @@ exports.Prisma.BudgetScalarFieldEnum = {
   year: 'year',
   userId: 'userId',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  deletedAt: 'deletedAt'
 };
 
 exports.Prisma.RefreshTokenScalarFieldEnum = {

@@ -1,7 +1,8 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../../core/db/app_database.dart';
+import '../../../../core/sync/sync_engine.dart';
 import '../../../accounts/presentation/providers/account_provider.dart';
-import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../data/models/transfer_model.dart';
 import '../../data/repositories/transfer_repository.dart';
 
@@ -9,7 +10,10 @@ part 'transfer_provider.g.dart';
 
 @riverpod
 TransferRepository transferRepository(TransferRepositoryRef ref) =>
-    TransferRepository(ref.watch(dioClientProvider));
+    TransferRepository(
+      ref.watch(appDatabaseProvider),
+      ref.watch(syncEngineProvider),
+    );
 
 @riverpod
 class TransferListNotifier extends _$TransferListNotifier {

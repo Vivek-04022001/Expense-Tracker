@@ -7,7 +7,8 @@ export const upsertBudget = async (req, res) => {
     where: {
       userId_category_month_year: { userId, category, month, year },
     },
-    update: { limitAmount },
+    // Re-upserting a previously soft-deleted budget revives it.
+    update: { limitAmount, deletedAt: null },
     create: { userId, category, limitAmount, month, year },
   });
 
@@ -23,6 +24,7 @@ export const getBudgets = async (req, res) => {
   const budgets = await prisma.budget.findMany({
     where: {
       userId,
+      deletedAt: null,
       ...(month && { month: parseInt(month) }),
       ...(year && { year: parseInt(year) }),
     },
@@ -39,12 +41,15 @@ export const deleteBudget = async (req, res) => {
     const { id } = req.params;
 
     const budget = await prisma.budget.findFirst({
-      where: { id, userId },
+      where: { id, userId, deletedAt: null },
     });
 
     if (!budget) return res.status(404).json({ message: "Budget not found" });
 
-    await prisma.budget.delete({ where: { id } });
+    await prisma.budget.update({
+      where: { id },
+      data: { deletedAt: new Date() },
+    });
 
     return res.status(200).json({ message: "Budget deleted successfully" });
   } catch (err) {
@@ -60,7 +65,7 @@ export const getBudgetStatus = async (req, res) => {
 
     // Ownership check — ensure this budget belongs to the user
     const budget = await prisma.budget.findFirst({
-      where: { id, userId },
+      where: { id, userId, deletedAt: null },
     });
 
     if (!budget) return res.status(404).json({ error: "Budget not found" });

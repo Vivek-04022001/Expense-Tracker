@@ -1,6 +1,8 @@
+import 'package:drift/native.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:paisa/core/db/app_database.dart';
 import 'package:paisa/core/errors/app_exceptions.dart';
 import 'package:paisa/features/auth/data/models/auth_model.dart';
 import 'package:paisa/features/auth/data/repositories/auth_repository.dart';
@@ -19,9 +21,13 @@ const _fakeAccessToken =
 const _fakeRefreshToken = 'fake.refresh.token';
 
 ProviderContainer _makeContainer(MockAuthRepository mockRepo) {
+  // logout() wipes the local DB, so back it with an in-memory database.
+  final db = AppDatabase(NativeDatabase.memory());
+  addTearDown(db.close);
   return ProviderContainer(
     overrides: [
       authRepositoryProvider.overrideWithValue(mockRepo),
+      appDatabaseProvider.overrideWithValue(db),
     ],
   );
 }

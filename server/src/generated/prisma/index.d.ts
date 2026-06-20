@@ -4305,10 +4305,12 @@ export namespace Prisma {
   }
 
   export type AccountAvgAggregateOutputType = {
+    openingBalance: Decimal | null
     balance: Decimal | null
   }
 
   export type AccountSumAggregateOutputType = {
+    openingBalance: Decimal | null
     balance: Decimal | null
   }
 
@@ -4316,6 +4318,7 @@ export namespace Prisma {
     id: string | null
     name: string | null
     type: $Enums.AccountType | null
+    openingBalance: Decimal | null
     balance: Decimal | null
     color: string | null
     userId: string | null
@@ -4328,6 +4331,7 @@ export namespace Prisma {
     id: string | null
     name: string | null
     type: $Enums.AccountType | null
+    openingBalance: Decimal | null
     balance: Decimal | null
     color: string | null
     userId: string | null
@@ -4340,6 +4344,7 @@ export namespace Prisma {
     id: number
     name: number
     type: number
+    openingBalance: number
     balance: number
     color: number
     userId: number
@@ -4351,10 +4356,12 @@ export namespace Prisma {
 
 
   export type AccountAvgAggregateInputType = {
+    openingBalance?: true
     balance?: true
   }
 
   export type AccountSumAggregateInputType = {
+    openingBalance?: true
     balance?: true
   }
 
@@ -4362,6 +4369,7 @@ export namespace Prisma {
     id?: true
     name?: true
     type?: true
+    openingBalance?: true
     balance?: true
     color?: true
     userId?: true
@@ -4374,6 +4382,7 @@ export namespace Prisma {
     id?: true
     name?: true
     type?: true
+    openingBalance?: true
     balance?: true
     color?: true
     userId?: true
@@ -4386,6 +4395,7 @@ export namespace Prisma {
     id?: true
     name?: true
     type?: true
+    openingBalance?: true
     balance?: true
     color?: true
     userId?: true
@@ -4485,6 +4495,7 @@ export namespace Prisma {
     id: string
     name: string
     type: $Enums.AccountType
+    openingBalance: Decimal
     balance: Decimal
     color: string | null
     userId: string
@@ -4516,6 +4527,7 @@ export namespace Prisma {
     id?: boolean
     name?: boolean
     type?: boolean
+    openingBalance?: boolean
     balance?: boolean
     color?: boolean
     userId?: boolean
@@ -4534,6 +4546,7 @@ export namespace Prisma {
     id?: boolean
     name?: boolean
     type?: boolean
+    openingBalance?: boolean
     balance?: boolean
     color?: boolean
     userId?: boolean
@@ -4547,6 +4560,7 @@ export namespace Prisma {
     id?: boolean
     name?: boolean
     type?: boolean
+    openingBalance?: boolean
     balance?: boolean
     color?: boolean
     userId?: boolean
@@ -4560,6 +4574,7 @@ export namespace Prisma {
     id?: boolean
     name?: boolean
     type?: boolean
+    openingBalance?: boolean
     balance?: boolean
     color?: boolean
     userId?: boolean
@@ -4568,7 +4583,7 @@ export namespace Prisma {
     deletedAt?: boolean
   }
 
-  export type AccountOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "type" | "balance" | "color" | "userId" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["account"]>
+  export type AccountOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "type" | "openingBalance" | "balance" | "color" | "userId" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["account"]>
   export type AccountInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | UserDefaultArgs<ExtArgs>
     expenses?: boolean | Account$expensesArgs<ExtArgs>
@@ -4597,6 +4612,7 @@ export namespace Prisma {
       id: string
       name: string
       type: $Enums.AccountType
+      openingBalance: Prisma.Decimal
       balance: Prisma.Decimal
       color: string | null
       userId: string
@@ -5034,6 +5050,7 @@ export namespace Prisma {
     readonly id: FieldRef<"Account", 'String'>
     readonly name: FieldRef<"Account", 'String'>
     readonly type: FieldRef<"Account", 'AccountType'>
+    readonly openingBalance: FieldRef<"Account", 'Decimal'>
     readonly balance: FieldRef<"Account", 'Decimal'>
     readonly color: FieldRef<"Account", 'String'>
     readonly userId: FieldRef<"Account", 'String'>
@@ -5585,6 +5602,7 @@ export namespace Prisma {
     accountId: string | null
     categoryId: string | null
     createdAt: Date | null
+    updatedAt: Date | null
     deletedAt: Date | null
   }
 
@@ -5598,6 +5616,7 @@ export namespace Prisma {
     accountId: string | null
     categoryId: string | null
     createdAt: Date | null
+    updatedAt: Date | null
     deletedAt: Date | null
   }
 
@@ -5611,6 +5630,7 @@ export namespace Prisma {
     accountId: number
     categoryId: number
     createdAt: number
+    updatedAt: number
     deletedAt: number
     _all: number
   }
@@ -5634,6 +5654,7 @@ export namespace Prisma {
     accountId?: true
     categoryId?: true
     createdAt?: true
+    updatedAt?: true
     deletedAt?: true
   }
 
@@ -5647,6 +5668,7 @@ export namespace Prisma {
     accountId?: true
     categoryId?: true
     createdAt?: true
+    updatedAt?: true
     deletedAt?: true
   }
 
@@ -5660,6 +5682,7 @@ export namespace Prisma {
     accountId?: true
     categoryId?: true
     createdAt?: true
+    updatedAt?: true
     deletedAt?: true
     _all?: true
   }
@@ -5760,6 +5783,7 @@ export namespace Prisma {
     accountId: string | null
     categoryId: string | null
     createdAt: Date
+    updatedAt: Date
     deletedAt: Date | null
     _count: ExpenseCountAggregateOutputType | null
     _avg: ExpenseAvgAggregateOutputType | null
@@ -5792,6 +5816,7 @@ export namespace Prisma {
     accountId?: boolean
     categoryId?: boolean
     createdAt?: boolean
+    updatedAt?: boolean
     deletedAt?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
     account?: boolean | Expense$accountArgs<ExtArgs>
@@ -5808,6 +5833,7 @@ export namespace Prisma {
     accountId?: boolean
     categoryId?: boolean
     createdAt?: boolean
+    updatedAt?: boolean
     deletedAt?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
     account?: boolean | Expense$accountArgs<ExtArgs>
@@ -5824,6 +5850,7 @@ export namespace Prisma {
     accountId?: boolean
     categoryId?: boolean
     createdAt?: boolean
+    updatedAt?: boolean
     deletedAt?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
     account?: boolean | Expense$accountArgs<ExtArgs>
@@ -5840,10 +5867,11 @@ export namespace Prisma {
     accountId?: boolean
     categoryId?: boolean
     createdAt?: boolean
+    updatedAt?: boolean
     deletedAt?: boolean
   }
 
-  export type ExpenseOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "amount" | "category" | "paymentMethod" | "description" | "userId" | "accountId" | "categoryId" | "createdAt" | "deletedAt", ExtArgs["result"]["expense"]>
+  export type ExpenseOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "amount" | "category" | "paymentMethod" | "description" | "userId" | "accountId" | "categoryId" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["expense"]>
   export type ExpenseInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | UserDefaultArgs<ExtArgs>
     account?: boolean | Expense$accountArgs<ExtArgs>
@@ -5877,6 +5905,7 @@ export namespace Prisma {
       accountId: string | null
       categoryId: string | null
       createdAt: Date
+      updatedAt: Date
       deletedAt: Date | null
     }, ExtArgs["result"]["expense"]>
     composites: {}
@@ -6313,6 +6342,7 @@ export namespace Prisma {
     readonly accountId: FieldRef<"Expense", 'String'>
     readonly categoryId: FieldRef<"Expense", 'String'>
     readonly createdAt: FieldRef<"Expense", 'DateTime'>
+    readonly updatedAt: FieldRef<"Expense", 'DateTime'>
     readonly deletedAt: FieldRef<"Expense", 'DateTime'>
   }
     
@@ -6800,6 +6830,8 @@ export namespace Prisma {
     accountId: string | null
     categoryId: string | null
     createdAt: Date | null
+    updatedAt: Date | null
+    deletedAt: Date | null
   }
 
   export type IncomeMaxAggregateOutputType = {
@@ -6811,6 +6843,8 @@ export namespace Prisma {
     accountId: string | null
     categoryId: string | null
     createdAt: Date | null
+    updatedAt: Date | null
+    deletedAt: Date | null
   }
 
   export type IncomeCountAggregateOutputType = {
@@ -6822,6 +6856,8 @@ export namespace Prisma {
     accountId: number
     categoryId: number
     createdAt: number
+    updatedAt: number
+    deletedAt: number
     _all: number
   }
 
@@ -6843,6 +6879,8 @@ export namespace Prisma {
     accountId?: true
     categoryId?: true
     createdAt?: true
+    updatedAt?: true
+    deletedAt?: true
   }
 
   export type IncomeMaxAggregateInputType = {
@@ -6854,6 +6892,8 @@ export namespace Prisma {
     accountId?: true
     categoryId?: true
     createdAt?: true
+    updatedAt?: true
+    deletedAt?: true
   }
 
   export type IncomeCountAggregateInputType = {
@@ -6865,6 +6905,8 @@ export namespace Prisma {
     accountId?: true
     categoryId?: true
     createdAt?: true
+    updatedAt?: true
+    deletedAt?: true
     _all?: true
   }
 
@@ -6963,6 +7005,8 @@ export namespace Prisma {
     accountId: string | null
     categoryId: string | null
     createdAt: Date
+    updatedAt: Date
+    deletedAt: Date | null
     _count: IncomeCountAggregateOutputType | null
     _avg: IncomeAvgAggregateOutputType | null
     _sum: IncomeSumAggregateOutputType | null
@@ -6993,6 +7037,8 @@ export namespace Prisma {
     accountId?: boolean
     categoryId?: boolean
     createdAt?: boolean
+    updatedAt?: boolean
+    deletedAt?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
     account?: boolean | Income$accountArgs<ExtArgs>
     categoryRef?: boolean | Income$categoryRefArgs<ExtArgs>
@@ -7007,6 +7053,8 @@ export namespace Prisma {
     accountId?: boolean
     categoryId?: boolean
     createdAt?: boolean
+    updatedAt?: boolean
+    deletedAt?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
     account?: boolean | Income$accountArgs<ExtArgs>
     categoryRef?: boolean | Income$categoryRefArgs<ExtArgs>
@@ -7021,6 +7069,8 @@ export namespace Prisma {
     accountId?: boolean
     categoryId?: boolean
     createdAt?: boolean
+    updatedAt?: boolean
+    deletedAt?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
     account?: boolean | Income$accountArgs<ExtArgs>
     categoryRef?: boolean | Income$categoryRefArgs<ExtArgs>
@@ -7035,9 +7085,11 @@ export namespace Prisma {
     accountId?: boolean
     categoryId?: boolean
     createdAt?: boolean
+    updatedAt?: boolean
+    deletedAt?: boolean
   }
 
-  export type IncomeOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "amount" | "incomeType" | "description" | "userId" | "accountId" | "categoryId" | "createdAt", ExtArgs["result"]["income"]>
+  export type IncomeOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "amount" | "incomeType" | "description" | "userId" | "accountId" | "categoryId" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["income"]>
   export type IncomeInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | UserDefaultArgs<ExtArgs>
     account?: boolean | Income$accountArgs<ExtArgs>
@@ -7070,6 +7122,8 @@ export namespace Prisma {
       accountId: string | null
       categoryId: string | null
       createdAt: Date
+      updatedAt: Date
+      deletedAt: Date | null
     }, ExtArgs["result"]["income"]>
     composites: {}
   }
@@ -7504,6 +7558,8 @@ export namespace Prisma {
     readonly accountId: FieldRef<"Income", 'String'>
     readonly categoryId: FieldRef<"Income", 'String'>
     readonly createdAt: FieldRef<"Income", 'DateTime'>
+    readonly updatedAt: FieldRef<"Income", 'DateTime'>
+    readonly deletedAt: FieldRef<"Income", 'DateTime'>
   }
     
 
@@ -7989,6 +8045,7 @@ export namespace Prisma {
     fromAccountId: string | null
     toAccountId: string | null
     createdAt: Date | null
+    updatedAt: Date | null
     deletedAt: Date | null
   }
 
@@ -8000,6 +8057,7 @@ export namespace Prisma {
     fromAccountId: string | null
     toAccountId: string | null
     createdAt: Date | null
+    updatedAt: Date | null
     deletedAt: Date | null
   }
 
@@ -8011,6 +8069,7 @@ export namespace Prisma {
     fromAccountId: number
     toAccountId: number
     createdAt: number
+    updatedAt: number
     deletedAt: number
     _all: number
   }
@@ -8032,6 +8091,7 @@ export namespace Prisma {
     fromAccountId?: true
     toAccountId?: true
     createdAt?: true
+    updatedAt?: true
     deletedAt?: true
   }
 
@@ -8043,6 +8103,7 @@ export namespace Prisma {
     fromAccountId?: true
     toAccountId?: true
     createdAt?: true
+    updatedAt?: true
     deletedAt?: true
   }
 
@@ -8054,6 +8115,7 @@ export namespace Prisma {
     fromAccountId?: true
     toAccountId?: true
     createdAt?: true
+    updatedAt?: true
     deletedAt?: true
     _all?: true
   }
@@ -8152,6 +8214,7 @@ export namespace Prisma {
     fromAccountId: string
     toAccountId: string
     createdAt: Date
+    updatedAt: Date
     deletedAt: Date | null
     _count: TransferCountAggregateOutputType | null
     _avg: TransferAvgAggregateOutputType | null
@@ -8182,6 +8245,7 @@ export namespace Prisma {
     fromAccountId?: boolean
     toAccountId?: boolean
     createdAt?: boolean
+    updatedAt?: boolean
     deletedAt?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
     fromAccount?: boolean | AccountDefaultArgs<ExtArgs>
@@ -8196,6 +8260,7 @@ export namespace Prisma {
     fromAccountId?: boolean
     toAccountId?: boolean
     createdAt?: boolean
+    updatedAt?: boolean
     deletedAt?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
     fromAccount?: boolean | AccountDefaultArgs<ExtArgs>
@@ -8210,6 +8275,7 @@ export namespace Prisma {
     fromAccountId?: boolean
     toAccountId?: boolean
     createdAt?: boolean
+    updatedAt?: boolean
     deletedAt?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
     fromAccount?: boolean | AccountDefaultArgs<ExtArgs>
@@ -8224,10 +8290,11 @@ export namespace Prisma {
     fromAccountId?: boolean
     toAccountId?: boolean
     createdAt?: boolean
+    updatedAt?: boolean
     deletedAt?: boolean
   }
 
-  export type TransferOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "amount" | "description" | "userId" | "fromAccountId" | "toAccountId" | "createdAt" | "deletedAt", ExtArgs["result"]["transfer"]>
+  export type TransferOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "amount" | "description" | "userId" | "fromAccountId" | "toAccountId" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["transfer"]>
   export type TransferInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | UserDefaultArgs<ExtArgs>
     fromAccount?: boolean | AccountDefaultArgs<ExtArgs>
@@ -8259,6 +8326,7 @@ export namespace Prisma {
       fromAccountId: string
       toAccountId: string
       createdAt: Date
+      updatedAt: Date
       deletedAt: Date | null
     }, ExtArgs["result"]["transfer"]>
     composites: {}
@@ -8693,6 +8761,7 @@ export namespace Prisma {
     readonly fromAccountId: FieldRef<"Transfer", 'String'>
     readonly toAccountId: FieldRef<"Transfer", 'String'>
     readonly createdAt: FieldRef<"Transfer", 'DateTime'>
+    readonly updatedAt: FieldRef<"Transfer", 'DateTime'>
     readonly deletedAt: FieldRef<"Transfer", 'DateTime'>
   }
     
@@ -9147,6 +9216,7 @@ export namespace Prisma {
     userId: string | null
     createdAt: Date | null
     updatedAt: Date | null
+    deletedAt: Date | null
   }
 
   export type BudgetMaxAggregateOutputType = {
@@ -9159,6 +9229,7 @@ export namespace Prisma {
     userId: string | null
     createdAt: Date | null
     updatedAt: Date | null
+    deletedAt: Date | null
   }
 
   export type BudgetCountAggregateOutputType = {
@@ -9171,6 +9242,7 @@ export namespace Prisma {
     userId: number
     createdAt: number
     updatedAt: number
+    deletedAt: number
     _all: number
   }
 
@@ -9197,6 +9269,7 @@ export namespace Prisma {
     userId?: true
     createdAt?: true
     updatedAt?: true
+    deletedAt?: true
   }
 
   export type BudgetMaxAggregateInputType = {
@@ -9209,6 +9282,7 @@ export namespace Prisma {
     userId?: true
     createdAt?: true
     updatedAt?: true
+    deletedAt?: true
   }
 
   export type BudgetCountAggregateInputType = {
@@ -9221,6 +9295,7 @@ export namespace Prisma {
     userId?: true
     createdAt?: true
     updatedAt?: true
+    deletedAt?: true
     _all?: true
   }
 
@@ -9320,6 +9395,7 @@ export namespace Prisma {
     userId: string
     createdAt: Date
     updatedAt: Date
+    deletedAt: Date | null
     _count: BudgetCountAggregateOutputType | null
     _avg: BudgetAvgAggregateOutputType | null
     _sum: BudgetSumAggregateOutputType | null
@@ -9351,6 +9427,7 @@ export namespace Prisma {
     userId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    deletedAt?: boolean
     categoryRef?: boolean | Budget$categoryRefArgs<ExtArgs>
     user?: boolean | UserDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["budget"]>
@@ -9365,6 +9442,7 @@ export namespace Prisma {
     userId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    deletedAt?: boolean
     categoryRef?: boolean | Budget$categoryRefArgs<ExtArgs>
     user?: boolean | UserDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["budget"]>
@@ -9379,6 +9457,7 @@ export namespace Prisma {
     userId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    deletedAt?: boolean
     categoryRef?: boolean | Budget$categoryRefArgs<ExtArgs>
     user?: boolean | UserDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["budget"]>
@@ -9393,9 +9472,10 @@ export namespace Prisma {
     userId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    deletedAt?: boolean
   }
 
-  export type BudgetOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "limitAmount" | "category" | "categoryId" | "month" | "year" | "userId" | "createdAt" | "updatedAt", ExtArgs["result"]["budget"]>
+  export type BudgetOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "limitAmount" | "category" | "categoryId" | "month" | "year" | "userId" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["budget"]>
   export type BudgetInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     categoryRef?: boolean | Budget$categoryRefArgs<ExtArgs>
     user?: boolean | UserDefaultArgs<ExtArgs>
@@ -9425,6 +9505,7 @@ export namespace Prisma {
       userId: string
       createdAt: Date
       updatedAt: Date
+      deletedAt: Date | null
     }, ExtArgs["result"]["budget"]>
     composites: {}
   }
@@ -9859,6 +9940,7 @@ export namespace Prisma {
     readonly userId: FieldRef<"Budget", 'String'>
     readonly createdAt: FieldRef<"Budget", 'DateTime'>
     readonly updatedAt: FieldRef<"Budget", 'DateTime'>
+    readonly deletedAt: FieldRef<"Budget", 'DateTime'>
   }
     
 
@@ -11420,6 +11502,7 @@ export namespace Prisma {
     id: 'id',
     name: 'name',
     type: 'type',
+    openingBalance: 'openingBalance',
     balance: 'balance',
     color: 'color',
     userId: 'userId',
@@ -11441,6 +11524,7 @@ export namespace Prisma {
     accountId: 'accountId',
     categoryId: 'categoryId',
     createdAt: 'createdAt',
+    updatedAt: 'updatedAt',
     deletedAt: 'deletedAt'
   };
 
@@ -11455,7 +11539,9 @@ export namespace Prisma {
     userId: 'userId',
     accountId: 'accountId',
     categoryId: 'categoryId',
-    createdAt: 'createdAt'
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt',
+    deletedAt: 'deletedAt'
   };
 
   export type IncomeScalarFieldEnum = (typeof IncomeScalarFieldEnum)[keyof typeof IncomeScalarFieldEnum]
@@ -11469,6 +11555,7 @@ export namespace Prisma {
     fromAccountId: 'fromAccountId',
     toAccountId: 'toAccountId',
     createdAt: 'createdAt',
+    updatedAt: 'updatedAt',
     deletedAt: 'deletedAt'
   };
 
@@ -11484,7 +11571,8 @@ export namespace Prisma {
     year: 'year',
     userId: 'userId',
     createdAt: 'createdAt',
-    updatedAt: 'updatedAt'
+    updatedAt: 'updatedAt',
+    deletedAt: 'deletedAt'
   };
 
   export type BudgetScalarFieldEnum = (typeof BudgetScalarFieldEnum)[keyof typeof BudgetScalarFieldEnum]
@@ -11862,6 +11950,7 @@ export namespace Prisma {
     id?: StringFilter<"Account"> | string
     name?: StringFilter<"Account"> | string
     type?: EnumAccountTypeFilter<"Account"> | $Enums.AccountType
+    openingBalance?: DecimalFilter<"Account"> | Decimal | DecimalJsLike | number | string
     balance?: DecimalFilter<"Account"> | Decimal | DecimalJsLike | number | string
     color?: StringNullableFilter<"Account"> | string | null
     userId?: StringFilter<"Account"> | string
@@ -11879,6 +11968,7 @@ export namespace Prisma {
     id?: SortOrder
     name?: SortOrder
     type?: SortOrder
+    openingBalance?: SortOrder
     balance?: SortOrder
     color?: SortOrderInput | SortOrder
     userId?: SortOrder
@@ -11899,6 +11989,7 @@ export namespace Prisma {
     NOT?: AccountWhereInput | AccountWhereInput[]
     name?: StringFilter<"Account"> | string
     type?: EnumAccountTypeFilter<"Account"> | $Enums.AccountType
+    openingBalance?: DecimalFilter<"Account"> | Decimal | DecimalJsLike | number | string
     balance?: DecimalFilter<"Account"> | Decimal | DecimalJsLike | number | string
     color?: StringNullableFilter<"Account"> | string | null
     userId?: StringFilter<"Account"> | string
@@ -11916,6 +12007,7 @@ export namespace Prisma {
     id?: SortOrder
     name?: SortOrder
     type?: SortOrder
+    openingBalance?: SortOrder
     balance?: SortOrder
     color?: SortOrderInput | SortOrder
     userId?: SortOrder
@@ -11936,6 +12028,7 @@ export namespace Prisma {
     id?: StringWithAggregatesFilter<"Account"> | string
     name?: StringWithAggregatesFilter<"Account"> | string
     type?: EnumAccountTypeWithAggregatesFilter<"Account"> | $Enums.AccountType
+    openingBalance?: DecimalWithAggregatesFilter<"Account"> | Decimal | DecimalJsLike | number | string
     balance?: DecimalWithAggregatesFilter<"Account"> | Decimal | DecimalJsLike | number | string
     color?: StringNullableWithAggregatesFilter<"Account"> | string | null
     userId?: StringWithAggregatesFilter<"Account"> | string
@@ -11957,6 +12050,7 @@ export namespace Prisma {
     accountId?: StringNullableFilter<"Expense"> | string | null
     categoryId?: StringNullableFilter<"Expense"> | string | null
     createdAt?: DateTimeFilter<"Expense"> | Date | string
+    updatedAt?: DateTimeFilter<"Expense"> | Date | string
     deletedAt?: DateTimeNullableFilter<"Expense"> | Date | string | null
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
     account?: XOR<AccountNullableScalarRelationFilter, AccountWhereInput> | null
@@ -11973,6 +12067,7 @@ export namespace Prisma {
     accountId?: SortOrderInput | SortOrder
     categoryId?: SortOrderInput | SortOrder
     createdAt?: SortOrder
+    updatedAt?: SortOrder
     deletedAt?: SortOrderInput | SortOrder
     user?: UserOrderByWithRelationInput
     account?: AccountOrderByWithRelationInput
@@ -11992,6 +12087,7 @@ export namespace Prisma {
     accountId?: StringNullableFilter<"Expense"> | string | null
     categoryId?: StringNullableFilter<"Expense"> | string | null
     createdAt?: DateTimeFilter<"Expense"> | Date | string
+    updatedAt?: DateTimeFilter<"Expense"> | Date | string
     deletedAt?: DateTimeNullableFilter<"Expense"> | Date | string | null
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
     account?: XOR<AccountNullableScalarRelationFilter, AccountWhereInput> | null
@@ -12008,6 +12104,7 @@ export namespace Prisma {
     accountId?: SortOrderInput | SortOrder
     categoryId?: SortOrderInput | SortOrder
     createdAt?: SortOrder
+    updatedAt?: SortOrder
     deletedAt?: SortOrderInput | SortOrder
     _count?: ExpenseCountOrderByAggregateInput
     _avg?: ExpenseAvgOrderByAggregateInput
@@ -12029,6 +12126,7 @@ export namespace Prisma {
     accountId?: StringNullableWithAggregatesFilter<"Expense"> | string | null
     categoryId?: StringNullableWithAggregatesFilter<"Expense"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"Expense"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"Expense"> | Date | string
     deletedAt?: DateTimeNullableWithAggregatesFilter<"Expense"> | Date | string | null
   }
 
@@ -12044,6 +12142,8 @@ export namespace Prisma {
     accountId?: StringNullableFilter<"Income"> | string | null
     categoryId?: StringNullableFilter<"Income"> | string | null
     createdAt?: DateTimeFilter<"Income"> | Date | string
+    updatedAt?: DateTimeFilter<"Income"> | Date | string
+    deletedAt?: DateTimeNullableFilter<"Income"> | Date | string | null
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
     account?: XOR<AccountNullableScalarRelationFilter, AccountWhereInput> | null
     categoryRef?: XOR<TransactionCategoryNullableScalarRelationFilter, TransactionCategoryWhereInput> | null
@@ -12058,6 +12158,8 @@ export namespace Prisma {
     accountId?: SortOrderInput | SortOrder
     categoryId?: SortOrderInput | SortOrder
     createdAt?: SortOrder
+    updatedAt?: SortOrder
+    deletedAt?: SortOrderInput | SortOrder
     user?: UserOrderByWithRelationInput
     account?: AccountOrderByWithRelationInput
     categoryRef?: TransactionCategoryOrderByWithRelationInput
@@ -12075,6 +12177,8 @@ export namespace Prisma {
     accountId?: StringNullableFilter<"Income"> | string | null
     categoryId?: StringNullableFilter<"Income"> | string | null
     createdAt?: DateTimeFilter<"Income"> | Date | string
+    updatedAt?: DateTimeFilter<"Income"> | Date | string
+    deletedAt?: DateTimeNullableFilter<"Income"> | Date | string | null
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
     account?: XOR<AccountNullableScalarRelationFilter, AccountWhereInput> | null
     categoryRef?: XOR<TransactionCategoryNullableScalarRelationFilter, TransactionCategoryWhereInput> | null
@@ -12089,6 +12193,8 @@ export namespace Prisma {
     accountId?: SortOrderInput | SortOrder
     categoryId?: SortOrderInput | SortOrder
     createdAt?: SortOrder
+    updatedAt?: SortOrder
+    deletedAt?: SortOrderInput | SortOrder
     _count?: IncomeCountOrderByAggregateInput
     _avg?: IncomeAvgOrderByAggregateInput
     _max?: IncomeMaxOrderByAggregateInput
@@ -12108,6 +12214,8 @@ export namespace Prisma {
     accountId?: StringNullableWithAggregatesFilter<"Income"> | string | null
     categoryId?: StringNullableWithAggregatesFilter<"Income"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"Income"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"Income"> | Date | string
+    deletedAt?: DateTimeNullableWithAggregatesFilter<"Income"> | Date | string | null
   }
 
   export type TransferWhereInput = {
@@ -12121,6 +12229,7 @@ export namespace Prisma {
     fromAccountId?: StringFilter<"Transfer"> | string
     toAccountId?: StringFilter<"Transfer"> | string
     createdAt?: DateTimeFilter<"Transfer"> | Date | string
+    updatedAt?: DateTimeFilter<"Transfer"> | Date | string
     deletedAt?: DateTimeNullableFilter<"Transfer"> | Date | string | null
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
     fromAccount?: XOR<AccountScalarRelationFilter, AccountWhereInput>
@@ -12135,6 +12244,7 @@ export namespace Prisma {
     fromAccountId?: SortOrder
     toAccountId?: SortOrder
     createdAt?: SortOrder
+    updatedAt?: SortOrder
     deletedAt?: SortOrderInput | SortOrder
     user?: UserOrderByWithRelationInput
     fromAccount?: AccountOrderByWithRelationInput
@@ -12152,6 +12262,7 @@ export namespace Prisma {
     fromAccountId?: StringFilter<"Transfer"> | string
     toAccountId?: StringFilter<"Transfer"> | string
     createdAt?: DateTimeFilter<"Transfer"> | Date | string
+    updatedAt?: DateTimeFilter<"Transfer"> | Date | string
     deletedAt?: DateTimeNullableFilter<"Transfer"> | Date | string | null
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
     fromAccount?: XOR<AccountScalarRelationFilter, AccountWhereInput>
@@ -12166,6 +12277,7 @@ export namespace Prisma {
     fromAccountId?: SortOrder
     toAccountId?: SortOrder
     createdAt?: SortOrder
+    updatedAt?: SortOrder
     deletedAt?: SortOrderInput | SortOrder
     _count?: TransferCountOrderByAggregateInput
     _avg?: TransferAvgOrderByAggregateInput
@@ -12185,6 +12297,7 @@ export namespace Prisma {
     fromAccountId?: StringWithAggregatesFilter<"Transfer"> | string
     toAccountId?: StringWithAggregatesFilter<"Transfer"> | string
     createdAt?: DateTimeWithAggregatesFilter<"Transfer"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"Transfer"> | Date | string
     deletedAt?: DateTimeNullableWithAggregatesFilter<"Transfer"> | Date | string | null
   }
 
@@ -12201,6 +12314,7 @@ export namespace Prisma {
     userId?: StringFilter<"Budget"> | string
     createdAt?: DateTimeFilter<"Budget"> | Date | string
     updatedAt?: DateTimeFilter<"Budget"> | Date | string
+    deletedAt?: DateTimeNullableFilter<"Budget"> | Date | string | null
     categoryRef?: XOR<TransactionCategoryNullableScalarRelationFilter, TransactionCategoryWhereInput> | null
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
   }
@@ -12215,6 +12329,7 @@ export namespace Prisma {
     userId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    deletedAt?: SortOrderInput | SortOrder
     categoryRef?: TransactionCategoryOrderByWithRelationInput
     user?: UserOrderByWithRelationInput
   }
@@ -12233,6 +12348,7 @@ export namespace Prisma {
     userId?: StringFilter<"Budget"> | string
     createdAt?: DateTimeFilter<"Budget"> | Date | string
     updatedAt?: DateTimeFilter<"Budget"> | Date | string
+    deletedAt?: DateTimeNullableFilter<"Budget"> | Date | string | null
     categoryRef?: XOR<TransactionCategoryNullableScalarRelationFilter, TransactionCategoryWhereInput> | null
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
   }, "id" | "userId_category_month_year">
@@ -12247,6 +12363,7 @@ export namespace Prisma {
     userId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    deletedAt?: SortOrderInput | SortOrder
     _count?: BudgetCountOrderByAggregateInput
     _avg?: BudgetAvgOrderByAggregateInput
     _max?: BudgetMaxOrderByAggregateInput
@@ -12267,6 +12384,7 @@ export namespace Prisma {
     userId?: StringWithAggregatesFilter<"Budget"> | string
     createdAt?: DateTimeWithAggregatesFilter<"Budget"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Budget"> | Date | string
+    deletedAt?: DateTimeNullableWithAggregatesFilter<"Budget"> | Date | string | null
   }
 
   export type RefreshTokenWhereInput = {
@@ -12533,6 +12651,7 @@ export namespace Prisma {
     id?: string
     name: string
     type?: $Enums.AccountType
+    openingBalance?: Decimal | DecimalJsLike | number | string
     balance?: Decimal | DecimalJsLike | number | string
     color?: string | null
     createdAt?: Date | string
@@ -12549,6 +12668,7 @@ export namespace Prisma {
     id?: string
     name: string
     type?: $Enums.AccountType
+    openingBalance?: Decimal | DecimalJsLike | number | string
     balance?: Decimal | DecimalJsLike | number | string
     color?: string | null
     userId: string
@@ -12565,6 +12685,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     type?: EnumAccountTypeFieldUpdateOperationsInput | $Enums.AccountType
+    openingBalance?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     balance?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     color?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -12581,6 +12702,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     type?: EnumAccountTypeFieldUpdateOperationsInput | $Enums.AccountType
+    openingBalance?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     balance?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     color?: NullableStringFieldUpdateOperationsInput | string | null
     userId?: StringFieldUpdateOperationsInput | string
@@ -12597,6 +12719,7 @@ export namespace Prisma {
     id?: string
     name: string
     type?: $Enums.AccountType
+    openingBalance?: Decimal | DecimalJsLike | number | string
     balance?: Decimal | DecimalJsLike | number | string
     color?: string | null
     userId: string
@@ -12609,6 +12732,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     type?: EnumAccountTypeFieldUpdateOperationsInput | $Enums.AccountType
+    openingBalance?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     balance?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     color?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -12620,6 +12744,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     type?: EnumAccountTypeFieldUpdateOperationsInput | $Enums.AccountType
+    openingBalance?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     balance?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     color?: NullableStringFieldUpdateOperationsInput | string | null
     userId?: StringFieldUpdateOperationsInput | string
@@ -12635,6 +12760,7 @@ export namespace Prisma {
     paymentMethod?: $Enums.PaymentMethod
     description?: string | null
     createdAt?: Date | string
+    updatedAt?: Date | string
     deletedAt?: Date | string | null
     user: UserCreateNestedOneWithoutExpensesInput
     account?: AccountCreateNestedOneWithoutExpensesInput
@@ -12651,6 +12777,7 @@ export namespace Prisma {
     accountId?: string | null
     categoryId?: string | null
     createdAt?: Date | string
+    updatedAt?: Date | string
     deletedAt?: Date | string | null
   }
 
@@ -12661,6 +12788,7 @@ export namespace Prisma {
     paymentMethod?: EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
     description?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     user?: UserUpdateOneRequiredWithoutExpensesNestedInput
     account?: AccountUpdateOneWithoutExpensesNestedInput
@@ -12677,6 +12805,7 @@ export namespace Prisma {
     accountId?: NullableStringFieldUpdateOperationsInput | string | null
     categoryId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
@@ -12690,6 +12819,7 @@ export namespace Prisma {
     accountId?: string | null
     categoryId?: string | null
     createdAt?: Date | string
+    updatedAt?: Date | string
     deletedAt?: Date | string | null
   }
 
@@ -12700,6 +12830,7 @@ export namespace Prisma {
     paymentMethod?: EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
     description?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
@@ -12713,6 +12844,7 @@ export namespace Prisma {
     accountId?: NullableStringFieldUpdateOperationsInput | string | null
     categoryId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
@@ -12722,6 +12854,8 @@ export namespace Prisma {
     incomeType?: $Enums.IncomeType
     description?: string | null
     createdAt?: Date | string
+    updatedAt?: Date | string
+    deletedAt?: Date | string | null
     user: UserCreateNestedOneWithoutIncomesInput
     account?: AccountCreateNestedOneWithoutIncomesInput
     categoryRef?: TransactionCategoryCreateNestedOneWithoutIncomesInput
@@ -12736,6 +12870,8 @@ export namespace Prisma {
     accountId?: string | null
     categoryId?: string | null
     createdAt?: Date | string
+    updatedAt?: Date | string
+    deletedAt?: Date | string | null
   }
 
   export type IncomeUpdateInput = {
@@ -12744,6 +12880,8 @@ export namespace Prisma {
     incomeType?: EnumIncomeTypeFieldUpdateOperationsInput | $Enums.IncomeType
     description?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     user?: UserUpdateOneRequiredWithoutIncomesNestedInput
     account?: AccountUpdateOneWithoutIncomesNestedInput
     categoryRef?: TransactionCategoryUpdateOneWithoutIncomesNestedInput
@@ -12758,6 +12896,8 @@ export namespace Prisma {
     accountId?: NullableStringFieldUpdateOperationsInput | string | null
     categoryId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type IncomeCreateManyInput = {
@@ -12769,6 +12909,8 @@ export namespace Prisma {
     accountId?: string | null
     categoryId?: string | null
     createdAt?: Date | string
+    updatedAt?: Date | string
+    deletedAt?: Date | string | null
   }
 
   export type IncomeUpdateManyMutationInput = {
@@ -12777,6 +12919,8 @@ export namespace Prisma {
     incomeType?: EnumIncomeTypeFieldUpdateOperationsInput | $Enums.IncomeType
     description?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type IncomeUncheckedUpdateManyInput = {
@@ -12788,6 +12932,8 @@ export namespace Prisma {
     accountId?: NullableStringFieldUpdateOperationsInput | string | null
     categoryId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type TransferCreateInput = {
@@ -12795,6 +12941,7 @@ export namespace Prisma {
     amount: Decimal | DecimalJsLike | number | string
     description?: string | null
     createdAt?: Date | string
+    updatedAt?: Date | string
     deletedAt?: Date | string | null
     user: UserCreateNestedOneWithoutTransfersInput
     fromAccount: AccountCreateNestedOneWithoutTransfersFromInput
@@ -12809,6 +12956,7 @@ export namespace Prisma {
     fromAccountId: string
     toAccountId: string
     createdAt?: Date | string
+    updatedAt?: Date | string
     deletedAt?: Date | string | null
   }
 
@@ -12817,6 +12965,7 @@ export namespace Prisma {
     amount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     user?: UserUpdateOneRequiredWithoutTransfersNestedInput
     fromAccount?: AccountUpdateOneRequiredWithoutTransfersFromNestedInput
@@ -12831,6 +12980,7 @@ export namespace Prisma {
     fromAccountId?: StringFieldUpdateOperationsInput | string
     toAccountId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
@@ -12842,6 +12992,7 @@ export namespace Prisma {
     fromAccountId: string
     toAccountId: string
     createdAt?: Date | string
+    updatedAt?: Date | string
     deletedAt?: Date | string | null
   }
 
@@ -12850,6 +13001,7 @@ export namespace Prisma {
     amount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
@@ -12861,6 +13013,7 @@ export namespace Prisma {
     fromAccountId?: StringFieldUpdateOperationsInput | string
     toAccountId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
@@ -12872,6 +13025,7 @@ export namespace Prisma {
     year: number
     createdAt?: Date | string
     updatedAt?: Date | string
+    deletedAt?: Date | string | null
     categoryRef?: TransactionCategoryCreateNestedOneWithoutBudgetsInput
     user: UserCreateNestedOneWithoutBudgetsInput
   }
@@ -12886,6 +13040,7 @@ export namespace Prisma {
     userId: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    deletedAt?: Date | string | null
   }
 
   export type BudgetUpdateInput = {
@@ -12896,6 +13051,7 @@ export namespace Prisma {
     year?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     categoryRef?: TransactionCategoryUpdateOneWithoutBudgetsNestedInput
     user?: UserUpdateOneRequiredWithoutBudgetsNestedInput
   }
@@ -12910,6 +13066,7 @@ export namespace Prisma {
     userId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type BudgetCreateManyInput = {
@@ -12922,6 +13079,7 @@ export namespace Prisma {
     userId: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    deletedAt?: Date | string | null
   }
 
   export type BudgetUpdateManyMutationInput = {
@@ -12932,6 +13090,7 @@ export namespace Prisma {
     year?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type BudgetUncheckedUpdateManyInput = {
@@ -12944,6 +13103,7 @@ export namespace Prisma {
     userId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type RefreshTokenCreateInput = {
@@ -13360,6 +13520,7 @@ export namespace Prisma {
     id?: SortOrder
     name?: SortOrder
     type?: SortOrder
+    openingBalance?: SortOrder
     balance?: SortOrder
     color?: SortOrder
     userId?: SortOrder
@@ -13369,6 +13530,7 @@ export namespace Prisma {
   }
 
   export type AccountAvgOrderByAggregateInput = {
+    openingBalance?: SortOrder
     balance?: SortOrder
   }
 
@@ -13376,6 +13538,7 @@ export namespace Prisma {
     id?: SortOrder
     name?: SortOrder
     type?: SortOrder
+    openingBalance?: SortOrder
     balance?: SortOrder
     color?: SortOrder
     userId?: SortOrder
@@ -13388,6 +13551,7 @@ export namespace Prisma {
     id?: SortOrder
     name?: SortOrder
     type?: SortOrder
+    openingBalance?: SortOrder
     balance?: SortOrder
     color?: SortOrder
     userId?: SortOrder
@@ -13397,6 +13561,7 @@ export namespace Prisma {
   }
 
   export type AccountSumOrderByAggregateInput = {
+    openingBalance?: SortOrder
     balance?: SortOrder
   }
 
@@ -13460,6 +13625,7 @@ export namespace Prisma {
     accountId?: SortOrder
     categoryId?: SortOrder
     createdAt?: SortOrder
+    updatedAt?: SortOrder
     deletedAt?: SortOrder
   }
 
@@ -13477,6 +13643,7 @@ export namespace Prisma {
     accountId?: SortOrder
     categoryId?: SortOrder
     createdAt?: SortOrder
+    updatedAt?: SortOrder
     deletedAt?: SortOrder
   }
 
@@ -13490,6 +13657,7 @@ export namespace Prisma {
     accountId?: SortOrder
     categoryId?: SortOrder
     createdAt?: SortOrder
+    updatedAt?: SortOrder
     deletedAt?: SortOrder
   }
 
@@ -13533,6 +13701,8 @@ export namespace Prisma {
     accountId?: SortOrder
     categoryId?: SortOrder
     createdAt?: SortOrder
+    updatedAt?: SortOrder
+    deletedAt?: SortOrder
   }
 
   export type IncomeAvgOrderByAggregateInput = {
@@ -13548,6 +13718,8 @@ export namespace Prisma {
     accountId?: SortOrder
     categoryId?: SortOrder
     createdAt?: SortOrder
+    updatedAt?: SortOrder
+    deletedAt?: SortOrder
   }
 
   export type IncomeMinOrderByAggregateInput = {
@@ -13559,6 +13731,8 @@ export namespace Prisma {
     accountId?: SortOrder
     categoryId?: SortOrder
     createdAt?: SortOrder
+    updatedAt?: SortOrder
+    deletedAt?: SortOrder
   }
 
   export type IncomeSumOrderByAggregateInput = {
@@ -13588,6 +13762,7 @@ export namespace Prisma {
     fromAccountId?: SortOrder
     toAccountId?: SortOrder
     createdAt?: SortOrder
+    updatedAt?: SortOrder
     deletedAt?: SortOrder
   }
 
@@ -13603,6 +13778,7 @@ export namespace Prisma {
     fromAccountId?: SortOrder
     toAccountId?: SortOrder
     createdAt?: SortOrder
+    updatedAt?: SortOrder
     deletedAt?: SortOrder
   }
 
@@ -13614,6 +13790,7 @@ export namespace Prisma {
     fromAccountId?: SortOrder
     toAccountId?: SortOrder
     createdAt?: SortOrder
+    updatedAt?: SortOrder
     deletedAt?: SortOrder
   }
 
@@ -13638,6 +13815,7 @@ export namespace Prisma {
     userId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    deletedAt?: SortOrder
   }
 
   export type BudgetAvgOrderByAggregateInput = {
@@ -13656,6 +13834,7 @@ export namespace Prisma {
     userId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    deletedAt?: SortOrder
   }
 
   export type BudgetMinOrderByAggregateInput = {
@@ -13668,6 +13847,7 @@ export namespace Prisma {
     userId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    deletedAt?: SortOrder
   }
 
   export type BudgetSumOrderByAggregateInput = {
@@ -14846,6 +15026,7 @@ export namespace Prisma {
     paymentMethod?: $Enums.PaymentMethod
     description?: string | null
     createdAt?: Date | string
+    updatedAt?: Date | string
     deletedAt?: Date | string | null
     account?: AccountCreateNestedOneWithoutExpensesInput
     categoryRef?: TransactionCategoryCreateNestedOneWithoutExpensesInput
@@ -14860,6 +15041,7 @@ export namespace Prisma {
     accountId?: string | null
     categoryId?: string | null
     createdAt?: Date | string
+    updatedAt?: Date | string
     deletedAt?: Date | string | null
   }
 
@@ -14879,6 +15061,8 @@ export namespace Prisma {
     incomeType?: $Enums.IncomeType
     description?: string | null
     createdAt?: Date | string
+    updatedAt?: Date | string
+    deletedAt?: Date | string | null
     account?: AccountCreateNestedOneWithoutIncomesInput
     categoryRef?: TransactionCategoryCreateNestedOneWithoutIncomesInput
   }
@@ -14891,6 +15075,8 @@ export namespace Prisma {
     accountId?: string | null
     categoryId?: string | null
     createdAt?: Date | string
+    updatedAt?: Date | string
+    deletedAt?: Date | string | null
   }
 
   export type IncomeCreateOrConnectWithoutUserInput = {
@@ -14911,6 +15097,7 @@ export namespace Prisma {
     year: number
     createdAt?: Date | string
     updatedAt?: Date | string
+    deletedAt?: Date | string | null
     categoryRef?: TransactionCategoryCreateNestedOneWithoutBudgetsInput
   }
 
@@ -14923,6 +15110,7 @@ export namespace Prisma {
     year: number
     createdAt?: Date | string
     updatedAt?: Date | string
+    deletedAt?: Date | string | null
   }
 
   export type BudgetCreateOrConnectWithoutUserInput = {
@@ -14939,6 +15127,7 @@ export namespace Prisma {
     id?: string
     name: string
     type?: $Enums.AccountType
+    openingBalance?: Decimal | DecimalJsLike | number | string
     balance?: Decimal | DecimalJsLike | number | string
     color?: string | null
     createdAt?: Date | string
@@ -14954,6 +15143,7 @@ export namespace Prisma {
     id?: string
     name: string
     type?: $Enums.AccountType
+    openingBalance?: Decimal | DecimalJsLike | number | string
     balance?: Decimal | DecimalJsLike | number | string
     color?: string | null
     createdAt?: Date | string
@@ -14980,6 +15170,7 @@ export namespace Prisma {
     amount: Decimal | DecimalJsLike | number | string
     description?: string | null
     createdAt?: Date | string
+    updatedAt?: Date | string
     deletedAt?: Date | string | null
     fromAccount: AccountCreateNestedOneWithoutTransfersFromInput
     toAccount: AccountCreateNestedOneWithoutTransfersToInput
@@ -14992,6 +15183,7 @@ export namespace Prisma {
     fromAccountId: string
     toAccountId: string
     createdAt?: Date | string
+    updatedAt?: Date | string
     deletedAt?: Date | string | null
   }
 
@@ -15104,6 +15296,7 @@ export namespace Prisma {
     accountId?: StringNullableFilter<"Expense"> | string | null
     categoryId?: StringNullableFilter<"Expense"> | string | null
     createdAt?: DateTimeFilter<"Expense"> | Date | string
+    updatedAt?: DateTimeFilter<"Expense"> | Date | string
     deletedAt?: DateTimeNullableFilter<"Expense"> | Date | string | null
   }
 
@@ -15135,6 +15328,8 @@ export namespace Prisma {
     accountId?: StringNullableFilter<"Income"> | string | null
     categoryId?: StringNullableFilter<"Income"> | string | null
     createdAt?: DateTimeFilter<"Income"> | Date | string
+    updatedAt?: DateTimeFilter<"Income"> | Date | string
+    deletedAt?: DateTimeNullableFilter<"Income"> | Date | string | null
   }
 
   export type BudgetUpsertWithWhereUniqueWithoutUserInput = {
@@ -15166,6 +15361,7 @@ export namespace Prisma {
     userId?: StringFilter<"Budget"> | string
     createdAt?: DateTimeFilter<"Budget"> | Date | string
     updatedAt?: DateTimeFilter<"Budget"> | Date | string
+    deletedAt?: DateTimeNullableFilter<"Budget"> | Date | string | null
   }
 
   export type AccountUpsertWithWhereUniqueWithoutUserInput = {
@@ -15191,6 +15387,7 @@ export namespace Prisma {
     id?: StringFilter<"Account"> | string
     name?: StringFilter<"Account"> | string
     type?: EnumAccountTypeFilter<"Account"> | $Enums.AccountType
+    openingBalance?: DecimalFilter<"Account"> | Decimal | DecimalJsLike | number | string
     balance?: DecimalFilter<"Account"> | Decimal | DecimalJsLike | number | string
     color?: StringNullableFilter<"Account"> | string | null
     userId?: StringFilter<"Account"> | string
@@ -15226,6 +15423,7 @@ export namespace Prisma {
     fromAccountId?: StringFilter<"Transfer"> | string
     toAccountId?: StringFilter<"Transfer"> | string
     createdAt?: DateTimeFilter<"Transfer"> | Date | string
+    updatedAt?: DateTimeFilter<"Transfer"> | Date | string
     deletedAt?: DateTimeNullableFilter<"Transfer"> | Date | string | null
   }
 
@@ -15331,6 +15529,7 @@ export namespace Prisma {
     paymentMethod?: $Enums.PaymentMethod
     description?: string | null
     createdAt?: Date | string
+    updatedAt?: Date | string
     deletedAt?: Date | string | null
     user: UserCreateNestedOneWithoutExpensesInput
     account?: AccountCreateNestedOneWithoutExpensesInput
@@ -15345,6 +15544,7 @@ export namespace Prisma {
     userId: string
     accountId?: string | null
     createdAt?: Date | string
+    updatedAt?: Date | string
     deletedAt?: Date | string | null
   }
 
@@ -15364,6 +15564,8 @@ export namespace Prisma {
     incomeType?: $Enums.IncomeType
     description?: string | null
     createdAt?: Date | string
+    updatedAt?: Date | string
+    deletedAt?: Date | string | null
     user: UserCreateNestedOneWithoutIncomesInput
     account?: AccountCreateNestedOneWithoutIncomesInput
   }
@@ -15376,6 +15578,8 @@ export namespace Prisma {
     userId: string
     accountId?: string | null
     createdAt?: Date | string
+    updatedAt?: Date | string
+    deletedAt?: Date | string | null
   }
 
   export type IncomeCreateOrConnectWithoutCategoryRefInput = {
@@ -15396,6 +15600,7 @@ export namespace Prisma {
     year: number
     createdAt?: Date | string
     updatedAt?: Date | string
+    deletedAt?: Date | string | null
     user: UserCreateNestedOneWithoutBudgetsInput
   }
 
@@ -15408,6 +15613,7 @@ export namespace Prisma {
     userId: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    deletedAt?: Date | string | null
   }
 
   export type BudgetCreateOrConnectWithoutCategoryRefInput = {
@@ -15547,6 +15753,7 @@ export namespace Prisma {
     paymentMethod?: $Enums.PaymentMethod
     description?: string | null
     createdAt?: Date | string
+    updatedAt?: Date | string
     deletedAt?: Date | string | null
     user: UserCreateNestedOneWithoutExpensesInput
     categoryRef?: TransactionCategoryCreateNestedOneWithoutExpensesInput
@@ -15561,6 +15768,7 @@ export namespace Prisma {
     userId: string
     categoryId?: string | null
     createdAt?: Date | string
+    updatedAt?: Date | string
     deletedAt?: Date | string | null
   }
 
@@ -15580,6 +15788,8 @@ export namespace Prisma {
     incomeType?: $Enums.IncomeType
     description?: string | null
     createdAt?: Date | string
+    updatedAt?: Date | string
+    deletedAt?: Date | string | null
     user: UserCreateNestedOneWithoutIncomesInput
     categoryRef?: TransactionCategoryCreateNestedOneWithoutIncomesInput
   }
@@ -15592,6 +15802,8 @@ export namespace Prisma {
     userId: string
     categoryId?: string | null
     createdAt?: Date | string
+    updatedAt?: Date | string
+    deletedAt?: Date | string | null
   }
 
   export type IncomeCreateOrConnectWithoutAccountInput = {
@@ -15609,6 +15821,7 @@ export namespace Prisma {
     amount: Decimal | DecimalJsLike | number | string
     description?: string | null
     createdAt?: Date | string
+    updatedAt?: Date | string
     deletedAt?: Date | string | null
     user: UserCreateNestedOneWithoutTransfersInput
     toAccount: AccountCreateNestedOneWithoutTransfersToInput
@@ -15621,6 +15834,7 @@ export namespace Prisma {
     userId: string
     toAccountId: string
     createdAt?: Date | string
+    updatedAt?: Date | string
     deletedAt?: Date | string | null
   }
 
@@ -15639,6 +15853,7 @@ export namespace Prisma {
     amount: Decimal | DecimalJsLike | number | string
     description?: string | null
     createdAt?: Date | string
+    updatedAt?: Date | string
     deletedAt?: Date | string | null
     user: UserCreateNestedOneWithoutTransfersInput
     fromAccount: AccountCreateNestedOneWithoutTransfersFromInput
@@ -15651,6 +15866,7 @@ export namespace Prisma {
     userId: string
     fromAccountId: string
     createdAt?: Date | string
+    updatedAt?: Date | string
     deletedAt?: Date | string | null
   }
 
@@ -15804,6 +16020,7 @@ export namespace Prisma {
     id?: string
     name: string
     type?: $Enums.AccountType
+    openingBalance?: Decimal | DecimalJsLike | number | string
     balance?: Decimal | DecimalJsLike | number | string
     color?: string | null
     createdAt?: Date | string
@@ -15819,6 +16036,7 @@ export namespace Prisma {
     id?: string
     name: string
     type?: $Enums.AccountType
+    openingBalance?: Decimal | DecimalJsLike | number | string
     balance?: Decimal | DecimalJsLike | number | string
     color?: string | null
     userId: string
@@ -15928,6 +16146,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     type?: EnumAccountTypeFieldUpdateOperationsInput | $Enums.AccountType
+    openingBalance?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     balance?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     color?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -15943,6 +16162,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     type?: EnumAccountTypeFieldUpdateOperationsInput | $Enums.AccountType
+    openingBalance?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     balance?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     color?: NullableStringFieldUpdateOperationsInput | string | null
     userId?: StringFieldUpdateOperationsInput | string
@@ -16036,6 +16256,7 @@ export namespace Prisma {
     id?: string
     name: string
     type?: $Enums.AccountType
+    openingBalance?: Decimal | DecimalJsLike | number | string
     balance?: Decimal | DecimalJsLike | number | string
     color?: string | null
     createdAt?: Date | string
@@ -16051,6 +16272,7 @@ export namespace Prisma {
     id?: string
     name: string
     type?: $Enums.AccountType
+    openingBalance?: Decimal | DecimalJsLike | number | string
     balance?: Decimal | DecimalJsLike | number | string
     color?: string | null
     userId: string
@@ -16160,6 +16382,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     type?: EnumAccountTypeFieldUpdateOperationsInput | $Enums.AccountType
+    openingBalance?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     balance?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     color?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -16175,6 +16398,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     type?: EnumAccountTypeFieldUpdateOperationsInput | $Enums.AccountType
+    openingBalance?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     balance?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     color?: NullableStringFieldUpdateOperationsInput | string | null
     userId?: StringFieldUpdateOperationsInput | string
@@ -16268,6 +16492,7 @@ export namespace Prisma {
     id?: string
     name: string
     type?: $Enums.AccountType
+    openingBalance?: Decimal | DecimalJsLike | number | string
     balance?: Decimal | DecimalJsLike | number | string
     color?: string | null
     createdAt?: Date | string
@@ -16283,6 +16508,7 @@ export namespace Prisma {
     id?: string
     name: string
     type?: $Enums.AccountType
+    openingBalance?: Decimal | DecimalJsLike | number | string
     balance?: Decimal | DecimalJsLike | number | string
     color?: string | null
     userId: string
@@ -16303,6 +16529,7 @@ export namespace Prisma {
     id?: string
     name: string
     type?: $Enums.AccountType
+    openingBalance?: Decimal | DecimalJsLike | number | string
     balance?: Decimal | DecimalJsLike | number | string
     color?: string | null
     createdAt?: Date | string
@@ -16318,6 +16545,7 @@ export namespace Prisma {
     id?: string
     name: string
     type?: $Enums.AccountType
+    openingBalance?: Decimal | DecimalJsLike | number | string
     balance?: Decimal | DecimalJsLike | number | string
     color?: string | null
     userId: string
@@ -16388,6 +16616,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     type?: EnumAccountTypeFieldUpdateOperationsInput | $Enums.AccountType
+    openingBalance?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     balance?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     color?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -16403,6 +16632,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     type?: EnumAccountTypeFieldUpdateOperationsInput | $Enums.AccountType
+    openingBalance?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     balance?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     color?: NullableStringFieldUpdateOperationsInput | string | null
     userId?: StringFieldUpdateOperationsInput | string
@@ -16429,6 +16659,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     type?: EnumAccountTypeFieldUpdateOperationsInput | $Enums.AccountType
+    openingBalance?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     balance?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     color?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -16444,6 +16675,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     type?: EnumAccountTypeFieldUpdateOperationsInput | $Enums.AccountType
+    openingBalance?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     balance?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     color?: NullableStringFieldUpdateOperationsInput | string | null
     userId?: StringFieldUpdateOperationsInput | string
@@ -16692,6 +16924,7 @@ export namespace Prisma {
     accountId?: string | null
     categoryId?: string | null
     createdAt?: Date | string
+    updatedAt?: Date | string
     deletedAt?: Date | string | null
   }
 
@@ -16703,6 +16936,8 @@ export namespace Prisma {
     accountId?: string | null
     categoryId?: string | null
     createdAt?: Date | string
+    updatedAt?: Date | string
+    deletedAt?: Date | string | null
   }
 
   export type BudgetCreateManyUserInput = {
@@ -16714,12 +16949,14 @@ export namespace Prisma {
     year: number
     createdAt?: Date | string
     updatedAt?: Date | string
+    deletedAt?: Date | string | null
   }
 
   export type AccountCreateManyUserInput = {
     id?: string
     name: string
     type?: $Enums.AccountType
+    openingBalance?: Decimal | DecimalJsLike | number | string
     balance?: Decimal | DecimalJsLike | number | string
     color?: string | null
     createdAt?: Date | string
@@ -16734,6 +16971,7 @@ export namespace Prisma {
     fromAccountId: string
     toAccountId: string
     createdAt?: Date | string
+    updatedAt?: Date | string
     deletedAt?: Date | string | null
   }
 
@@ -16766,6 +17004,7 @@ export namespace Prisma {
     paymentMethod?: EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
     description?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     account?: AccountUpdateOneWithoutExpensesNestedInput
     categoryRef?: TransactionCategoryUpdateOneWithoutExpensesNestedInput
@@ -16780,6 +17019,7 @@ export namespace Prisma {
     accountId?: NullableStringFieldUpdateOperationsInput | string | null
     categoryId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
@@ -16792,6 +17032,7 @@ export namespace Prisma {
     accountId?: NullableStringFieldUpdateOperationsInput | string | null
     categoryId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
@@ -16801,6 +17042,8 @@ export namespace Prisma {
     incomeType?: EnumIncomeTypeFieldUpdateOperationsInput | $Enums.IncomeType
     description?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     account?: AccountUpdateOneWithoutIncomesNestedInput
     categoryRef?: TransactionCategoryUpdateOneWithoutIncomesNestedInput
   }
@@ -16813,6 +17056,8 @@ export namespace Prisma {
     accountId?: NullableStringFieldUpdateOperationsInput | string | null
     categoryId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type IncomeUncheckedUpdateManyWithoutUserInput = {
@@ -16823,6 +17068,8 @@ export namespace Prisma {
     accountId?: NullableStringFieldUpdateOperationsInput | string | null
     categoryId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type BudgetUpdateWithoutUserInput = {
@@ -16833,6 +17080,7 @@ export namespace Prisma {
     year?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     categoryRef?: TransactionCategoryUpdateOneWithoutBudgetsNestedInput
   }
 
@@ -16845,6 +17093,7 @@ export namespace Prisma {
     year?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type BudgetUncheckedUpdateManyWithoutUserInput = {
@@ -16856,12 +17105,14 @@ export namespace Prisma {
     year?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type AccountUpdateWithoutUserInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     type?: EnumAccountTypeFieldUpdateOperationsInput | $Enums.AccountType
+    openingBalance?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     balance?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     color?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -16877,6 +17128,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     type?: EnumAccountTypeFieldUpdateOperationsInput | $Enums.AccountType
+    openingBalance?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     balance?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     color?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -16892,6 +17144,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     type?: EnumAccountTypeFieldUpdateOperationsInput | $Enums.AccountType
+    openingBalance?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     balance?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     color?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -16904,6 +17157,7 @@ export namespace Prisma {
     amount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     fromAccount?: AccountUpdateOneRequiredWithoutTransfersFromNestedInput
     toAccount?: AccountUpdateOneRequiredWithoutTransfersToNestedInput
@@ -16916,6 +17170,7 @@ export namespace Prisma {
     fromAccountId?: StringFieldUpdateOperationsInput | string
     toAccountId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
@@ -16926,6 +17181,7 @@ export namespace Prisma {
     fromAccountId?: StringFieldUpdateOperationsInput | string
     toAccountId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
@@ -17010,6 +17266,7 @@ export namespace Prisma {
     userId: string
     accountId?: string | null
     createdAt?: Date | string
+    updatedAt?: Date | string
     deletedAt?: Date | string | null
   }
 
@@ -17021,6 +17278,8 @@ export namespace Prisma {
     userId: string
     accountId?: string | null
     createdAt?: Date | string
+    updatedAt?: Date | string
+    deletedAt?: Date | string | null
   }
 
   export type BudgetCreateManyCategoryRefInput = {
@@ -17032,6 +17291,7 @@ export namespace Prisma {
     userId: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    deletedAt?: Date | string | null
   }
 
   export type ExpenseUpdateWithoutCategoryRefInput = {
@@ -17041,6 +17301,7 @@ export namespace Prisma {
     paymentMethod?: EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
     description?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     user?: UserUpdateOneRequiredWithoutExpensesNestedInput
     account?: AccountUpdateOneWithoutExpensesNestedInput
@@ -17055,6 +17316,7 @@ export namespace Prisma {
     userId?: StringFieldUpdateOperationsInput | string
     accountId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
@@ -17067,6 +17329,7 @@ export namespace Prisma {
     userId?: StringFieldUpdateOperationsInput | string
     accountId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
@@ -17076,6 +17339,8 @@ export namespace Prisma {
     incomeType?: EnumIncomeTypeFieldUpdateOperationsInput | $Enums.IncomeType
     description?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     user?: UserUpdateOneRequiredWithoutIncomesNestedInput
     account?: AccountUpdateOneWithoutIncomesNestedInput
   }
@@ -17088,6 +17353,8 @@ export namespace Prisma {
     userId?: StringFieldUpdateOperationsInput | string
     accountId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type IncomeUncheckedUpdateManyWithoutCategoryRefInput = {
@@ -17098,6 +17365,8 @@ export namespace Prisma {
     userId?: StringFieldUpdateOperationsInput | string
     accountId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type BudgetUpdateWithoutCategoryRefInput = {
@@ -17108,6 +17377,7 @@ export namespace Prisma {
     year?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     user?: UserUpdateOneRequiredWithoutBudgetsNestedInput
   }
 
@@ -17120,6 +17390,7 @@ export namespace Prisma {
     userId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type BudgetUncheckedUpdateManyWithoutCategoryRefInput = {
@@ -17131,6 +17402,7 @@ export namespace Prisma {
     userId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type ExpenseCreateManyAccountInput = {
@@ -17142,6 +17414,7 @@ export namespace Prisma {
     userId: string
     categoryId?: string | null
     createdAt?: Date | string
+    updatedAt?: Date | string
     deletedAt?: Date | string | null
   }
 
@@ -17153,6 +17426,8 @@ export namespace Prisma {
     userId: string
     categoryId?: string | null
     createdAt?: Date | string
+    updatedAt?: Date | string
+    deletedAt?: Date | string | null
   }
 
   export type TransferCreateManyFromAccountInput = {
@@ -17162,6 +17437,7 @@ export namespace Prisma {
     userId: string
     toAccountId: string
     createdAt?: Date | string
+    updatedAt?: Date | string
     deletedAt?: Date | string | null
   }
 
@@ -17172,6 +17448,7 @@ export namespace Prisma {
     userId: string
     fromAccountId: string
     createdAt?: Date | string
+    updatedAt?: Date | string
     deletedAt?: Date | string | null
   }
 
@@ -17182,6 +17459,7 @@ export namespace Prisma {
     paymentMethod?: EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
     description?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     user?: UserUpdateOneRequiredWithoutExpensesNestedInput
     categoryRef?: TransactionCategoryUpdateOneWithoutExpensesNestedInput
@@ -17196,6 +17474,7 @@ export namespace Prisma {
     userId?: StringFieldUpdateOperationsInput | string
     categoryId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
@@ -17208,6 +17487,7 @@ export namespace Prisma {
     userId?: StringFieldUpdateOperationsInput | string
     categoryId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
@@ -17217,6 +17497,8 @@ export namespace Prisma {
     incomeType?: EnumIncomeTypeFieldUpdateOperationsInput | $Enums.IncomeType
     description?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     user?: UserUpdateOneRequiredWithoutIncomesNestedInput
     categoryRef?: TransactionCategoryUpdateOneWithoutIncomesNestedInput
   }
@@ -17229,6 +17511,8 @@ export namespace Prisma {
     userId?: StringFieldUpdateOperationsInput | string
     categoryId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type IncomeUncheckedUpdateManyWithoutAccountInput = {
@@ -17239,6 +17523,8 @@ export namespace Prisma {
     userId?: StringFieldUpdateOperationsInput | string
     categoryId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type TransferUpdateWithoutFromAccountInput = {
@@ -17246,6 +17532,7 @@ export namespace Prisma {
     amount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     user?: UserUpdateOneRequiredWithoutTransfersNestedInput
     toAccount?: AccountUpdateOneRequiredWithoutTransfersToNestedInput
@@ -17258,6 +17545,7 @@ export namespace Prisma {
     userId?: StringFieldUpdateOperationsInput | string
     toAccountId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
@@ -17268,6 +17556,7 @@ export namespace Prisma {
     userId?: StringFieldUpdateOperationsInput | string
     toAccountId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
@@ -17276,6 +17565,7 @@ export namespace Prisma {
     amount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     user?: UserUpdateOneRequiredWithoutTransfersNestedInput
     fromAccount?: AccountUpdateOneRequiredWithoutTransfersFromNestedInput
@@ -17288,6 +17578,7 @@ export namespace Prisma {
     userId?: StringFieldUpdateOperationsInput | string
     fromAccountId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
@@ -17298,6 +17589,7 @@ export namespace Prisma {
     userId?: StringFieldUpdateOperationsInput | string
     fromAccountId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 

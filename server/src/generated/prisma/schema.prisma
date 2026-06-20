@@ -83,25 +83,30 @@ model TransactionCategory {
   deletedAt DateTime?
 
   @@index([userId])
+  @@index([userId, updatedAt])
 }
 
 model Account {
-  id            String      @id @default(uuid())
-  name          String
-  type          AccountType @default(other)
-  balance       Decimal     @default(0)
-  color         String?
-  userId        String
-  user          User        @relation(fields: [userId], references: [id])
-  expenses      Expense[]
-  incomes       Income[]
-  transfersFrom Transfer[]  @relation("TransferFrom")
-  transfersTo   Transfer[]  @relation("TransferTo")
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
-  deletedAt     DateTime?
+  id             String      @id @default(uuid())
+  name           String
+  type           AccountType @default(other)
+  // User-entered starting balance. `balance` below is derived from openingBalance
+  // plus all (non-deleted) income/expense/transfer activity — see recomputeBalance().
+  openingBalance Decimal     @default(0)
+  balance        Decimal     @default(0)
+  color          String?
+  userId         String
+  user           User        @relation(fields: [userId], references: [id])
+  expenses       Expense[]
+  incomes        Income[]
+  transfersFrom  Transfer[]  @relation("TransferFrom")
+  transfersTo    Transfer[]  @relation("TransferTo")
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+  deletedAt      DateTime?
 
   @@index([userId])
+  @@index([userId, updatedAt])
 }
 
 model Expense {
@@ -117,10 +122,12 @@ model Expense {
   categoryId    String?
   categoryRef   TransactionCategory? @relation(fields: [categoryId], references: [id])
   createdAt     DateTime             @default(now())
+  updatedAt     DateTime             @default(now()) @updatedAt
   deletedAt     DateTime?
 
   @@index([accountId])
   @@index([categoryId])
+  @@index([userId, updatedAt])
 }
 
 model Income {
@@ -135,9 +142,12 @@ model Income {
   categoryId  String?
   categoryRef TransactionCategory? @relation(fields: [categoryId], references: [id])
   createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @default(now()) @updatedAt
+  deletedAt   DateTime?
 
   @@index([accountId])
   @@index([categoryId])
+  @@index([userId, updatedAt])
 }
 
 model Transfer {
@@ -151,9 +161,11 @@ model Transfer {
   toAccountId   String
   toAccount     Account   @relation("TransferTo", fields: [toAccountId], references: [id])
   createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @default(now()) @updatedAt
   deletedAt     DateTime?
 
   @@index([userId])
+  @@index([userId, updatedAt])
 }
 
 model Budget {
@@ -168,9 +180,11 @@ model Budget {
   user        User                 @relation(fields: [userId], references: [id])
   createdAt   DateTime             @default(now())
   updatedAt   DateTime             @updatedAt
+  deletedAt   DateTime?
 
   @@unique([userId, category, month, year])
   @@index([categoryId])
+  @@index([userId, updatedAt])
 }
 
 model RefreshToken {

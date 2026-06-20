@@ -1,230 +1,134 @@
-import 'package:dio/dio.dart';
+import 'package:drift/drift.dart';
+import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:paisa/core/constants/api_constants.dart';
-import 'package:paisa/core/errors/app_exceptions.dart';
+import 'package:paisa/core/db/app_database.dart';
 import 'package:paisa/core/network/dio_client.dart';
-import 'package:paisa/features/income/data/models/income_model.dart';
+import 'package:paisa/core/sync/sync_api.dart';
+import 'package:paisa/core/sync/sync_engine.dart';
 import 'package:paisa/features/income/data/repositories/income_repository.dart';
+import 'package:paisa/features/income/data/models/income_model.dart';
 
 class MockDioClient extends Mock implements DioClient {}
 
-Response<dynamic> _response(dynamic data, {int statusCode = 200}) =>
-    Response(
-      data: data,
-      statusCode: statusCode,
-      requestOptions: RequestOptions(path: ''),
+class FakeSyncEngine extends SyncEngine {
+  FakeSyncEngine(AppDatabase db) : super(db, SyncApi(MockDioClient()));
+  @override
+  Future<void> sync() async {}
+  @override
+  Future<void> push() async {}
+  @override
+  Future<void> pull() async {}
+}
+
+IncomesCompanion _seed({
+  String id = 'i1',
+  double amount = 50000.0,
+  String incomeType = 'salary',
+  DateTime? createdAt,
+}) =>
+    IncomesCompanion.insert(
+      id: id,
+      amount: amount,
+      incomeType: Value(incomeType),
+      createdAt: Value(createdAt ?? DateTime(2026, 5, 18, 10)),
+      updatedAt: Value(createdAt ?? DateTime(2026, 5, 18, 10)),
     );
 
-Map<String, dynamic> _incomeJson({
-  String id = 'i1',
-  String amount = '50000.00',
-  String incomeType = 'salary',
-  String? description = 'May salary',
-}) => {
-      'id': id,
-      'amount': amount,
-      'incomeType': incomeType,
-      'description': description,
-      'userId': 'u1',
-      'createdAt': '2026-05-18T10:00:00.000Z',
-    };
-
 void main() {
-  late MockDioClient mockDio;
+  late AppDatabase db;
   late IncomeRepository repo;
 
   setUp(() {
-    mockDio = MockDioClient();
-    repo = IncomeRepository(mockDio);
+    db = AppDatabase(NativeDatabase.memory());
+    repo = IncomeRepository(db, FakeSyncEngine(db));
   });
 
-  group('getIncomes', () {
-    test('returns list of IncomeModel on success', () async {
-      when(
-        () => mockDio.get(any(), queryParameters: any(named: 'queryParameters')),
-      ).thenAnswer(
-        (_) async => _response([_incomeJson(), _incomeJson(id: 'i2', amount: '10000.00')]),
+  tearDown(() => db.close());
+
+  group('getIncomes (local)', () {
+    test('returns rows in range, newest first', () async {
+      await db.into(db.incomes)
+          .insert(_seed(id: 'i1', createdAt: DateTime(2026, 5, 10)));
+      await db.into(db.incomes)
+          .insert(_seed(id: 'i2', amount: 10000, createdAt: DateTime(2026, 5, 20)));
+      await db.into(db.incomes)
+          .insert(_seed(id: 'i3', amount: 5, createdAt: DateTime(2026, 4, 1)));
+
+      final result = await repo.getIncomes(
+        from: DateTime(2026, 5, 1),
+        to: DateTime(2026, 5, 31, 23, 59, 59),
       );
-
-      final from = DateTime(2026, 5, 1);
-      final to = DateTime(2026, 5, 31);
-      final result = await repo.getIncomes(from: from, to: to);
-
-      expect(result, hasLength(2));
-      expect(result.first.id, 'i1');
-      expect(result.first.amount, 50000.0);
-      expect(result.first.incomeType, IncomeType.salary);
-      expect(result.first.description, 'May salary');
+      expect(result.map((e) => e.id), ['i2', 'i1']);
     });
 
-    test('sends YYYY-MM-DD date format', () async {
-      when(
-        () => mockDio.get(any(), queryParameters: any(named: 'queryParameters')),
-      ).thenAnswer((_) async => _response([]));
+    test('filters by incomeType', () async {
+      await db.into(db.incomes).insert(_seed(id: 'i1', incomeType: 'salary'));
+      await db.into(db.incomes).insert(_seed(id: 'i2', incomeType: 'freelance'));
 
-      await repo.getIncomes(from: DateTime(2026, 5, 1), to: DateTime(2026, 5, 31));
-
-      final captured = verify(
-        () => mockDio.get(any(), queryParameters: captureAny(named: 'queryParameters')),
-      ).captured.first as Map<String, String>;
-      expect(captured['from'], '2026-05-01');
-      expect(captured['to'], '2026-05-31');
-    });
-
-    test('includes incomeType filter when provided', () async {
-      when(
-        () => mockDio.get(any(), queryParameters: any(named: 'queryParameters')),
-      ).thenAnswer((_) async => _response([]));
-
-      await repo.getIncomes(
+      final result = await repo.getIncomes(
         from: DateTime(2026, 5, 1),
         to: DateTime(2026, 5, 31),
-        incomeType: IncomeType.salary,
+        incomeType: IncomeType.freelance,
       );
-
-      final captured = verify(
-        () => mockDio.get(any(), queryParameters: captureAny(named: 'queryParameters')),
-      ).captured.first as Map<String, String>;
-      expect(captured['incomeType'], 'salary');
-    });
-
-    test('propagates AppException on auth failure', () {
-      when(
-        () => mockDio.get(any(), queryParameters: any(named: 'queryParameters')),
-      ).thenThrow(AppException.unauthorized());
-
-      expect(
-        () => repo.getIncomes(from: DateTime(2026, 5, 1), to: DateTime(2026, 5, 31)),
-        throwsA(isA<AppException>()),
-      );
+      expect(result.single.id, 'i2');
     });
   });
 
-  group('createIncome', () {
-    test('returns IncomeModel on success', () async {
-      when(
-        () => mockDio.post(any(), data: any(named: 'data')),
-      ).thenAnswer((_) async => _response({'income': _incomeJson()}));
-
+  group('createIncome (local-first)', () {
+    test('writes a pending row and enqueues an outbox op', () async {
       final result = await repo.createIncome(
-        amount: 50000.0,
+        amount: 50000,
         incomeType: IncomeType.salary,
         description: 'May salary',
       );
 
-      expect(result.id, 'i1');
-      expect(result.amount, 50000.0);
-      expect(result.incomeType, IncomeType.salary);
-      verify(
-        () => mockDio.post(
-          ApiConstants.income,
-          data: {
-            'amount': 50000.0,
-            'incomeType': 'salary',
-            'description': 'May salary',
-          },
-        ),
-      ).called(1);
+      expect(result.id, isNotEmpty);
+      final rows = await db.select(db.incomes).get();
+      expect(rows.single.syncStatus, 'pending');
+
+      final outbox = await db.select(db.outbox).get();
+      expect(outbox.single.entity, 'income');
+      expect(outbox.single.op, 'upsert');
     });
 
-    test('omits optional fields when null', () async {
-      when(
-        () => mockDio.post(any(), data: any(named: 'data')),
-      ).thenAnswer(
-        (_) async => _response({'income': _incomeJson(description: null)}),
-      );
+    test('recomputes the linked account balance (income adds)', () async {
+      await db.into(db.accounts).insert(AccountsCompanion.insert(
+        id: 'a1',
+        name: 'Bank',
+        openingBalance: const Value(1000),
+        balance: const Value(1000),
+      ));
 
-      await repo.createIncome(amount: 100.0);
+      await repo.createIncome(amount: 500, accountId: 'a1');
 
-      final captured = verify(
-        () => mockDio.post(any(), data: captureAny(named: 'data')),
-      ).captured.first as Map<String, dynamic>;
-      expect(captured.containsKey('incomeType'), isFalse);
-      expect(captured.containsKey('description'), isFalse);
-    });
-
-    test('propagates AppException on server error', () {
-      when(
-        () => mockDio.post(any(), data: any(named: 'data')),
-      ).thenThrow(AppException.server());
-
-      expect(
-        () => repo.createIncome(amount: 100.0),
-        throwsA(isA<AppException>()),
-      );
+      final account = await (db.select(db.accounts)
+            ..where((t) => t.id.equals('a1')))
+          .getSingle();
+      expect(account.balance, 1500);
     });
   });
 
-  group('updateIncome', () {
-    test('uses PATCH and returns updated IncomeModel', () async {
-      when(
-        () => mockDio.patch(any(), data: any(named: 'data')),
-      ).thenAnswer(
-        (_) async => _response({
-          'income': _incomeJson(amount: '75000.00', incomeType: 'freelance'),
-        }),
-      );
-
-      final result = await repo.updateIncome(
-        'i1',
-        amount: 75000.0,
-        incomeType: IncomeType.freelance,
-      );
-
-      expect(result.amount, 75000.0);
-      expect(result.incomeType, IncomeType.freelance);
-      verify(
-        () => mockDio.patch(
-          ApiConstants.incomeById('i1'),
-          data: {'amount': 75000.0, 'incomeType': 'freelance'},
-        ),
-      ).called(1);
-    });
-
-    test('only sends provided fields', () async {
-      when(
-        () => mockDio.patch(any(), data: any(named: 'data')),
-      ).thenAnswer((_) async => _response({'income': _incomeJson()}));
-
-      await repo.updateIncome('i1', description: 'Bonus');
-
-      final captured = verify(
-        () => mockDio.patch(any(), data: captureAny(named: 'data')),
-      ).captured.first as Map<String, dynamic>;
-      expect(captured, {'description': 'Bonus'});
-    });
-  });
-
-  group('deleteIncome', () {
-    test('calls DELETE endpoint', () async {
-      when(() => mockDio.delete(any())).thenAnswer((_) async => _response({}));
+  group('deleteIncome (local-first)', () {
+    test('soft-deletes and enqueues a delete op', () async {
+      await db.into(db.incomes).insert(_seed(id: 'i1'));
 
       await repo.deleteIncome('i1');
 
-      verify(() => mockDio.delete(ApiConstants.incomeById('i1'))).called(1);
-    });
-
-    test('propagates AppException', () {
-      when(() => mockDio.delete(any())).thenThrow(AppException.unknown());
-
-      expect(() => repo.deleteIncome('i1'), throwsA(isA<AppException>()));
+      final visible = await repo.getIncomes(
+        from: DateTime(2000),
+        to: DateTime(2100),
+      );
+      expect(visible, isEmpty);
+      final outbox = await db.select(db.outbox).get();
+      expect(outbox.single.op, 'delete');
     });
   });
 
-  group('IncomeType', () {
-    test('fromServer maps all known values', () {
-      expect(IncomeType.fromServer('salary'), IncomeType.salary);
-      expect(IncomeType.fromServer('freelance'), IncomeType.freelance);
-      expect(IncomeType.fromServer('investment'), IncomeType.investment);
-      expect(IncomeType.fromServer('reward'), IncomeType.reward);
-      expect(IncomeType.fromServer('other'), IncomeType.other);
-      expect(IncomeType.fromServer('unknown'), IncomeType.other);
-    });
-
-    test('toServer round-trips correctly', () {
-      for (final type in IncomeType.values) {
-        expect(IncomeType.fromServer(type.toServer()), type);
+  group('enum mapping', () {
+    test('round-trips', () {
+      for (final t in IncomeType.values) {
+        expect(IncomeType.fromServer(t.toServer()), t);
       }
     });
   });

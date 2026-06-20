@@ -51,7 +51,7 @@ export const getIncomes = async (req, res) => {
   const { from, to, incomeType } = result.data;
   const userId = req.user.userId;
 
-  const where = { userId };
+  const where = { userId, deletedAt: null };
 
   if (incomeType) where.incomeType = incomeType;
 
@@ -82,7 +82,7 @@ export const updateIncome = async (req, res) => {
   const userId = req.user.userId;
 
   const income = await prisma.income.findFirst({
-    where: { id, userId },
+    where: { id, userId, deletedAt: null },
   });
 
   if (!income) return res.status(404).json({ message: "Income not found" });
@@ -127,13 +127,13 @@ export const deleteIncome = async (req, res) => {
   const userId = req.user.userId;
 
   const income = await prisma.income.findFirst({
-    where: { id, userId },
+    where: { id, userId, deletedAt: null },
   });
 
   if (!income) return res.status(404).json({ message: "Income not found" });
 
   await prisma.$transaction(async (tx) => {
-    await tx.income.delete({ where: { id } });
+    await tx.income.update({ where: { id }, data: { deletedAt: new Date() } });
     // Reverse the income: remove the amount from the account.
     await applyDelta(tx, income.accountId, -parseFloat(income.amount));
   });

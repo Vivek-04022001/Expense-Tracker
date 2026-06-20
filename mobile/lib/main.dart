@@ -3,8 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'core/notifications/notification_service.dart';
 import 'core/router/app_router.dart';
+import 'core/sync/connectivity_provider.dart';
+import 'core/sync/sync_controller.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/theme_provider.dart';
+import 'features/auth/presentation/providers/auth_provider.dart';
 import 'features/reminders/presentation/providers/reminder_provider.dart';
 
 void main() async {
@@ -25,11 +28,56 @@ void main() async {
   );
 }
 
-class PaisaApp extends ConsumerWidget {
+class PaisaApp extends ConsumerStatefulWidget {
   const PaisaApp({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<PaisaApp> createState() => _PaisaAppState();
+}
+
+class _PaisaAppState extends ConsumerState<PaisaApp>
+    with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+
+    // Sync whenever the user becomes authenticated (restored session or login).
+    ref.listenManual(
+      authNotifierProvider,
+      (previous, next) {
+        if (next.valueOrNull is AuthAuthenticated) _syncIfAuthed();
+      },
+      fireImmediately: true,
+    );
+
+    // Sync the moment connectivity is restored.
+    ref.listenManual(connectivityProvider, (previous, next) {
+      final wasOffline = previous?.valueOrNull == false;
+      if (wasOffline && next.valueOrNull == true) _syncIfAuthed();
+    });
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // Sync when the app returns to the foreground.
+    if (state == AppLifecycleState.resumed) _syncIfAuthed();
+  }
+
+  void _syncIfAuthed() {
+    if (ref.read(authNotifierProvider).valueOrNull is AuthAuthenticated) {
+      ref.read(syncControllerProvider.notifier).syncNow();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final router = ref.watch(appRouterProvider);
     final themeMode = ref.watch(themeModeProvider);
 

@@ -7,6 +7,7 @@ import '../../../../features/expenses/presentation/sheets/add_expense_sheet.dart
 import '../../../../features/income/presentation/sheets/add_income_sheet.dart';
 import '../../../../features/transfers/presentation/sheets/add_transfer_sheet.dart';
 import '../../../../shared/widgets/success_overlay.dart';
+import '../../../../shared/widgets/sync_banner.dart';
 
 class ShellScreen extends StatelessWidget {
   const ShellScreen({super.key, required this.navigationShell});
@@ -68,7 +69,12 @@ class ShellScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: navigationShell,
+      body: Column(
+        children: [
+          const SyncBanner(),
+          Expanded(child: navigationShell),
+        ],
+      ),
       // Entire nav lives inside the FAB slot so the body fills the full screen
       // and content remains visible behind the floating pill.
       floatingActionButton: _FloatingNavBar(

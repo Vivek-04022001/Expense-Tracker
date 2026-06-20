@@ -1,5 +1,6 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import '../../../auth/presentation/providers/auth_provider.dart';
+import '../../../../core/db/app_database.dart';
+import '../../../../core/sync/sync_engine.dart';
 import '../../../expenses/data/models/expense_model.dart';
 import '../../../expenses/presentation/providers/expense_provider.dart';
 import '../../data/models/budget_model.dart';
@@ -9,7 +10,10 @@ part 'budget_provider.g.dart';
 
 @riverpod
 BudgetRepository budgetRepository(BudgetRepositoryRef ref) =>
-    BudgetRepository(ref.watch(dioClientProvider));
+    BudgetRepository(
+      ref.watch(appDatabaseProvider),
+      ref.watch(syncEngineProvider),
+    );
 
 @riverpod
 class SelectedBudgetMonth extends _$SelectedBudgetMonth {
