@@ -9,6 +9,7 @@ import '../providers/expense_provider.dart';
 import '../../../../features/income/presentation/screens/income_detail_screen.dart';
 import '../../../../features/income/presentation/providers/income_provider.dart';
 import '../../../../features/income/data/models/income_model.dart';
+import '../widgets/month_summary_header.dart';
 import 'expense_detail_screen.dart';
 
 // ── Screen ────────────────────────────────────────────────────────────────────
@@ -66,11 +67,11 @@ class _ExpensesScreenState extends ConsumerState<ExpensesScreen>
       final d = e.createdAt;
       String label;
       if (_isSameDay(d, today)) {
-        label = 'TODAY';
+        label = 'Today · ${DateFormat('EEEE').format(d)}';
       } else if (_isSameDay(d, yesterday)) {
-        label = 'YESTERDAY';
+        label = 'Yesterday · ${DateFormat('EEEE').format(d)}';
       } else {
-        label = DateFormat('MMM d').format(d).toUpperCase();
+        label = DateFormat('MMM d, EEEE').format(d);
       }
       map.putIfAbsent(label, () => []).add(e);
     }
@@ -99,6 +100,11 @@ class _ExpensesScreenState extends ConsumerState<ExpensesScreen>
         },
       ),
     );
+  }
+
+  void _shiftMonth(DateTime current, int delta) {
+    final m = DateTime(current.year, current.month + delta);
+    ref.read(selectedExpenseMonthProvider.notifier).setMonth(m.year, m.month);
   }
 
   void _openFilterSheet() {
@@ -194,7 +200,13 @@ class _ExpensesScreenState extends ConsumerState<ExpensesScreen>
                   Column(
                     children: [
                       if (_searchOpen) _buildSearchBar(),
-                      _buildMonthRow(selectedMonth, months),
+                      MonthNavigator(
+                        selected: selectedMonth,
+                        onPrev: () => _shiftMonth(selectedMonth, -1),
+                        onNext: () => _shiftMonth(selectedMonth, 1),
+                        onTapLabel: () =>
+                            _openMonthPicker(selectedMonth, months),
+                      ),
                       expensesAsync.when(
                         loading: () => Expanded(
                           child: Center(child: CircularProgressIndicator()),
@@ -217,9 +229,19 @@ class _ExpensesScreenState extends ConsumerState<ExpensesScreen>
                             0.0,
                             (s, e) => s + e.amount,
                           );
+                          // Income for the same month, for the summary strip.
+                          final monthIncome = ref
+                              .watch(incomesForMonthProvider(selectedMonth))
+                              .valueOrNull;
+                          final totalIncome = (monthIncome ?? [])
+                              .fold(0.0, (s, e) => s + e.amount);
                           return Expanded(
                             child: Column(
                               children: [
+                                MonthSummaryHeader(
+                                  expense: totalExpenses,
+                                  income: totalIncome,
+                                ),
                                 _buildSummaryRow(
                                   totalExpenses,
                                   filtered.length,
@@ -369,46 +391,6 @@ class _ExpensesScreenState extends ConsumerState<ExpensesScreen>
               ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildMonthRow(DateTime selected, List<DateTime> months) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 14, 20, 0),
-      child: Row(
-        children: [
-          GestureDetector(
-            onTap: () => _openMonthPicker(selected, months),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-              decoration: BoxDecoration(
-                color: context.bgSurface,
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: context.borderSubtle),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    DateFormat('MMMM yyyy').format(selected),
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: context.textPrimary,
-                    ),
-                  ),
-                  SizedBox(width: 4),
-                  PhosphorIcon(
-                    PhosphorIcons.caretDown(PhosphorIconsStyle.bold),
-                    size: 12,
-                    color: context.textSecondary,
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
       ),
     );
   }
@@ -873,6 +855,33 @@ class _IncomeTab extends ConsumerStatefulWidget {
 }
 
 class _IncomeTabState extends ConsumerState<_IncomeTab> {
+  void _shiftMonth(DateTime current, int delta) {
+    final m = DateTime(current.year, current.month + delta);
+    ref.read(selectedIncomeMonthProvider.notifier).setMonth(m.year, m.month);
+  }
+
+  bool _isSameDay(DateTime a, DateTime b) =>
+      a.year == b.year && a.month == b.month && a.day == b.day;
+
+  Map<String, List<IncomeModel>> _group(List<IncomeModel> incomes) {
+    final today = DateTime.now();
+    final yesterday = today.subtract(const Duration(days: 1));
+    final map = <String, List<IncomeModel>>{};
+    for (final e in incomes) {
+      final d = e.createdAt;
+      String label;
+      if (_isSameDay(d, today)) {
+        label = 'Today · ${DateFormat('EEEE').format(d)}';
+      } else if (_isSameDay(d, yesterday)) {
+        label = 'Yesterday · ${DateFormat('EEEE').format(d)}';
+      } else {
+        label = DateFormat('MMM d, EEEE').format(d);
+      }
+      map.putIfAbsent(label, () => []).add(e);
+    }
+    return map;
+  }
+
   void _openMonthPicker(DateTime selected, List<DateTime> months) {
     showModalBottomSheet(
       context: context,
@@ -905,46 +914,11 @@ class _IncomeTabState extends ConsumerState<_IncomeTab> {
 
     return Column(
       children: [
-        // Month picker row
-        Padding(
-          padding: const EdgeInsets.fromLTRB(20, 14, 20, 0),
-          child: Row(
-            children: [
-              GestureDetector(
-                onTap: () => _openMonthPicker(selectedMonth, months),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 7,
-                  ),
-                  decoration: BoxDecoration(
-                    color: context.bgSurface,
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: context.borderSubtle),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        DateFormat('MMMM yyyy').format(selectedMonth),
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                          color: context.textPrimary,
-                        ),
-                      ),
-                      SizedBox(width: 4),
-                      PhosphorIcon(
-                        PhosphorIcons.caretDown(PhosphorIconsStyle.bold),
-                        size: 12,
-                        color: context.textSecondary,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
+        MonthNavigator(
+          selected: selectedMonth,
+          onPrev: () => _shiftMonth(selectedMonth, -1),
+          onNext: () => _shiftMonth(selectedMonth, 1),
+          onTapLabel: () => _openMonthPicker(selectedMonth, months),
         ),
         incomesAsync.when(
           loading: () =>
@@ -958,34 +932,21 @@ class _IncomeTabState extends ConsumerState<_IncomeTab> {
             ),
           ),
           data: (incomes) {
-            if (incomes.isEmpty) {
-              return Expanded(
-                child: Center(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      PhosphorIcon(
-                        PhosphorIcons.trendUp(PhosphorIconsStyle.light),
-                        size: 56,
-                        color: context.textTertiary,
-                      ),
-                      SizedBox(height: 12),
-                      Text(
-                        'No income this month',
-                        style: TextStyle(
-                          fontSize: 15,
-                          color: context.textSecondary,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            }
             final totalIncome = incomes.fold(0.0, (s, e) => s + e.amount);
+            // Expense for the same month, for the summary strip.
+            final monthExpense =
+                ref.watch(expensesForMonthProvider(selectedMonth)).valueOrNull;
+            final totalExpense =
+                (monthExpense ?? []).fold(0.0, (s, e) => s + e.amount);
+            final grouped = _group(incomes);
+            final dateKeys = grouped.keys.toList();
             return Expanded(
               child: Column(
                 children: [
+                  MonthSummaryHeader(
+                    expense: totalExpense,
+                    income: totalIncome,
+                  ),
                   Padding(
                     padding: const EdgeInsets.fromLTRB(20, 6, 20, 8),
                     child: Row(
@@ -1001,16 +962,105 @@ class _IncomeTabState extends ConsumerState<_IncomeTab> {
                     ),
                   ),
                   Expanded(
-                    child: ListView.builder(
-                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 100),
-                      itemCount: incomes.length,
-                      itemBuilder: (_, i) => _IncomeTile(income: incomes[i]),
-                    ),
+                    child: incomes.isEmpty
+                        ? Center(
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                PhosphorIcon(
+                                  PhosphorIcons.trendUp(
+                                      PhosphorIconsStyle.light),
+                                  size: 56,
+                                  color: context.textTertiary,
+                                ),
+                                SizedBox(height: 12),
+                                Text(
+                                  'No income this month',
+                                  style: TextStyle(
+                                    fontSize: 15,
+                                    color: context.textSecondary,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          )
+                        : ListView.builder(
+                            padding: const EdgeInsets.only(bottom: 100),
+                            itemCount: dateKeys.length,
+                            itemBuilder: (_, i) {
+                              final key = dateKeys[i];
+                              final entries = grouped[key]!;
+                              final dayTotal = entries.fold(
+                                0.0,
+                                (s, e) => s + e.amount,
+                              );
+                              return _IncomeDaySection(
+                                label: key,
+                                total: dayTotal,
+                                entries: entries,
+                              );
+                            },
+                          ),
                   ),
                 ],
               ),
             );
           },
+        ),
+      ],
+    );
+  }
+}
+
+class _IncomeDaySection extends StatelessWidget {
+  const _IncomeDaySection({
+    required this.label,
+    required this.total,
+    required this.entries,
+  });
+
+  final String label;
+  final double total;
+  final List<IncomeModel> entries;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(20, 18, 20, 8),
+          child: Row(
+            children: [
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: context.textTertiary,
+                  letterSpacing: 0.4,
+                ),
+              ),
+              const Spacer(),
+              if (total > 0)
+                Text(
+                  '+${_fmtRupee(total)}',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.success,
+                  ),
+                ),
+            ],
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Column(
+            children: [
+              for (final e in entries) _IncomeTile(income: e),
+            ],
+          ),
         ),
       ],
     );
