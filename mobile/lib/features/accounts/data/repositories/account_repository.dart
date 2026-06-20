@@ -1,5 +1,8 @@
 import '../../../../core/constants/api_constants.dart';
+import '../../../../core/db/app_database.dart';
 import '../../../../core/network/dio_client.dart';
+import '../../../../core/sync/sync_engine.dart';
+import '../datasources/account_local_datasource.dart';
 import '../models/account_model.dart';
 
 class AccountsResult {
@@ -9,18 +12,19 @@ class AccountsResult {
   final double totalBalance;
 }
 
+/// Offline-first account repository. Reads (and the derived total balance) come
+/// from Drift; writes hit the network then trigger a delta sync.
 class AccountRepository {
-  final DioClient _dioClient;
+  AccountRepository(this._dioClient, AppDatabase db, this._sync)
+      : _local = AccountLocalDataSource(db);
 
-  AccountRepository(this._dioClient);
+  final DioClient _dioClient;
+  final AccountLocalDataSource _local;
+  final SyncEngine _sync;
 
   Future<AccountsResult> getAccounts() async {
-    final response = await _dioClient.get(ApiConstants.accounts);
-    final accounts = (response.data['accounts'] as List)
-        .cast<Map<String, dynamic>>()
-        .map(AccountModel.fromJson)
-        .toList();
-    final total = double.parse((response.data['totalBalance'] ?? 0).toString());
+    final accounts = await _local.getAccounts();
+    final total = accounts.fold<double>(0, (sum, a) => sum + a.balance);
     return AccountsResult(accounts: accounts, totalBalance: total);
   }
 
@@ -39,7 +43,9 @@ class AccountRepository {
         if (color != null) 'color': color,
       },
     );
-    return AccountModel.fromJson(response.data['account'] as Map<String, dynamic>);
+    await _sync.pullQuietly();
+    return AccountModel.fromJson(
+        response.data['account'] as Map<String, dynamic>);
   }
 
   Future<AccountModel> updateAccount({
@@ -58,10 +64,13 @@ class AccountRepository {
         if (color != null) 'color': color,
       },
     );
-    return AccountModel.fromJson(response.data['account'] as Map<String, dynamic>);
+    await _sync.pullQuietly();
+    return AccountModel.fromJson(
+        response.data['account'] as Map<String, dynamic>);
   }
 
   Future<void> deleteAccount(String id) async {
     await _dioClient.delete(ApiConstants.accountById(id));
+    await _sync.pullQuietly();
   }
 }

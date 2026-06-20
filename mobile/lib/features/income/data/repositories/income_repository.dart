@@ -1,34 +1,30 @@
-import 'package:intl/intl.dart';
 import '../../../../core/constants/api_constants.dart';
+import '../../../../core/db/app_database.dart';
 import '../../../../core/network/dio_client.dart';
+import '../../../../core/sync/sync_engine.dart';
+import '../datasources/income_local_datasource.dart';
 import '../models/income_model.dart';
 
+/// Offline-first income repository. Reads from Drift; writes hit the network
+/// then trigger a delta sync (Phase 4 will move writes to the outbox).
 class IncomeRepository {
+  IncomeRepository(this._dioClient, AppDatabase db, this._sync)
+      : _local = IncomeLocalDataSource(db);
+
   final DioClient _dioClient;
-
-  IncomeRepository(this._dioClient);
-
-  static final _dateFmt = DateFormat('yyyy-MM-dd');
+  final IncomeLocalDataSource _local;
+  final SyncEngine _sync;
 
   Future<List<IncomeModel>> getIncomes({
     required DateTime from,
     required DateTime to,
     IncomeType? incomeType,
-  }) async {
-    final params = <String, String>{
-      'from': _dateFmt.format(from),
-      'to': _dateFmt.format(to),
-    };
-    if (incomeType != null) params['incomeType'] = incomeType.toServer();
-
-    final response = await _dioClient.get(
-      ApiConstants.income,
-      queryParameters: params,
+  }) {
+    return _local.getIncomes(
+      from: from,
+      to: to,
+      incomeType: incomeType?.toServer(),
     );
-    return (response.data as List)
-        .cast<Map<String, dynamic>>()
-        .map(IncomeModel.fromJson)
-        .toList();
   }
 
   Future<IncomeModel> createIncome({
@@ -49,6 +45,7 @@ class IncomeRepository {
         if (categoryId != null) 'categoryId': categoryId,
       },
     );
+    await _sync.pullQuietly();
     return IncomeModel.fromJson(
       response.data['income'] as Map<String, dynamic>,
     );
@@ -68,6 +65,7 @@ class IncomeRepository {
         if (description != null) 'description': description,
       },
     );
+    await _sync.pullQuietly();
     return IncomeModel.fromJson(
       response.data['income'] as Map<String, dynamic>,
     );
@@ -75,5 +73,6 @@ class IncomeRepository {
 
   Future<void> deleteIncome(String id) async {
     await _dioClient.delete(ApiConstants.incomeById(id));
+    await _sync.pullQuietly();
   }
 }

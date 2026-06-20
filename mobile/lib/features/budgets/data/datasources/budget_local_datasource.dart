@@ -32,6 +32,39 @@ class BudgetLocalDataSource {
     return rows.map(_toModel).toList();
   }
 
+  /// Computes a budget's progress locally: sums non-deleted expenses in the
+  /// budget's category for its month/year window. Mirrors `/budgets/:id/status`.
+  Future<BudgetStatusModel?> getBudgetStatus(String id) async {
+    final budgetRow = await (_db.select(_db.budgets)
+          ..where((t) => t.id.equals(id) & t.deletedAt.isNull()))
+        .getSingleOrNull();
+    if (budgetRow == null) return null;
+
+    final start = DateTime(budgetRow.year, budgetRow.month);
+    final end = DateTime(budgetRow.year, budgetRow.month + 1);
+
+    final expenses = await (_db.select(_db.expenses)
+          ..where((t) =>
+              t.deletedAt.isNull() &
+              t.category.equals(budgetRow.category) &
+              t.createdAt.isBiggerOrEqualValue(start) &
+              t.createdAt.isSmallerThanValue(end)))
+        .get();
+
+    final spent = expenses.fold<double>(0, (sum, e) => sum + e.amount);
+    final limit = budgetRow.limitAmount;
+    final remaining = limit - spent;
+    final percentUsed = limit == 0 ? 0.0 : (spent / limit * 100);
+
+    return BudgetStatusModel(
+      budget: _toModel(budgetRow),
+      spent: spent,
+      remaining: remaining,
+      percentUsed: double.parse(percentUsed.toStringAsFixed(1)),
+      isOverBudget: spent > limit,
+    );
+  }
+
   Future<void> upsert(BudgetsCompanion row) =>
       _db.into(_db.budgets).insertOnConflictUpdate(row);
 

@@ -1,5 +1,7 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../../core/db/app_database.dart';
+import '../../../../core/sync/sync_engine.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../data/models/account_model.dart';
 import '../../data/repositories/account_repository.dart';
@@ -8,7 +10,11 @@ part 'account_provider.g.dart';
 
 @riverpod
 AccountRepository accountRepository(AccountRepositoryRef ref) =>
-    AccountRepository(ref.watch(dioClientProvider));
+    AccountRepository(
+      ref.watch(dioClientProvider),
+      ref.watch(appDatabaseProvider),
+      ref.watch(syncEngineProvider),
+    );
 
 @riverpod
 class AccountListNotifier extends _$AccountListNotifier {

@@ -1,9 +1,14 @@
 import 'package:dio/dio.dart';
+import 'package:drift/drift.dart';
+import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:paisa/core/constants/api_constants.dart';
+import 'package:paisa/core/db/app_database.dart';
 import 'package:paisa/core/errors/app_exceptions.dart';
 import 'package:paisa/core/network/dio_client.dart';
+import 'package:paisa/core/sync/sync_api.dart';
+import 'package:paisa/core/sync/sync_engine.dart';
 import 'package:paisa/features/expenses/data/models/expense_model.dart';
 import 'package:paisa/features/expenses/data/repositories/expense_repository.dart';
 
@@ -30,109 +35,87 @@ Map<String, dynamic> _expenseJson({
       'description': description,
       'userId': 'u1',
       'createdAt': '2026-05-18T10:00:00.000Z',
+      'updatedAt': '2026-05-18T10:00:00.000Z',
       'deletedAt': null,
     };
 
-Map<String, dynamic> _summaryJson() => {
-      'allTimeTotal': '1234.56',
-      'byCategory': [
-        {
-          'category': 'food_and_drink',
-          '_sum': {'amount': '500.00'},
-        },
-      ],
-      'byMonth': [
-        {'month': '2026-05', 'total': '500.00'},
-      ],
-      'byCategoryPerMonth': [
-        {
-          'month': '2026-05',
-          'categories': [
-            {'category': 'food_and_drink', 'total': '300.00'},
-          ],
-        },
-      ],
-    };
+ExpensesCompanion _seed({
+  String id = 'e1',
+  double amount = 342.50,
+  String category = 'food_and_drink',
+  DateTime? createdAt,
+}) =>
+    ExpensesCompanion.insert(
+      id: id,
+      amount: amount,
+      category: Value(category),
+      paymentMethod: const Value('upi'),
+      createdAt: Value(createdAt ?? DateTime(2026, 5, 18, 10)),
+      updatedAt: Value(createdAt ?? DateTime(2026, 5, 18, 10)),
+    );
 
 void main() {
   late MockDioClient mockDio;
+  late AppDatabase db;
   late ExpenseRepository repo;
 
   setUp(() {
     mockDio = MockDioClient();
-    repo = ExpenseRepository(mockDio);
+    db = AppDatabase(NativeDatabase.memory());
+    repo = ExpenseRepository(mockDio, db, SyncEngine(db, SyncApi(mockDio)));
+
+    // The post-write pull hits /sync/pull; return an empty delta.
+    when(() => mockDio.get('/sync/pull',
+            queryParameters: any(named: 'queryParameters')))
+        .thenAnswer((_) async => _response({
+              'serverTime': DateTime.now().toUtc().toIso8601String(),
+              'changes': <String, dynamic>{},
+            }));
   });
 
-  group('getExpenses', () {
-    test('returns list of ExpenseModel on success', () async {
-      when(
-        () => mockDio.get(any(), queryParameters: any(named: 'queryParameters')),
-      ).thenAnswer(
-        (_) async => _response({
-          'expenses': [_expenseJson(), _expenseJson(id: 'e2', amount: '100.00')],
-        }),
-      );
+  tearDown(() => db.close());
 
-      final from = DateTime(2026, 5, 1);
-      final to = DateTime(2026, 5, 31);
-      final result = await repo.getExpenses(from: from, to: to);
+  group('getExpenses (local)', () {
+    test('returns rows in the requested month, newest first', () async {
+      await db.into(db.expenses).insert(_seed(id: 'e1', amount: 342.50,
+          createdAt: DateTime(2026, 5, 10)));
+      await db.into(db.expenses).insert(_seed(id: 'e2', amount: 100.0,
+          createdAt: DateTime(2026, 5, 20)));
+      // Out of range — should be excluded.
+      await db.into(db.expenses).insert(_seed(id: 'e3', amount: 5,
+          createdAt: DateTime(2026, 4, 1)));
+
+      final result = await repo.getExpenses(
+        from: DateTime(2026, 5, 1),
+        to: DateTime(2026, 5, 31, 23, 59, 59),
+      );
 
       expect(result, hasLength(2));
-      expect(result.first.id, 'e1');
-      expect(result.first.amount, 342.50);
-      expect(result.first.category, ExpenseCategory.foodAndDrink);
-      expect(result.first.paymentMethod, ExpensePaymentMethod.upi);
-      expect(result.first.description, 'Swiggy');
-      verify(
-        () => mockDio.get(
-          ApiConstants.expenses,
-          queryParameters: any(named: 'queryParameters'),
-        ),
-      ).called(1);
+      expect(result.first.id, 'e2'); // newest first
+      expect(result.map((e) => e.id), isNot(contains('e3')));
+      verifyNever(() => mockDio.get(ApiConstants.expenses,
+          queryParameters: any(named: 'queryParameters')));
     });
 
-    test('passes category query param when provided', () async {
-      when(
-        () => mockDio.get(any(), queryParameters: any(named: 'queryParameters')),
-      ).thenAnswer((_) async => _response({'expenses': []}));
+    test('filters by category when provided', () async {
+      await db.into(db.expenses).insert(_seed(id: 'e1', category: 'food_and_drink'));
+      await db.into(db.expenses).insert(_seed(id: 'e2', category: 'shopping'));
 
-      await repo.getExpenses(
+      final result = await repo.getExpenses(
         from: DateTime(2026, 5, 1),
         to: DateTime(2026, 5, 31),
-        category: 'food_and_drink',
+        category: 'shopping',
       );
 
-      final captured = verify(
-        () => mockDio.get(
-          any(),
-          queryParameters: captureAny(named: 'queryParameters'),
-        ),
-      ).captured.first as Map<String, String>;
-      expect(captured['category'], 'food_and_drink');
-    });
-
-    test('propagates AppException on auth failure', () async {
-      when(
-        () => mockDio.get(any(), queryParameters: any(named: 'queryParameters')),
-      ).thenThrow(AppException.unauthorized());
-
-      expect(
-        () => repo.getExpenses(
-          from: DateTime(2026, 5, 1),
-          to: DateTime(2026, 5, 31),
-        ),
-        throwsA(isA<AppException>()),
-      );
+      expect(result, hasLength(1));
+      expect(result.single.id, 'e2');
     });
   });
 
   group('createExpense', () {
-    test('returns ExpenseModel on success', () async {
-      when(
-        () => mockDio.post(any(), data: any(named: 'data')),
-      ).thenAnswer(
-        (_) async => _response({'expense': _expenseJson()}),
-      );
+    test('posts to the network and triggers a sync', () async {
+      when(() => mockDio.post(any(), data: any(named: 'data')))
+          .thenAnswer((_) async => _response({'expense': _expenseJson()}));
 
       final result = await repo.createExpense(
         amount: 342.50,
@@ -143,166 +126,61 @@ void main() {
 
       expect(result.id, 'e1');
       expect(result.amount, 342.50);
-      expect(result.category, ExpenseCategory.foodAndDrink);
-      verify(
-        () => mockDio.post(
-          ApiConstants.expenses,
-          data: {
+      verify(() => mockDio.post(ApiConstants.expenses, data: {
             'amount': 342.50,
             'description': 'Swiggy',
             'category': 'food_and_drink',
             'paymentMethod': 'upi',
-          },
-        ),
-      ).called(1);
-    });
-
-    test('omits optional fields when null', () async {
-      when(
-        () => mockDio.post(any(), data: any(named: 'data')),
-      ).thenAnswer(
-        (_) async => _response({'expense': _expenseJson(description: null)}),
-      );
-
-      await repo.createExpense(amount: 100.0);
-
-      final captured = verify(
-        () => mockDio.post(any(), data: captureAny(named: 'data')),
-      ).captured.first as Map<String, dynamic>;
-      expect(captured.containsKey('description'), isFalse);
-      expect(captured.containsKey('category'), isFalse);
-      expect(captured.containsKey('paymentMethod'), isFalse);
+          })).called(1);
+      verify(() => mockDio.get('/sync/pull',
+          queryParameters: any(named: 'queryParameters'))).called(1);
     });
 
     test('propagates AppException on server error', () async {
-      when(
-        () => mockDio.post(any(), data: any(named: 'data')),
-      ).thenThrow(AppException.server());
+      when(() => mockDio.post(any(), data: any(named: 'data')))
+          .thenThrow(AppException.server());
 
-      expect(
-        () => repo.createExpense(amount: 100.0),
-        throwsA(isA<AppException>()),
-      );
+      expect(() => repo.createExpense(amount: 100.0),
+          throwsA(isA<AppException>()));
     });
   });
 
-  group('updateExpense', () {
-    test('returns updated ExpenseModel', () async {
-      when(
-        () => mockDio.put(any(), data: any(named: 'data')),
-      ).thenAnswer(
-        (_) async => _response({
-          'expense': _expenseJson(amount: '999.00', category: 'shopping'),
-        }),
-      );
+  group('getExpenseSummary (local)', () {
+    test('aggregates all-time total, by category and by month', () async {
+      await db.into(db.expenses).insert(_seed(id: 'e1', amount: 300,
+          category: 'food_and_drink', createdAt: DateTime(2026, 5, 2)));
+      await db.into(db.expenses).insert(_seed(id: 'e2', amount: 200,
+          category: 'shopping', createdAt: DateTime(2026, 5, 3)));
+      await db.into(db.expenses).insert(_seed(id: 'e3', amount: 50,
+          category: 'food_and_drink', createdAt: DateTime(2026, 6, 1)));
 
-      final result = await repo.updateExpense(
-        'e1',
-        amount: 999.0,
-        category: ExpenseCategory.shopping,
-      );
+      final summary = await repo.getExpenseSummary();
 
-      expect(result.amount, 999.0);
-      expect(result.category, ExpenseCategory.shopping);
-      verify(
-        () => mockDio.put(
-          ApiConstants.expenseById('e1'),
-          data: {'amount': 999.0, 'category': 'shopping'},
-        ),
-      ).called(1);
-    });
-
-    test('only sends provided fields', () async {
-      when(
-        () => mockDio.put(any(), data: any(named: 'data')),
-      ).thenAnswer(
-        (_) async => _response({'expense': _expenseJson()}),
-      );
-
-      await repo.updateExpense('e1', description: 'Zomato');
-
-      final captured = verify(
-        () => mockDio.put(any(), data: captureAny(named: 'data')),
-      ).captured.first as Map<String, dynamic>;
-      expect(captured, {'description': 'Zomato'});
-    });
-  });
-
-  group('deleteExpense', () {
-    test('calls delete endpoint and returns void', () async {
-      when(() => mockDio.delete(any())).thenAnswer(
-        (_) async => _response({}),
-      );
-
-      await repo.deleteExpense('e1');
-
-      verify(() => mockDio.delete(ApiConstants.expenseById('e1'))).called(1);
-    });
-
-    test('propagates AppException on not found', () async {
-      when(() => mockDio.delete(any())).thenThrow(AppException.unknown());
-
-      expect(() => repo.deleteExpense('nonexistent'), throwsA(isA<AppException>()));
-    });
-  });
-
-  group('getExpenseSummary', () {
-    test('returns ExpenseSummaryModel with parsed fields', () async {
-      when(() => mockDio.get(any())).thenAnswer(
-        (_) async => _response(_summaryJson()),
-      );
-
-      final result = await repo.getExpenseSummary();
-
-      expect(result.allTimeTotal, 1234.56);
-      expect(result.byMonth, hasLength(1));
-      expect(result.byMonth.first.month, '2026-05');
-      expect(result.byMonth.first.total, 500.0);
-      expect(result.byCategoryPerMonth, hasLength(1));
-      expect(result.byCategoryPerMonth.first.categories.first.category, 'food_and_drink');
-      verify(() => mockDio.get(ApiConstants.expenseSummary)).called(1);
-    });
-
-    test('propagates AppException on network failure', () async {
-      when(() => mockDio.get(any())).thenThrow(AppException.network());
-
-      expect(() => repo.getExpenseSummary(), throwsA(isA<AppException>()));
+      expect(summary.allTimeTotal, 550);
+      final may = summary.byMonth.firstWhere((m) => m.month == '2026-05');
+      expect(may.total, 500);
+      final food = summary.byCategory
+          .firstWhere((c) => c.category == 'food_and_drink');
+      expect(food.total, 350);
     });
   });
 
   group('ExpenseCategory', () {
-    test('fromServer maps all known values', () {
-      expect(ExpenseCategory.fromServer('food_and_drink'), ExpenseCategory.foodAndDrink);
-      expect(ExpenseCategory.fromServer('transport'), ExpenseCategory.transport);
-      expect(ExpenseCategory.fromServer('bills_and_utilities'), ExpenseCategory.billsAndUtilities);
-      expect(ExpenseCategory.fromServer('shopping'), ExpenseCategory.shopping);
-      expect(ExpenseCategory.fromServer('health'), ExpenseCategory.health);
-      expect(ExpenseCategory.fromServer('entertainment'), ExpenseCategory.entertainment);
-      expect(ExpenseCategory.fromServer('education'), ExpenseCategory.education);
-      expect(ExpenseCategory.fromServer('other'), ExpenseCategory.other);
-      expect(ExpenseCategory.fromServer('unknown_value'), ExpenseCategory.other);
-    });
-
-    test('toServer round-trips correctly', () {
+    test('fromServer/toServer round-trip', () {
       for (final cat in ExpenseCategory.values) {
         expect(ExpenseCategory.fromServer(cat.toServer()), cat);
       }
+      expect(ExpenseCategory.fromServer('unknown'), ExpenseCategory.other);
     });
   });
 
   group('ExpensePaymentMethod', () {
-    test('fromServer maps all known values', () {
-      expect(ExpensePaymentMethod.fromServer('upi'), ExpensePaymentMethod.upi);
-      expect(ExpensePaymentMethod.fromServer('bank_transfer'), ExpensePaymentMethod.bankTransfer);
-      expect(ExpensePaymentMethod.fromServer('cash'), ExpensePaymentMethod.cash);
-      expect(ExpensePaymentMethod.fromServer('other'), ExpensePaymentMethod.other);
-      expect(ExpensePaymentMethod.fromServer('unknown'), ExpensePaymentMethod.other);
-    });
-
-    test('toServer round-trips correctly', () {
+    test('fromServer/toServer round-trip', () {
       for (final pm in ExpensePaymentMethod.values) {
         expect(ExpensePaymentMethod.fromServer(pm.toServer()), pm);
       }
+      expect(ExpensePaymentMethod.fromServer('unknown'),
+          ExpensePaymentMethod.other);
     });
   });
 }

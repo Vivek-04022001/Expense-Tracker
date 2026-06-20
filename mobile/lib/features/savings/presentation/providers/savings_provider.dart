@@ -1,5 +1,5 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import '../../../auth/presentation/providers/auth_provider.dart';
+import '../../../../core/db/app_database.dart';
 import '../../data/models/savings_model.dart';
 import '../../data/repositories/savings_repository.dart';
 
@@ -7,7 +7,7 @@ part 'savings_provider.g.dart';
 
 @riverpod
 SavingsRepository savingsRepository(SavingsRepositoryRef ref) =>
-    SavingsRepository(ref.watch(dioClientProvider));
+    SavingsRepository(ref.watch(appDatabaseProvider));
 
 @riverpod
 Future<SavingsModel> currentMonthSavings(CurrentMonthSavingsRef ref) async {

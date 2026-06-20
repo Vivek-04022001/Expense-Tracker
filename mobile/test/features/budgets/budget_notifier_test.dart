@@ -1,6 +1,8 @@
+import 'package:drift/native.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:paisa/core/db/app_database.dart';
 import 'package:paisa/core/errors/app_exceptions.dart';
 import 'package:paisa/features/budgets/data/models/budget_model.dart';
 import 'package:paisa/features/budgets/data/repositories/budget_repository.dart';
@@ -24,8 +26,14 @@ BudgetModel _fakeBudget({
     );
 
 ProviderContainer _makeContainer(MockBudgetRepository mockRepo) {
+  // In-memory DB backs related providers (expenses) invalidated on write.
+  final db = AppDatabase(NativeDatabase.memory());
+  addTearDown(db.close);
   return ProviderContainer(
-    overrides: [budgetRepositoryProvider.overrideWithValue(mockRepo)],
+    overrides: [
+      budgetRepositoryProvider.overrideWithValue(mockRepo),
+      appDatabaseProvider.overrideWithValue(db),
+    ],
   );
 }
 

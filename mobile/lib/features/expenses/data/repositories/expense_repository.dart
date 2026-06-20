@@ -1,32 +1,31 @@
 import '../../../../core/constants/api_constants.dart';
+import '../../../../core/db/app_database.dart';
 import '../../../../core/network/dio_client.dart';
+import '../../../../core/sync/sync_engine.dart';
+import '../datasources/expense_local_datasource.dart';
 import '../models/expense_model.dart';
 import '../models/expense_summary_model.dart';
 
+/// Offline-first expense repository.
+///
+/// Reads come from the local Drift database (instant, works offline). Writes
+/// still go to the network in this phase, then trigger a delta sync so the
+/// local copy — including recomputed account balances — stays current.
+/// Phase 4 will flip writes to local-first via the outbox.
 class ExpenseRepository {
-  final DioClient _dioClient;
+  ExpenseRepository(this._dioClient, AppDatabase db, this._sync)
+      : _local = ExpenseLocalDataSource(db);
 
-  ExpenseRepository(this._dioClient);
+  final DioClient _dioClient;
+  final ExpenseLocalDataSource _local;
+  final SyncEngine _sync;
 
   Future<List<ExpenseModel>> getExpenses({
     required DateTime from,
     required DateTime to,
     String? category,
-  }) async {
-    final params = <String, String>{
-      'from': from.toIso8601String(),
-      'to': to.toIso8601String(),
-    };
-    if (category != null) params['category'] = category;
-
-    final response = await _dioClient.get(
-      ApiConstants.expenses,
-      queryParameters: params,
-    );
-    return (response.data['expenses'] as List)
-        .cast<Map<String, dynamic>>()
-        .map(ExpenseModel.fromJson)
-        .toList();
+  }) {
+    return _local.getExpenses(from: from, to: to, category: category);
   }
 
   Future<ExpenseModel> createExpense({
@@ -49,6 +48,7 @@ class ExpenseRepository {
         if (categoryId != null) 'categoryId': categoryId,
       },
     );
+    await _sync.pullQuietly();
     return ExpenseModel.fromJson(
       response.data['expense'] as Map<String, dynamic>,
     );
@@ -70,6 +70,7 @@ class ExpenseRepository {
         if (paymentMethod != null) 'paymentMethod': paymentMethod.toServer(),
       },
     );
+    await _sync.pullQuietly();
     return ExpenseModel.fromJson(
       response.data['expense'] as Map<String, dynamic>,
     );
@@ -77,12 +78,8 @@ class ExpenseRepository {
 
   Future<void> deleteExpense(String id) async {
     await _dioClient.delete(ApiConstants.expenseById(id));
+    await _sync.pullQuietly();
   }
 
-  Future<ExpenseSummaryModel> getExpenseSummary() async {
-    final response = await _dioClient.get(ApiConstants.expenseSummary);
-    return ExpenseSummaryModel.fromJson(
-      response.data as Map<String, dynamic>,
-    );
-  }
+  Future<ExpenseSummaryModel> getExpenseSummary() => _local.getSummary();
 }

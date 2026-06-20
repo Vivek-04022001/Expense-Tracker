@@ -1,5 +1,7 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../../core/db/app_database.dart';
+import '../../../../core/sync/sync_engine.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../data/models/category_model.dart';
 import '../../data/repositories/category_repository.dart';
@@ -8,7 +10,11 @@ part 'category_provider.g.dart';
 
 @riverpod
 CategoryRepository categoryRepository(CategoryRepositoryRef ref) =>
-    CategoryRepository(ref.watch(dioClientProvider));
+    CategoryRepository(
+      ref.watch(dioClientProvider),
+      ref.watch(appDatabaseProvider),
+      ref.watch(syncEngineProvider),
+    );
 
 @riverpod
 class CategoryListNotifier extends _$CategoryListNotifier {

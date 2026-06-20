@@ -1,19 +1,21 @@
 import '../../../../core/constants/api_constants.dart';
+import '../../../../core/db/app_database.dart';
 import '../../../../core/network/dio_client.dart';
+import '../../../../core/sync/sync_engine.dart';
+import '../datasources/category_local_datasource.dart';
 import '../models/category_model.dart';
 
+/// Offline-first category repository. Reads from Drift; writes hit the network
+/// then trigger a delta sync.
 class CategoryRepository {
+  CategoryRepository(this._dioClient, AppDatabase db, this._sync)
+      : _local = CategoryLocalDataSource(db);
+
   final DioClient _dioClient;
+  final CategoryLocalDataSource _local;
+  final SyncEngine _sync;
 
-  CategoryRepository(this._dioClient);
-
-  Future<List<CategoryModel>> getCategories() async {
-    final response = await _dioClient.get(ApiConstants.categories);
-    return (response.data['categories'] as List)
-        .cast<Map<String, dynamic>>()
-        .map(CategoryModel.fromJson)
-        .toList();
-  }
+  Future<List<CategoryModel>> getCategories() => _local.getCategories();
 
   Future<CategoryModel> createCategory({
     required String name,
@@ -30,6 +32,7 @@ class CategoryRepository {
         'color': color,
       },
     );
+    await _sync.pullQuietly();
     return CategoryModel.fromJson(
         response.data['category'] as Map<String, dynamic>);
   }
@@ -48,11 +51,13 @@ class CategoryRepository {
         if (color != null) 'color': color,
       },
     );
+    await _sync.pullQuietly();
     return CategoryModel.fromJson(
         response.data['category'] as Map<String, dynamic>);
   }
 
   Future<void> deleteCategory(String id) async {
     await _dioClient.delete(ApiConstants.categoryById(id));
+    await _sync.pullQuietly();
   }
 }

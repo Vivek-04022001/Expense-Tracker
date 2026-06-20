@@ -1,4 +1,6 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import '../../../../core/db/app_database.dart';
+import '../../../../core/sync/sync_engine.dart';
 import '../../../accounts/presentation/providers/account_provider.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../expenses/presentation/providers/expense_provider.dart';
@@ -10,7 +12,11 @@ part 'income_provider.g.dart';
 
 @riverpod
 IncomeRepository incomeRepository(IncomeRepositoryRef ref) =>
-    IncomeRepository(ref.watch(dioClientProvider));
+    IncomeRepository(
+      ref.watch(dioClientProvider),
+      ref.watch(appDatabaseProvider),
+      ref.watch(syncEngineProvider),
+    );
 
 @riverpod
 class IncomeListNotifier extends _$IncomeListNotifier {

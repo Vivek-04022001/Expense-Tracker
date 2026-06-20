@@ -1,25 +1,26 @@
 import '../../../../core/constants/api_constants.dart';
+import '../../../../core/db/app_database.dart';
 import '../../../../core/network/dio_client.dart';
+import '../../../../core/sync/sync_engine.dart';
 import '../../../expenses/data/models/expense_model.dart';
+import '../datasources/budget_local_datasource.dart';
 import '../models/budget_model.dart';
 
+/// Offline-first budget repository. Reads and status come from Drift; writes hit
+/// the network then trigger a delta sync.
 class BudgetRepository {
-  final DioClient _dioClient;
+  BudgetRepository(this._dioClient, AppDatabase db, this._sync)
+      : _local = BudgetLocalDataSource(db);
 
-  BudgetRepository(this._dioClient);
+  final DioClient _dioClient;
+  final BudgetLocalDataSource _local;
+  final SyncEngine _sync;
 
   Future<List<BudgetModel>> getBudgets({
     required int month,
     required int year,
-  }) async {
-    final response = await _dioClient.get(
-      ApiConstants.budgets,
-      queryParameters: {'month': month.toString(), 'year': year.toString()},
-    );
-    return (response.data['budgets'] as List)
-        .cast<Map<String, dynamic>>()
-        .map(BudgetModel.fromJson)
-        .toList();
+  }) {
+    return _local.getBudgets(month: month, year: year);
   }
 
   Future<BudgetModel> upsertBudget({
@@ -37,15 +38,20 @@ class BudgetRepository {
         'year': year,
       },
     );
+    await _sync.pullQuietly();
     return BudgetModel.fromJson(response.data['budget'] as Map<String, dynamic>);
   }
 
   Future<void> deleteBudget(String id) async {
     await _dioClient.delete(ApiConstants.budgetById(id));
+    await _sync.pullQuietly();
   }
 
   Future<BudgetStatusModel> getBudgetStatus(String id) async {
-    final response = await _dioClient.get(ApiConstants.budgetStatus(id));
-    return BudgetStatusModel.fromJson(response.data as Map<String, dynamic>);
+    final status = await _local.getBudgetStatus(id);
+    if (status == null) {
+      throw StateError('Budget not found: $id');
+    }
+    return status;
   }
 }

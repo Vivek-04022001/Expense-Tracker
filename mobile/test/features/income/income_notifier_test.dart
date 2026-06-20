@@ -1,6 +1,8 @@
+import 'package:drift/native.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:paisa/core/db/app_database.dart';
 import 'package:paisa/core/errors/app_exceptions.dart';
 import 'package:paisa/features/income/data/models/income_model.dart';
 import 'package:paisa/features/income/data/repositories/income_repository.dart';
@@ -25,9 +27,13 @@ IncomeModel _fakeIncome({
     );
 
 ProviderContainer _makeContainer(MockIncomeRepository mockRepo) {
+  // In-memory DB backs related providers (savings, accounts) invalidated on write.
+  final db = AppDatabase(NativeDatabase.memory());
+  addTearDown(db.close);
   return ProviderContainer(
     overrides: [
       incomeRepositoryProvider.overrideWithValue(mockRepo),
+      appDatabaseProvider.overrideWithValue(db),
     ],
   );
 }
