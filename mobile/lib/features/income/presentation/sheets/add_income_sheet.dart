@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/errors/app_exceptions.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../shared/utils/currency.dart';
 import '../../../../shared/widgets/calculator_numpad.dart';
 import '../../../accounts/presentation/widgets/account_selector.dart';
 import '../../../categories/data/models/category_model.dart';
@@ -233,7 +234,7 @@ class _AddIncomeSheetState extends ConsumerState<AddIncomeSheet> {
                           ),
                         ),
                         Text(
-                          isEmpty ? '0' : _expr,
+                          isEmpty ? '0' : groupIndianExpression(_expr),
                           style: TextStyle(
                             fontSize: 52,
                             fontWeight: FontWeight.w800,
@@ -248,7 +249,7 @@ class _AddIncomeSheetState extends ConsumerState<AddIncomeSheet> {
                       duration: const Duration(milliseconds: 200),
                       child: _hasFullExpression && result != null
                           ? Text(
-                              '= ₹${_fmtNum(result)}',
+                              '= ₹${groupIndianExpression(_fmtNum(result))}',
                               key: const ValueKey('result'),
                               style: TextStyle(
                                 fontSize: 14,
@@ -347,7 +348,7 @@ class _AddIncomeSheetState extends ConsumerState<AddIncomeSheet> {
                             )
                           : Text(
                               _hasFullExpression && result != null
-                                  ? 'Save ₹${_fmtNum(result)}'
+                                  ? 'Save ₹${groupIndianExpression(_fmtNum(result))}'
                                   : 'Save income',
                               style: TextStyle(
                                 fontSize: 16,
@@ -363,7 +364,7 @@ class _AddIncomeSheetState extends ConsumerState<AddIncomeSheet> {
           // Success overlay
           if (_showSuccess)
             _SuccessOverlay(
-              amount: _fmtNum(_computeResult() ?? 0),
+              amount: groupIndianExpression(_fmtNum(_computeResult() ?? 0)),
             ),
         ],
       ),

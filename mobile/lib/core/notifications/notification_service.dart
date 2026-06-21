@@ -14,6 +14,7 @@ class NotificationService {
       FlutterLocalNotificationsPlugin();
 
   static const int _reminderId = 1001;
+  static const int _secondReminderId = 1003;
   static const String _channelId = 'daily_reminder';
   static const String _channelName = 'Daily reminder';
   static const String _channelDesc =
@@ -96,12 +97,20 @@ class NotificationService {
     return false;
   }
 
-  /// (Re)schedules the daily reminder at [time], cancelling any prior one.
-  Future<void> scheduleDailyReminder(TimeOfDay time) async {
-    await cancelReminder();
+  /// (Re)schedules the primary daily reminder at [time], cancelling any prior
+  /// one. Use [scheduleSecondReminder] for the optional second reminder.
+  Future<void> scheduleDailyReminder(TimeOfDay time) =>
+      _schedule(_reminderId, time);
+
+  /// (Re)schedules the optional second daily reminder at [time].
+  Future<void> scheduleSecondReminder(TimeOfDay time) =>
+      _schedule(_secondReminderId, time);
+
+  Future<void> _schedule(int id, TimeOfDay time) async {
+    await _plugin.cancel(id);
 
     await _plugin.zonedSchedule(
-      _reminderId,
+      id,
       'Log today\'s spending',
       'Take a moment to record your expenses and savings for today.',
       _nextInstanceOf(time),
@@ -123,7 +132,14 @@ class NotificationService {
     );
   }
 
-  Future<void> cancelReminder() => _plugin.cancel(_reminderId);
+  /// Cancels both the primary and optional second daily reminders.
+  Future<void> cancelReminder() async {
+    await _plugin.cancel(_reminderId);
+    await _plugin.cancel(_secondReminderId);
+  }
+
+  /// Cancels only the optional second daily reminder.
+  Future<void> cancelSecondReminder() => _plugin.cancel(_secondReminderId);
 
   /// Fires a one-off notification immediately, for the "send test" action.
   Future<void> showTestNotification() async {

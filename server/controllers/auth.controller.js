@@ -125,6 +125,25 @@ export const refreshToken = async (req, res) => {
   }
 };
 
+export const updateProfile = async (req, res) => {
+  try {
+    const name = typeof req.body?.name === "string" ? req.body.name.trim() : "";
+    if (!name) {
+      return res.status(400).json({ message: "Name is required" });
+    }
+    // Phone is the login identifier and is intentionally immutable here.
+    const user = await prisma.user.update({
+      where: { id: req.user.userId },
+      data: { name },
+      select: { id: true, name: true, phone: true },
+    });
+    return res.status(200).json({ user });
+  } catch (error) {
+    console.error("Error updating profile:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 export const logoutUser = async (req, res) => {
   try {
     const { refreshToken } = req.body;

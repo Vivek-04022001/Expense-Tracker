@@ -5,7 +5,9 @@ import 'package:phosphor_flutter/phosphor_flutter.dart';
 import '../../../../core/router/transitions.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/category_mapper.dart';
+import '../../../../core/utils/expense_visual.dart';
 import '../../../../shared/widgets/category_avatar.dart';
+import '../../../categories/presentation/providers/category_provider.dart';
 import '../../data/models/expense_model.dart';
 import '../providers/expense_provider.dart';
 import '../../../../features/income/presentation/screens/income_detail_screen.dart';
@@ -503,7 +505,7 @@ class _DaySection extends StatelessWidget {
 
 // ── Entry tile ────────────────────────────────────────────────────────────────
 
-class _EntryTile extends StatelessWidget {
+class _EntryTile extends ConsumerWidget {
   const _EntryTile({required this.expense});
   final ExpenseModel expense;
 
@@ -514,9 +516,12 @@ class _EntryTile extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
-    final color = CategoryMapper.color(expense.category);
-    final label = CategoryMapper.label(expense.category);
+  Widget build(BuildContext context, WidgetRef ref) {
+    final categories =
+        ref.watch(categoryListNotifierProvider).valueOrNull ?? const [];
+    final visual = ExpenseVisual.of(expense, categories);
+    final color = visual.color;
+    final label = visual.label;
     final timeStr = DateFormat('h:mm a').format(expense.createdAt);
     final paymentLabel = expense.paymentMethod.displayLabel;
     final name = expense.description ?? label;
@@ -529,7 +534,7 @@ class _EntryTile extends StatelessWidget {
         child: Row(
           children: [
             CategoryAvatar(
-              icon: CategoryMapper.icon(expense.category),
+              icon: visual.icon,
               color: color,
               size: 38,
               iconSize: 18,
@@ -596,7 +601,9 @@ class _IconBtn extends StatelessWidget {
         width: 36,
         height: 36,
         decoration: BoxDecoration(
-          color: active ? AppColors.primary100 : Colors.white,
+          color: active
+              ? AppColors.primary500.withValues(alpha: 0.12)
+              : context.bgSurface,
           borderRadius: BorderRadius.circular(10),
           border: Border.all(
             color: active
@@ -659,7 +666,9 @@ class _MonthPickerSheet extends StatelessWidget {
                 ),
                 margin: const EdgeInsets.only(bottom: 8),
                 decoration: BoxDecoration(
-                  color: isSelected ? AppColors.primary100 : Colors.white,
+                  color: isSelected
+                      ? AppColors.primary500.withValues(alpha: 0.12)
+                      : context.bgSurface,
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
                     color: isSelected
@@ -775,7 +784,7 @@ class _FilterSheetState extends State<_FilterSheet> {
                     vertical: 8,
                   ),
                   decoration: BoxDecoration(
-                    color: isActive ? AppColors.primary500 : Colors.white,
+                    color: isActive ? AppColors.primary500 : context.bgSubtle,
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
                       color: isActive
@@ -788,7 +797,7 @@ class _FilterSheetState extends State<_FilterSheet> {
                     style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
-                      color: isActive ? Colors.white : context.textSecondary,
+                      color: isActive ? Colors.white : context.textPrimary,
                     ),
                   ),
                 ),

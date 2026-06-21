@@ -25,3 +25,27 @@ String _groupIndian(String intStr) {
   }
   return '$buf,$last3';
 }
+
+/// Adds Indian digit grouping to a raw calculator expression while it is being
+/// typed, e.g. "1234+50000" -> "1,234+50,000" and "12345.6" -> "12,345.6".
+/// Operators, the decimal point and trailing decimals are left untouched.
+String groupIndianExpression(String expr) {
+  final buf = StringBuffer();
+  final numberRe = RegExp(r'\d+(\.\d*)?');
+  var last = 0;
+  for (final m in numberRe.allMatches(expr)) {
+    buf.write(expr.substring(last, m.start));
+    final token = m.group(0)!;
+    final dot = token.indexOf('.');
+    if (dot == -1) {
+      buf.write(_groupIndian(token));
+    } else {
+      buf
+        ..write(_groupIndian(token.substring(0, dot)))
+        ..write(token.substring(dot));
+    }
+    last = m.end;
+  }
+  buf.write(expr.substring(last));
+  return buf.toString();
+}

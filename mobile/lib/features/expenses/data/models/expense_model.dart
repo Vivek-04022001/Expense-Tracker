@@ -69,6 +69,7 @@ class ExpenseModel {
     required this.createdAt,
     this.description,
     this.accountId,
+    this.categoryId,
   });
 
   final String id;
@@ -79,6 +80,10 @@ class ExpenseModel {
   final DateTime createdAt;
   final String? description;
   final String? accountId;
+
+  /// Id of the user-managed category this expense was logged under (null for
+  /// expenses that only carry the legacy built-in [category] enum).
+  final String? categoryId;
 
   factory ExpenseModel.fromJson(Map<String, dynamic> json) => ExpenseModel(
         id: json['id'] as String,
@@ -91,5 +96,6 @@ class ExpenseModel {
         createdAt: DateTime.parse(json['createdAt'] as String),
         description: json['description'] as String?,
         accountId: json['accountId'] as String?,
+        categoryId: json['categoryId'] as String?,
       );
 }

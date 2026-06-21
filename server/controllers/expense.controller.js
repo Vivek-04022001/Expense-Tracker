@@ -6,7 +6,7 @@ import { ownsCategory } from "../services/category.service.js";
 
 const ExpenseSchema = z.object({
   amount: z.number().positive(),
-  description: z.string().min(5).optional(),
+  description: z.string().min(1).max(255).optional(),
   category: z.enum(Object.values(Category)).optional(),
   paymentMethod: z.enum(Object.values(PaymentMethod)).optional(),
   accountId: z.string().uuid().optional(),

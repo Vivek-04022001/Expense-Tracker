@@ -8,6 +8,8 @@ import '../../../../core/animation/app_motion.dart';
 import '../../../../core/animation/pressable_scale.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/category_mapper.dart';
+import '../../../categories/data/models/category_model.dart';
+import '../../../categories/presentation/providers/category_provider.dart';
 import '../../../expenses/data/models/expense_model.dart';
 import '../../../expenses/presentation/providers/expense_provider.dart';
 import '../../../expenses/presentation/sheets/add_expense_sheet.dart';
@@ -91,10 +93,12 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
     if (isExpense) {
       final (items, l) = _loadExpenses(months);
       loading = l;
+      final categories =
+          ref.watch(categoryListNotifierProvider).valueOrNull ?? const [];
       final cur = items.where((e) => _inRange(e.createdAt, w.curStart, w.curEnd));
       final prev =
           items.where((e) => _inRange(e.createdAt, w.prevStart, w.prevEnd));
-      slices = _expenseSlices(cur);
+      slices = _expenseSlices(cur, categories);
       total = cur.fold<double>(0, (s, e) => s + e.amount).round();
       prevTotal = prev.fold<double>(0, (s, e) => s + e.amount).round();
     } else {
@@ -218,16 +222,50 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
     return (all, loading);
   }
 
-  List<CategorySlice> _expenseSlices(Iterable<ExpenseModel> items) {
-    final map = <ExpenseCategory, double>{};
+  List<CategorySlice> _expenseSlices(
+    Iterable<ExpenseModel> items,
+    List<CategoryModel> categories,
+  ) {
+    final byId = {for (final c in categories) c.id: c};
+
+    // Group by the *resolved* category: a user-created category keeps its own
+    // name/colour instead of collapsing into the generic "Other" bucket. Only
+    // genuinely uncategorised expenses (built-in `other` with no custom
+    // category) land in "Other".
+    final amounts = <String, double>{};
+    final labels = <String, String>{};
+    final colors = <String, Color>{};
+    final isOther = <String, bool>{};
+
     for (final e in items) {
-      map[e.category] = (map[e.category] ?? 0) + e.amount;
+      final custom = e.categoryId != null ? byId[e.categoryId] : null;
+      final String key;
+      final String label;
+      final Color color;
+      final bool other;
+      if (custom != null) {
+        key = 'cat:${custom.id}';
+        label = custom.name;
+        color = custom.displayColor;
+        other = false;
+      } else {
+        key = 'enum:${e.category.name}';
+        label = CategoryMapper.label(e.category);
+        color = CategoryMapper.color(e.category);
+        other = e.category == ExpenseCategory.other;
+      }
+      amounts[key] = (amounts[key] ?? 0) + e.amount;
+      labels[key] = label;
+      colors[key] = color;
+      isOther[key] = other;
     }
-    return map.entries
-        .map((e) => CategorySlice(
-              label: CategoryMapper.label(e.key),
-              amount: e.value.round(),
-              color: CategoryMapper.color(e.key),
+
+    return amounts.entries
+        .map((en) => CategorySlice(
+              label: labels[en.key]!,
+              amount: en.value.round(),
+              color: colors[en.key]!,
+              note: isOther[en.key]! ? 'Expenses without a category' : null,
             ))
         .where((s) => s.amount > 0)
         .toList()
@@ -244,6 +282,9 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
               label: e.key.displayLabel,
               amount: e.value.round(),
               color: _incomeTypeColor(e.key),
+              note: e.key == IncomeType.other
+                  ? 'Income without a category'
+                  : null,
             ))
         .where((s) => s.amount > 0)
         .toList()

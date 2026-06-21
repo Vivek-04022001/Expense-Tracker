@@ -22,6 +22,7 @@ class ExpenseLocalDataSource {
         createdAt: r.createdAt,
         description: r.description,
         accountId: r.accountId,
+        categoryId: r.categoryId,
       );
 
   /// Non-deleted expenses whose createdAt falls in [from, to], newest first.

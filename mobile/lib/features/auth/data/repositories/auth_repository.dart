@@ -36,6 +36,17 @@ class AuthRepository {
     return RegisterResponse.fromJson(response.data as Map<String, dynamic>);
   }
 
+  /// Persists the user's display name to the backend and returns the updated
+  /// user. Phone stays immutable server-side.
+  Future<UserModel> updateProfile({required String name}) async {
+    final response = await _dioClient.patch(
+      ApiConstants.updateProfileEndpoint,
+      data: {'name': name},
+    );
+    final data = response.data as Map<String, dynamic>;
+    return UserModel.fromJson(data['user'] as Map<String, dynamic>);
+  }
+
   Future<void> logout() async {
     final refreshToken = await _storage.read(key: ApiConstants.refreshTokenKey);
     try {

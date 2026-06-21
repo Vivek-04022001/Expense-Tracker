@@ -4,9 +4,12 @@ import 'package:intl/intl.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/category_mapper.dart';
+import '../../../../core/utils/expense_visual.dart';
 import '../../data/models/expense_model.dart';
 import '../providers/expense_provider.dart';
 import '../../../../shared/widgets/category_avatar.dart';
+import '../../../accounts/presentation/providers/account_provider.dart';
+import '../../../categories/presentation/providers/category_provider.dart';
 
 class ExpenseDetailScreen extends ConsumerWidget {
   const ExpenseDetailScreen({super.key, required this.expense});
@@ -15,13 +18,16 @@ class ExpenseDetailScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final categories =
+        ref.watch(categoryListNotifierProvider).valueOrNull ?? const [];
+    final visual = ExpenseVisual.of(expense, categories);
     return Scaffold(
       backgroundColor: context.bgBase,
       body: SafeArea(
         child: Column(
           children: [
             _TopBar(
-              name: expense.description ?? CategoryMapper.label(expense.category),
+              name: expense.description ?? visual.label,
               onBack: () => Navigator.of(context).pop(),
             ),
             Expanded(
@@ -119,22 +125,26 @@ class _NavBtn extends StatelessWidget {
 
 // ── Hero section ──────────────────────────────────────────────────────────────
 
-class _HeroSection extends StatelessWidget {
+class _HeroSection extends ConsumerWidget {
   const _HeroSection({required this.expense});
   final ExpenseModel expense;
 
   @override
-  Widget build(BuildContext context) {
-    final color = CategoryMapper.color(expense.category);
-    final label = CategoryMapper.label(expense.category);
+  Widget build(BuildContext context, WidgetRef ref) {
+    final categories =
+        ref.watch(categoryListNotifierProvider).valueOrNull ?? const [];
+    final visual = ExpenseVisual.of(expense, categories);
+    final color = visual.color;
+    final label = visual.label;
     final name = expense.description ?? label;
     final timeStr = DateFormat('h:mm a').format(expense.createdAt);
     final dateLabel = _formatDate(expense.createdAt);
 
     return Column(
       children: [
-        CategoryAvatar.expense(
-          expense.category,
+        CategoryAvatar(
+          icon: visual.icon,
+          color: visual.color,
           size: 72,
           iconSize: 32,
         ),
@@ -203,17 +213,35 @@ class _HeroSection extends StatelessWidget {
 
 // ── Details card ──────────────────────────────────────────────────────────────
 
-class _DetailsCard extends StatelessWidget {
+class _DetailsCard extends ConsumerWidget {
   const _DetailsCard({required this.expense});
   final ExpenseModel expense;
 
   @override
-  Widget build(BuildContext context) {
-    final rows = [
+  Widget build(BuildContext context, WidgetRef ref) {
+    final accounts = ref
+            .watch(accountListNotifierProvider)
+            .valueOrNull
+            ?.accounts ??
+        const [];
+    String? accountName;
+    if (expense.accountId != null) {
+      for (final a in accounts) {
+        if (a.id == expense.accountId) {
+          accountName = a.name;
+          break;
+        }
+      }
+    }
+
+    final rows = <_DetailRow>[
+      if (expense.description != null && expense.description!.isNotEmpty)
+        _DetailRow(label: 'Note', value: expense.description!),
       _DetailRow(
         label: 'Payment method',
         value: expense.paymentMethod.displayLabel,
       ),
+      if (accountName != null) _DetailRow(label: 'Account', value: accountName),
       _DetailRow(
         label: 'Date',
         value: DateFormat('MMM d, yyyy').format(expense.createdAt),
@@ -556,7 +584,7 @@ class _RecategorizeSheetState extends State<_RecategorizeSheet> {
                     vertical: 8,
                   ),
                   decoration: BoxDecoration(
-                    color: isActive ? AppColors.primary500 : Colors.white,
+                    color: isActive ? AppColors.primary500 : context.bgSubtle,
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
                       color: isActive
@@ -571,7 +599,7 @@ class _RecategorizeSheetState extends State<_RecategorizeSheet> {
                       fontWeight: FontWeight.w600,
                       color: isActive
                           ? Colors.white
-                          : context.textSecondary,
+                          : context.textPrimary,
                     ),
                   ),
                 ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import '../../../../shared/utils/currency.dart';
 import '../../../accounts/presentation/widgets/account_selector.dart';
 import '../providers/transfer_provider.dart';
 
@@ -145,7 +146,7 @@ class _AddTransferSheetState extends ConsumerState<AddTransferSheet> {
                     ),
                   ),
                   Text(
-                    _amount.isEmpty ? '0' : _amount,
+                    _amount.isEmpty ? '0' : groupIndianExpression(_amount),
                     style: TextStyle(
                       fontSize: 46,
                       fontWeight: FontWeight.w800,

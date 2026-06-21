@@ -9,10 +9,15 @@ class CategorySlice {
     required this.label,
     required this.amount,
     required this.color,
+    this.note,
   });
   final String label;
   final int amount;
   final Color color;
+
+  /// Optional one-line clarification shown under the label in the legend
+  /// (e.g. explaining what the "Other" bucket contains).
+  final String? note;
 }
 
 /// Unified period overview: title + total, a vs-previous delta pill, an
@@ -262,16 +267,33 @@ class _LegendRow extends StatelessWidget {
                 ),
                 const SizedBox(width: 10),
                 Expanded(
-                  child: Text(
-                    slice.label,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w500,
-                      color: context.textPrimary,
-                    ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        slice.label,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                          color: context.textPrimary,
+                        ),
+                      ),
+                      if (slice.note != null) ...[
+                        const SizedBox(height: 1),
+                        Text(
+                          slice.note!,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 10.5,
+                            color: context.textTertiary,
+                          ),
+                        ),
+                      ],
+                    ],
                   ),
                 ),
+                const SizedBox(width: 8),
                 Text(
                   '₹${_grp(slice.amount)}',
                   style: TextStyle(

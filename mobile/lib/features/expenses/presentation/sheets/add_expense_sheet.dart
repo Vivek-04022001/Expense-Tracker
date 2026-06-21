@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import '../../../../core/errors/app_exceptions.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../shared/utils/currency.dart';
 import '../../../../shared/widgets/calculator_numpad.dart';
 import '../../../accounts/presentation/widgets/account_selector.dart';
 import '../../../categories/data/models/category_model.dart';
@@ -131,7 +132,7 @@ class _AddExpenseSheetState extends ConsumerState<AddExpenseSheet> {
           : ExpenseCategory.other;
       await ref.read(expenseListNotifierProvider.notifier).create(
             amount: value,
-            description: desc.length >= 5 ? desc : null,
+            description: desc.isNotEmpty ? desc : null,
             category: legacyCategory,
             paymentMethod: _payment,
             accountId: _accountId,
@@ -397,7 +398,7 @@ class _AddExpenseSheetState extends ConsumerState<AddExpenseSheet> {
                             )
                           : Text(
                               _hasFullExpression && result != null
-                                  ? 'Save ₹${_fmtNum(result)}'
+                                  ? 'Save ₹${groupIndianExpression(_fmtNum(result))}'
                                   : 'Save expense',
                               style: TextStyle(
                                 fontSize: 16,
@@ -413,7 +414,7 @@ class _AddExpenseSheetState extends ConsumerState<AddExpenseSheet> {
           // Success overlay
           if (_showSuccess)
             _SuccessOverlay(
-              amount: _fmtNum(_computeResult() ?? 0),
+              amount: groupIndianExpression(_fmtNum(_computeResult() ?? 0)),
               color: AppColors.primary500,
               label: 'Expense saved',
             ),
@@ -465,7 +466,7 @@ class _AmountDisplay extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isEmpty = expr.isEmpty;
-    final displayText = isEmpty ? '0' : expr;
+    final displayText = isEmpty ? '0' : groupIndianExpression(expr);
     final textColor =
         isEmpty ? context.textTertiary : context.textPrimary;
 
@@ -500,7 +501,7 @@ class _AmountDisplay extends StatelessWidget {
           duration: const Duration(milliseconds: 200),
           child: hasFullExpression && result != null
               ? Text(
-                  '= ₹${fmtNum(result!)}',
+                  '= ₹${groupIndianExpression(fmtNum(result!))}',
                   key: const ValueKey('result'),
                   style: TextStyle(
                     fontSize: 14,

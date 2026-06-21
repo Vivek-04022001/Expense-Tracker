@@ -91,6 +91,7 @@ class ExpenseRepository {
       createdAt: now,
       description: description,
       accountId: accountId,
+      categoryId: categoryId,
     );
   }
 
@@ -113,6 +114,10 @@ class ExpenseRepository {
           category: category == null
               ? const Value.absent()
               : Value(category.toServer()),
+          // Picking a built-in category clears any custom category id, so the
+          // built-in icon/label actually takes effect on screen.
+          categoryId:
+              category == null ? const Value.absent() : const Value(null),
           paymentMethod: paymentMethod == null
               ? const Value.absent()
               : Value(paymentMethod.toServer()),
@@ -129,6 +134,7 @@ class ExpenseRepository {
           if (amount != null) 'amount': amount,
           if (description != null) 'description': description,
           if (category != null) 'category': category.toServer(),
+          if (category != null) 'categoryId': null,
           if (paymentMethod != null) 'paymentMethod': paymentMethod.toServer(),
         },
       );

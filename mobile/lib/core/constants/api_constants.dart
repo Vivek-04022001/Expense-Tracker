@@ -11,6 +11,7 @@ class ApiConstants {
   static const String loginEndpoint = '/auth/login';
   static const String refreshEndpoint = '/auth/refresh-token';
   static const String logoutEndpoint = '/auth/logout';
+  static const String updateProfileEndpoint = '/auth/me';
 
   static const String expenses = '/expenses';
   static const String expenseSummary = '/expenses/summary';

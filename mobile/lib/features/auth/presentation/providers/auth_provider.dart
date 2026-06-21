@@ -97,20 +97,28 @@ class AuthNotifier extends _$AuthNotifier {
     state = AsyncValue.data(AuthUnauthenticated());
   }
 
-  /// Updates the locally stored profile name. Persists to secure storage only —
-  /// there is no backend profile-update endpoint yet, and phone is the login
-  /// identifier so it stays immutable here.
+  /// Updates the user's display name. Pushes the change to the backend and
+  /// mirrors it into secure storage so it survives restarts. Phone is the login
+  /// identifier and stays immutable. If the network call fails the name is still
+  /// updated locally so the UI stays responsive offline.
   Future<void> updateProfile({required String name}) async {
     final current = state.valueOrNull;
     if (current is! AuthAuthenticated) return;
     final trimmed = name.trim();
     if (trimmed.isEmpty || trimmed == current.user.name) return;
-    final updated = UserModel(
+
+    final repo = ref.read(authRepositoryProvider);
+    UserModel updated = UserModel(
       id: current.user.id,
       name: trimmed,
       phone: current.user.phone,
     );
-    await ref.read(authRepositoryProvider).saveUser(updated);
+    try {
+      updated = await repo.updateProfile(name: trimmed);
+    } on AppException {
+      // Offline / server error: keep the optimistic local value.
+    }
+    await repo.saveUser(updated);
     state = AsyncValue.data(AuthAuthenticated(updated));
   }
 

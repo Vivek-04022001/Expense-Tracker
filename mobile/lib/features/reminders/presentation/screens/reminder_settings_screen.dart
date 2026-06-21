@@ -35,6 +35,17 @@ class ReminderSettingsScreen extends ConsumerWidget {
     }
   }
 
+  Future<void> _pickSecondTime(BuildContext context, WidgetRef ref) async {
+    final current = ref.read(reminderProvider).secondTime;
+    final picked = await showTimePicker(
+      context: context,
+      initialTime: current,
+    );
+    if (picked != null) {
+      await ref.read(reminderProvider.notifier).setSecondTime(picked);
+    }
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final settings = ref.watch(reminderProvider);
@@ -57,17 +68,43 @@ class ReminderSettingsScreen extends ConsumerWidget {
               ),
               Divider(height: 1, indent: 64, color: context.borderSubtle),
               _TimeRow(
+                label: 'First reminder time',
                 enabled: settings.enabled,
                 time: settings.time,
                 onTap: settings.enabled ? () => _pickTime(context, ref) : null,
               ),
             ],
           ),
+          if (settings.enabled) ...[
+            const SizedBox(height: 20),
+            _Card(
+              children: [
+                _ToggleRow(
+                  icon: PhosphorIcons.bellRinging(PhosphorIconsStyle.fill),
+                  iconBg: AppColors.primary500,
+                  label: 'Second reminder',
+                  subtitle: 'Add another nudge at a different time',
+                  value: settings.secondEnabled,
+                  onChanged: (v) =>
+                      ref.read(reminderProvider.notifier).setSecondEnabled(v),
+                ),
+                Divider(height: 1, indent: 64, color: context.borderSubtle),
+                _TimeRow(
+                  label: 'Second reminder time',
+                  enabled: settings.secondEnabled,
+                  time: settings.secondTime,
+                  onTap: settings.secondEnabled
+                      ? () => _pickSecondTime(context, ref)
+                      : null,
+                ),
+              ],
+            ),
+          ],
           const SizedBox(height: 20),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 4),
             child: Text(
-              'You\'ll get one reminder a day at the time you choose. Turn it '
+              'Choose up to two times a day to be reminded. Turn reminders '
               'off anytime.',
               style: TextStyle(fontSize: 12, color: context.textSecondary),
             ),
@@ -195,11 +232,13 @@ class _ToggleRow extends StatelessWidget {
 
 class _TimeRow extends StatelessWidget {
   const _TimeRow({
+    required this.label,
     required this.enabled,
     required this.time,
     required this.onTap,
   });
 
+  final String label;
   final bool enabled;
   final TimeOfDay time;
   final VoidCallback? onTap;
@@ -222,7 +261,7 @@ class _TimeRow extends StatelessWidget {
             const SizedBox(width: 14),
             Expanded(
               child: Text(
-                'Reminder time',
+                label,
                 style: TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w500,

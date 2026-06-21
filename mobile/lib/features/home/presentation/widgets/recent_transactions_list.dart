@@ -4,12 +4,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
+import '../../../../core/router/transitions.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../../../../core/utils/category_mapper.dart';
+import '../../../../core/utils/expense_visual.dart';
+import '../../../categories/data/models/category_model.dart';
+import '../../../categories/presentation/providers/category_provider.dart';
 import '../../../expenses/data/models/expense_model.dart';
 import '../../../expenses/presentation/providers/expense_provider.dart';
+import '../../../expenses/presentation/screens/expense_detail_screen.dart';
 import '../../../income/data/models/income_model.dart';
 import '../../../income/presentation/providers/income_provider.dart';
+import '../../../income/presentation/screens/income_detail_screen.dart';
 import '../../../../shared/widgets/category_avatar.dart';
 import '../../../../shared/widgets/shimmer.dart';
 
@@ -25,21 +30,23 @@ class _Tx {
     required this.amountLabel,
     required this.amountColor,
     required this.createdAt,
+    this.expense,
+    this.income,
   });
 
-  factory _Tx.fromExpense(ExpenseModel e) {
-    final color = CategoryMapper.color(e.category);
-    final label = CategoryMapper.label(e.category);
+  factory _Tx.fromExpense(ExpenseModel e, List<CategoryModel> categories) {
+    final visual = ExpenseVisual.of(e, categories);
     final time = DateFormat('h:mm a').format(e.createdAt);
     return _Tx._(
       id: e.id,
-      name: e.description ?? label,
-      subtitle: '$label · $time · ${e.paymentMethod.displayLabel}',
-      icon: CategoryMapper.icon(e.category),
-      iconColor: color,
+      name: e.description ?? visual.label,
+      subtitle: '${visual.label} · $time · ${e.paymentMethod.displayLabel}',
+      icon: visual.icon,
+      iconColor: visual.color,
       amountLabel: '-₹${_fmt(e.amount.round())}',
       amountColor: AppColors.danger,
       createdAt: e.createdAt,
+      expense: e,
     );
   }
 
@@ -54,6 +61,7 @@ class _Tx {
       amountLabel: '+₹${_fmt(e.amount.round())}',
       amountColor: AppColors.success,
       createdAt: e.createdAt,
+      income: e,
     );
   }
 
@@ -65,6 +73,18 @@ class _Tx {
   final String amountLabel;
   final Color amountColor;
   final DateTime createdAt;
+  final ExpenseModel? expense;
+  final IncomeModel? income;
+
+  void openDetail(BuildContext context) {
+    if (expense != null) {
+      Navigator.of(context, rootNavigator: true)
+          .push(slideFadeRoute(ExpenseDetailScreen(expense: expense!)));
+    } else if (income != null) {
+      Navigator.of(context, rootNavigator: true)
+          .push(slideFadeRoute(IncomeDetailScreen(income: income!)));
+    }
+  }
 
   static PhosphorIconData _incomeIcon(IncomeType t) => switch (t) {
         IncomeType.salary => PhosphorIcons.briefcase(),
@@ -132,14 +152,20 @@ class RecentTransactionsList extends ConsumerWidget {
             context,
             expensesAsync.value ?? [],
             incomesAsync.value ?? [],
+            ref.watch(categoryListNotifierProvider).valueOrNull ?? const [],
           ),
       ],
     );
   }
 
-  Widget _buildList(BuildContext context, List<ExpenseModel> expenses, List<IncomeModel> incomes) {
+  Widget _buildList(
+    BuildContext context,
+    List<ExpenseModel> expenses,
+    List<IncomeModel> incomes,
+    List<CategoryModel> categories,
+  ) {
     final all = [
-      ...expenses.map(_Tx.fromExpense),
+      ...expenses.map((e) => _Tx.fromExpense(e, categories)),
       ...incomes.map(_Tx.fromIncome),
     ]..sort((a, b) => b.createdAt.compareTo(a.createdAt));
 
@@ -197,7 +223,10 @@ class _TransactionTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
+    return GestureDetector(
+      onTap: () => tx.openDetail(context),
+      behavior: HitTestBehavior.opaque,
+      child: Padding(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
       child: Row(
         children: [
@@ -254,6 +283,7 @@ class _TransactionTile extends StatelessWidget {
             ),
           ),
         ],
+      ),
       ),
     );
   }
