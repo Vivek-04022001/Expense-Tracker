@@ -57,6 +57,7 @@ connection.
 ## Feature Catalogue
 
 ### Authentication & Profile
+
 - Register with **name, phone, password**; phone is the unique login identifier.
 - Login issues a short-lived **access token** and a 7-day **refresh token**
   (persisted server-side in a `RefreshToken` table).
@@ -66,6 +67,7 @@ connection.
 - New users are automatically **seeded with built-in categories** on register.
 
 ### Accounts
+
 - CRUD for financial accounts with types: `card`, `cash`, `wallet`, `bank`,
   `savings`, `investment`, `other`.
 - Each account has a user-entered **`openingBalance`** and a **derived
@@ -77,6 +79,7 @@ connection.
 - Optional per-account color.
 
 ### Expenses
+
 - Create / read / update / soft-delete expenses.
 - Fields: `amount`, `category`, `paymentMethod` (`upi`, `bank_transfer`, `cash`,
   `other`), optional `description`, linked `account`, and linked custom
@@ -86,16 +89,19 @@ connection.
   numpad (theme-aware for dark mode).
 
 ### Income
+
 - Create / read / update / soft-delete income.
 - Income types: `salary`, `freelance`, `investment`, `reward`, `other`.
 - Linked to accounts and custom categories; increases account balance.
 
 ### Transfers
+
 - Move money **between two accounts** in a single record.
 - Decreases the source account balance, increases the destination.
 - Create / read / soft-delete.
 
 ### Budgets
+
 - One budget per **(category, month, year)** — enforced by a composite unique
   constraint.
 - Upsert semantics (`PUT /budgets`); budget **status** endpoint reports
@@ -103,6 +109,7 @@ connection.
 - Surfaced on the home dashboard as a budget-progress card.
 
 ### Categories
+
 - Built-in **system categories** for both expenses and income, each with a
   stable `key`, Phosphor `icon`, and `color`.
 - Users can **create, update, and delete custom categories** (`kind` =
@@ -111,6 +118,7 @@ connection.
   aggregations stay consistent.
 
 ### Savings & Statistics
+
 - **Savings summary** endpoint and screen (income vs. expenses).
 - Statistics screen with spending-overview and trend cards (charts via
   `fl_chart`).
@@ -118,6 +126,7 @@ connection.
   card, today/this-week row, budget progress, and recent transactions.
 
 ### Reminders (Local Notifications)
+
 - Schedule a **primary** daily reminder and an optional **second** daily
   reminder at user-chosen times.
 - Recurring local notifications via `flutter_local_notifications` +
@@ -126,6 +135,7 @@ connection.
   per-reminder cancellation.
 
 ### Offline-First Sync
+
 - Full local **SQLite (Drift)** mirror of all entities.
 - **Outbox** queue of pending mutations + **delta pull** cursor.
 - Last-Write-Wins conflict resolution, soft deletes that propagate, and
@@ -170,6 +180,7 @@ The app is **local-first**: the UI reads and writes the on-device SQLite (Drift)
 database, and a background sync engine reconciles with the server.
 
 **Client side** (`mobile/lib/core/sync/`, `core/db/`):
+
 - Every syncable row carries `createdAt`, `updatedAt`, `deletedAt`, and a
   `syncStatus` (`synced` | `pending` | `failed`).
 - Local mutations are appended to a durable **Outbox** table (one row per change)
@@ -183,6 +194,7 @@ database, and a background sync engine reconciles with the server.
   online.
 
 **Server side** (`server/controllers/sync.controller.js`):
+
 - `GET /sync/pull?since=<ISO>` returns **every row changed after `since`**
   (including soft-deleted rows) plus the authoritative `serverTime`, which the
   client stores as its next cursor.
@@ -205,32 +217,34 @@ Synced entities: `account`, `category`, `expense`, `income`, `transfer`,
 ## Tech Stack
 
 ### Mobile (Flutter)
-| Concern | Package |
-|---|---|
-| State management | `flutter_riverpod`, `riverpod_annotation` |
-| Navigation | `go_router` |
-| HTTP | `dio` |
-| Local DB (offline-first) | `drift`, `sqlite3_flutter_libs`, `path_provider` |
-| Client UUIDs | `uuid` |
-| Connectivity | `connectivity_plus` |
-| Secure token storage | `flutter_secure_storage` |
-| Preferences | `shared_preferences` |
-| Charts | `fl_chart` |
-| Animations | `flutter_animate`, `animated_text_kit` |
-| Icons | `phosphor_flutter` |
-| Notifications | `flutter_local_notifications`, `timezone`, `flutter_timezone` |
-| Formatting / Fonts | `intl`, `google_fonts` |
+
+| Concern                  | Package                                                       |
+| ------------------------ | ------------------------------------------------------------- |
+| State management         | `flutter_riverpod`, `riverpod_annotation`                     |
+| Navigation               | `go_router`                                                   |
+| HTTP                     | `dio`                                                         |
+| Local DB (offline-first) | `drift`, `sqlite3_flutter_libs`, `path_provider`              |
+| Client UUIDs             | `uuid`                                                        |
+| Connectivity             | `connectivity_plus`                                           |
+| Secure token storage     | `flutter_secure_storage`                                      |
+| Preferences              | `shared_preferences`                                          |
+| Charts                   | `fl_chart`                                                    |
+| Animations               | `flutter_animate`, `animated_text_kit`                        |
+| Icons                    | `phosphor_flutter`                                            |
+| Notifications            | `flutter_local_notifications`, `timezone`, `flutter_timezone` |
+| Formatting / Fonts       | `intl`, `google_fonts`                                        |
 
 ### Server (Node.js)
-| Concern | Tooling |
-|---|---|
-| Runtime / framework | Node.js (ESM), Express 5 |
-| ORM | Prisma 7 (`@prisma/client`) |
-| Database | PostgreSQL (Neon serverless via `@prisma/adapter-neon` + `ws`) |
-| Auth | `jsonwebtoken` (JWT), `bcrypt` |
-| Validation | `zod` |
-| Middleware | `cors`, JSON body parsing |
-| Dev | `nodemon` |
+
+| Concern             | Tooling                                                        |
+| ------------------- | -------------------------------------------------------------- |
+| Runtime / framework | Node.js (ESM), Express 5                                       |
+| ORM                 | Prisma 7 (`@prisma/client`)                                    |
+| Database            | PostgreSQL (Neon serverless via `@prisma/adapter-neon` + `ws`) |
+| Auth                | `jsonwebtoken` (JWT), `bcrypt`                                 |
+| Validation          | `zod`                                                          |
+| Middleware          | `cors`, JSON body parsing                                      |
+| Dev                 | `nodemon`                                                      |
 
 ---
 
@@ -287,6 +301,7 @@ PostgreSQL via Prisma (`server/prisma/schema.prisma`). All financial models use
 **soft deletes** (`deletedAt`) and `updatedAt` for delta sync.
 
 ### Enums
+
 - **Category**: `food_and_drink`, `transport`, `bills_and_utilities`,
   `shopping`, `health`, `entertainment`, `education`, `other`
 - **IncomeType**: `salary`, `freelance`, `investment`, `reward`, `other`
@@ -325,7 +340,7 @@ timestamps + `deletedAt`.
 
 > **Derived balances:** `Account.balance` is never trusted from the client. The
 > server recomputes it as `openingBalance + Σincome − Σexpenses + ΣtransfersIn −
-> ΣtransfersOut` over non-deleted rows after every relevant change.
+ΣtransfersOut` over non-deleted rows after every relevant change.
 
 ---
 
@@ -336,77 +351,87 @@ All routes except auth/health require a **Bearer access token** in the
 `Authorization` header.
 
 ### Health
-| Method | Path | Description |
-|---|---|---|
-| GET | `/health` | Service health check |
+
+| Method | Path      | Description          |
+| ------ | --------- | -------------------- |
+| GET    | `/health` | Service health check |
 
 ### Auth (`/auth`)
-| Method | Path | Description |
-|---|---|---|
-| POST | `/auth/register` | Register (name, phone, password); seeds built-in categories |
-| POST | `/auth/login` | Login → `{ accessToken, refreshToken }` |
-| POST | `/auth/refresh-token` | Exchange refresh token → new access token |
-| POST | `/auth/logout` | Revoke a refresh token |
-| PATCH | `/auth/me` | Update profile name (auth required) |
+
+| Method | Path                  | Description                                                 |
+| ------ | --------------------- | ----------------------------------------------------------- |
+| POST   | `/auth/register`      | Register (name, phone, password); seeds built-in categories |
+| POST   | `/auth/login`         | Login → `{ accessToken, refreshToken }`                     |
+| POST   | `/auth/refresh-token` | Exchange refresh token → new access token                   |
+| POST   | `/auth/logout`        | Revoke a refresh token                                      |
+| PATCH  | `/auth/me`            | Update profile name (auth required)                         |
 
 ### Expenses (`/expenses`)
-| Method | Path | Description |
-|---|---|---|
-| GET | `/expenses` | List expenses |
-| POST | `/expenses` | Create expense |
-| PUT | `/expenses/:id` | Update expense |
-| DELETE | `/expenses/:id` | Soft-delete expense |
-| GET | `/expenses/summary` | Expense aggregations |
+
+| Method | Path                | Description          |
+| ------ | ------------------- | -------------------- |
+| GET    | `/expenses`         | List expenses        |
+| POST   | `/expenses`         | Create expense       |
+| PUT    | `/expenses/:id`     | Update expense       |
+| DELETE | `/expenses/:id`     | Soft-delete expense  |
+| GET    | `/expenses/summary` | Expense aggregations |
 
 ### Income (`/income`)
-| Method | Path | Description |
-|---|---|---|
-| GET | `/income` | List income |
-| POST | `/income` | Create income |
-| PATCH | `/income/:id` | Update income |
+
+| Method | Path          | Description        |
+| ------ | ------------- | ------------------ |
+| GET    | `/income`     | List income        |
+| POST   | `/income`     | Create income      |
+| PATCH  | `/income/:id` | Update income      |
 | DELETE | `/income/:id` | Soft-delete income |
 
 ### Accounts (`/accounts`)
-| Method | Path | Description |
-|---|---|---|
-| GET | `/accounts` | List accounts |
-| POST | `/accounts` | Create account (Zod-validated) |
-| PUT | `/accounts/:id` | Update account (Zod-validated) |
-| DELETE | `/accounts/:id` | Soft-delete account |
+
+| Method | Path            | Description                    |
+| ------ | --------------- | ------------------------------ |
+| GET    | `/accounts`     | List accounts                  |
+| POST   | `/accounts`     | Create account (Zod-validated) |
+| PUT    | `/accounts/:id` | Update account (Zod-validated) |
+| DELETE | `/accounts/:id` | Soft-delete account            |
 
 ### Transfers (`/transfers`)
-| Method | Path | Description |
-|---|---|---|
-| GET | `/transfers` | List transfers |
-| POST | `/transfers` | Create transfer (Zod-validated) |
-| DELETE | `/transfers/:id` | Soft-delete transfer |
+
+| Method | Path             | Description                     |
+| ------ | ---------------- | ------------------------------- |
+| GET    | `/transfers`     | List transfers                  |
+| POST   | `/transfers`     | Create transfer (Zod-validated) |
+| DELETE | `/transfers/:id` | Soft-delete transfer            |
 
 ### Budgets (`/budgets`)
-| Method | Path | Description |
-|---|---|---|
-| GET | `/budgets` | List budgets |
-| PUT | `/budgets` | Upsert budget (Zod-validated) |
-| DELETE | `/budgets/:id` | Soft-delete budget |
-| GET | `/budgets/:id/status` | Spend-vs-limit status |
+
+| Method | Path                  | Description                   |
+| ------ | --------------------- | ----------------------------- |
+| GET    | `/budgets`            | List budgets                  |
+| PUT    | `/budgets`            | Upsert budget (Zod-validated) |
+| DELETE | `/budgets/:id`        | Soft-delete budget            |
+| GET    | `/budgets/:id/status` | Spend-vs-limit status         |
 
 ### Categories (`/categories`)
-| Method | Path | Description |
-|---|---|---|
-| GET | `/categories` | List categories |
-| POST | `/categories` | Create custom category (Zod-validated) |
-| PATCH | `/categories/:id` | Update category (Zod-validated) |
-| DELETE | `/categories/:id` | Soft-delete category |
+
+| Method | Path              | Description                            |
+| ------ | ----------------- | -------------------------------------- |
+| GET    | `/categories`     | List categories                        |
+| POST   | `/categories`     | Create custom category (Zod-validated) |
+| PATCH  | `/categories/:id` | Update category (Zod-validated)        |
+| DELETE | `/categories/:id` | Soft-delete category                   |
 
 ### Savings (`/savings`)
-| Method | Path | Description |
-|---|---|---|
-| GET | `/savings/summary` | Income-vs-expense savings summary |
+
+| Method | Path               | Description                       |
+| ------ | ------------------ | --------------------------------- |
+| GET    | `/savings/summary` | Income-vs-expense savings summary |
 
 ### Sync (`/sync`)
-| Method | Path | Description |
-|---|---|---|
-| GET | `/sync/pull?since=<ISO>` | Delta pull of all rows changed since cursor |
-| POST | `/sync/push` | Apply a batch of upsert/delete operations |
+
+| Method | Path                     | Description                                 |
+| ------ | ------------------------ | ------------------------------------------- |
+| GET    | `/sync/pull?since=<ISO>` | Delta pull of all rows changed since cursor |
+| POST   | `/sync/push`             | Apply a batch of upsert/delete operations   |
 
 ---
 
@@ -510,7 +535,7 @@ REFRESH_TOKEN_EXPIRY=   # e.g. 7d
 
 ---
 
-*Mobile app is branded **Paisa** (`mobile/pubspec.yaml`). Backend is a standalone
+_Mobile app is branded **Paisa** (`mobile/pubspec.yaml`). Backend is a standalone
 Express/Prisma service. Both share the data model defined in
 `server/prisma/schema.prisma` and the sync contract in
-`server/controllers/sync.controller.js`.*
+`server/controllers/sync.controller.js`._
