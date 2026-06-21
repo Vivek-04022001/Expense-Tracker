@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_colors.dart'; // for AppThemeColors extension
 
 class CalculatorNumpad extends StatelessWidget {
   const CalculatorNumpad({super.key, required this.onKeyTap});
@@ -68,10 +68,10 @@ class _CalcKey extends StatelessWidget {
           height: 52,
           child: Center(
             child: label == '⌫'
-                ? const Icon(
+                ? Icon(
                     Icons.backspace_outlined,
                     size: 20,
-                    color: AppColors.lightTextPrimary,
+                    color: context.textPrimary,
                   )
                 : Text(
                     label,
@@ -80,8 +80,8 @@ class _CalcKey extends StatelessWidget {
                       fontWeight:
                           isOperator ? FontWeight.w300 : FontWeight.w500,
                       color: isOperator
-                          ? AppColors.lightTextTertiary
-                          : AppColors.lightTextPrimary,
+                          ? context.textTertiary
+                          : context.textPrimary,
                     ),
                   ),
           ),
