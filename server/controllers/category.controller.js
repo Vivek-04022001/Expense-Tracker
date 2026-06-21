@@ -73,8 +73,8 @@ export const updateCategory = async (req, res) => {
   }
 
   // Display attributes (name/icon/color/sortOrder) are editable for both custom
-  // and system categories. `kind` and `key` stay immutable so SMS classification,
-  // charts, and budget aggregation keep resolving built-ins.
+  // and system categories. `kind` and `key` stay immutable so charts and budget
+  // aggregation keep resolving built-ins.
   const updated = await prisma.transactionCategory.update({
     where: { id },
     data: req.body,
@@ -97,7 +97,7 @@ export const deleteCategory = async (req, res) => {
   }
 
   // System (built-in) categories cannot be deleted — they back the legacy enum
-  // keys used by SMS import and reporting. Users can edit them instead.
+  // keys used by reporting. Users can edit them instead.
   if (category.isSystem) {
     return res
       .status(400)

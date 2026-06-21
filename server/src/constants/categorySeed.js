@@ -1,7 +1,7 @@
 // Built-in categories seeded for every user as system rows.
 // `key` is a stable identifier that mirrors the legacy Category / IncomeType enum
-// values so the SMS classifier, charts, and budget aggregation keep working while
-// custom categories are layered on top.
+// values so charts and budget aggregation keep working while custom categories
+// are layered on top.
 //
 // Keep this list in sync with the migration that backfills existing users
 // (prisma/migrations/20260620000000_add_category_table/migration.sql) and with the
